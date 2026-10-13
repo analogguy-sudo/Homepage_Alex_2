@@ -324,10 +324,12 @@
    (Project Settings → API: "Project URL" und "anon public" Key)
    ============================================================ */
 const CONFIG = {
-  supabaseUrl:  "https://owbbsnujnkhyyqvagtai.supabase.co",
+  supabaseUrl: "https://owbbsnujnkhyyqvagtai.supabase.co",
   supabaseKey: "sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga",
-  table:  "photos",  // Tabelle mit den Foto-Infos
-  bucket: "photos"   // öffentlicher Storage-Bucket mit den Bilddateien
+  table:  "photos",
+  bucket: "photos",
+  heroImage: "portrait.jpg",
+  heroPosition: "50% 30%"
 };
 
 /* ---------- Demo-Motive (erscheinen, solange Supabase nicht verbunden ist) ---------- */
@@ -399,14 +401,24 @@ function metaFull(p) {
 
 function renderHero(p) {
   const img = $("heroImg");
-  img.src = p.src;
-  img.alt = p.title + (p.location ? ", " + p.location : "");
+  if (CONFIG.heroImage) {
+    const f = CONFIG.heroImage;
+    img.src = /^https?:/.test(f)
+      ? f
+      : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${f.split("/").map(encodeURIComponent).join("/")}`;
+    img.alt = "Porträt";
+    $("edgeLeft").textContent = "▸ 1   1A";
+    $("edgeRight").textContent = "";
+  } else {
+    img.src = p.src;
+    img.alt = p.title + (p.location ? ", " + p.location : "");
+    const idx = state.all.indexOf(p) + 1;
+    $("edgeLeft").textContent = "▸ " + idx + "   " + idx + "A";
+    $("edgeRight").textContent = (p.film || "").toUpperCase();
+  }
+  img.style.objectPosition = CONFIG.heroPosition || "50% 50%";
   img.classList.add("develop");
-  const idx = state.all.indexOf(p) + 1;
-  $("edgeLeft").textContent = "▸ " + idx + "   " + idx + "A";
-  $("edgeRight").textContent = (p.film || "").toUpperCase();
 }
-
 function renderFilters() {
   const formats = ["Alle", ...new Set(state.all.map((p) => p.format).filter(Boolean))];
   const box = $("filters");
