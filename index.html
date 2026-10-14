@@ -154,10 +154,10 @@
   .status { color: var(--ink-soft); margin: 0 0 1.5rem; }
   .status.demo { border-left: 4px solid var(--amber); padding-left: .9rem; }
 
-    .grid { columns: 5 170px; column-gap: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 22px; align-items: start; }
   .print {
     break-inside: avoid;
-    margin: 0 0 18px;
+    margin: margin: 0 0 18px;
     background: var(--print);
     padding: 11px 11px 0;
     box-shadow: 0 10px 22px -14px rgba(42, 31, 22, .55);
@@ -385,7 +385,7 @@ async function loadPhotos() {
   if (!res.ok) throw new Error("Supabase antwortete mit Status " + res.status);
   const rows = await res.json();
   return rows.filter((r) => r.storage_path).map((r) => ({
-    title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, year: r.year, location: r.location,
+    title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, category: r.cat,, year: r.year, location: r.location,
     src: `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${r.storage_path.split("/").map(encodeURIComponent).join("/")}`
   }));
 }
