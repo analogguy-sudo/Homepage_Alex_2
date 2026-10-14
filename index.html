@@ -76,7 +76,7 @@
   /* Hero */
   .hero {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-columns: minmax(0, 6fr) minmax(0, 4fr);
     gap: clamp(2rem, 5vw, 5rem);
     align-items: center;
     padding-block: clamp(1.5rem, 5vw, 4rem) clamp(3rem, 8vw, 6rem);
@@ -102,7 +102,7 @@
 
   /* Filmstreifen im Hero */
   .strip {
-    width: min(100%, 400px);
+    width: min(100%, 300px);
     justify-self: end;
     background: var(--ink);
     padding: 0 14px;
@@ -154,10 +154,10 @@
   .status { color: var(--ink-soft); margin: 0 0 1.5rem; }
   .status.demo { border-left: 4px solid var(--amber); padding-left: .9rem; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 22px; align-items: start; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 22px; align-items: start; }
   .print {
     break-inside: avoid;
-    margin: margin: 0 0 18px;
+    margin: 0;
     background: var(--print);
     padding: 11px 11px 0;
     box-shadow: 0 10px 22px -14px rgba(42, 31, 22, .55);
@@ -165,7 +165,8 @@
   .print button {
     display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in;
   }
-    .print img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; background: var(--paper-deep); }
+  .print img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; background: var(--paper-deep); }
+  .print figcaption { padding: .7rem .1rem .8rem; }
   .print .t { font-family: var(--serif); font-size: 1.05rem; line-height: 1.25; }
   .print .m { color: var(--ink-soft); font-size: .88rem; }
 
@@ -261,7 +262,7 @@
     <div class="wrap">
       <div class="works-head">
         <h2 id="arbeiten-titel">Arbeiten</h2>
-        <div class="filters" id="filters" role="group" aria-label="Nach Format filtern"></div>
+        <div class="filters" id="filters" role="group" aria-label="Nach Kategorie filtern"></div>
       </div>
       <p class="status" id="status" role="status">Fotos werden geladen …</p>
       <div class="grid" id="grid"></div>
@@ -327,10 +328,10 @@
 const CONFIG = {
   supabaseUrl: "https://owbbsnujnkhyyqvagtai.supabase.co",
   supabaseKey: "sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga",
-  table:  "photos",
-  bucket: "photos",
-  heroImage: "portrait.jpg",
-  heroPosition: "50% 30%"
+  table:  "photos",  // Tabelle mit den Foto-Infos
+  bucket: "photos",  // öffentlicher Storage-Bucket mit den Bilddateien
+  heroImage: "",     // optional: Dateiname im Bucket für das Bild oben rechts, z. B. "portrait.jpg" (leer = erstes Galerie-Foto)
+  heroPosition: "50% 50%"  // Bildausschnitt, z. B. "50% 25%" rückt den Ausschnitt nach oben
 };
 
 /* ---------- Demo-Motive (erscheinen, solange Supabase nicht verbunden ist) ---------- */
@@ -379,13 +380,14 @@ async function loadPhotos() {
     return DEMO;
   }
   const url = `${CONFIG.supabaseUrl}/rest/v1/${CONFIG.table}?select=*&order=sort.asc,created_at.desc`;
-  const res = await fetch(url, {
-    headers: { apikey: CONFIG.supabaseKey, Authorization: `Bearer ${CONFIG.supabaseKey}` }
-  });
+  const headers = { apikey: CONFIG.supabaseKey };
+  // Alte anon-Keys sind JWTs (beginnen mit "eyJ"); neue Publishable Keys (sb_publishable_…) brauchen den Header nicht.
+  if (CONFIG.supabaseKey.startsWith("eyJ")) headers.Authorization = `Bearer ${CONFIG.supabaseKey}`;
+  const res = await fetch(url, { headers });
   if (!res.ok) throw new Error("Supabase antwortete mit Status " + res.status);
   const rows = await res.json();
   return rows.filter((r) => r.storage_path).map((r) => ({
-    title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, category: r.cat,, year: r.year, location: r.location,
+    title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, category: r.cat, year: r.year, location: r.location,
     src: `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${r.storage_path.split("/").map(encodeURIComponent).join("/")}`
   }));
 }
@@ -420,8 +422,9 @@ function renderHero(p) {
   img.style.objectPosition = CONFIG.heroPosition || "50% 50%";
   img.classList.add("develop");
 }
+
 function renderFilters() {
-  const formats = ["Alle", ...new Set(state.all.map((p) => p.format).filter(Boolean))];
+  const formats = ["Alle", ...new Set(state.all.map((p) => p.category).filter(Boolean))];
   const box = $("filters");
   box.innerHTML = "";
   if (formats.length <= 2) return;   // nur ein Format vorhanden → kein Filter nötig
@@ -435,7 +438,7 @@ function renderFilters() {
 }
 
 function renderGrid() {
-  state.shown = state.filter === "Alle" ? state.all : state.all.filter((p) => p.format === state.filter);
+  state.shown = state.filter === "Alle" ? state.all : state.all.filter((p) => p.category === state.filter);
   const grid = $("grid");
   grid.innerHTML = "";
   state.shown.forEach((p, i) => {
