@@ -399,7 +399,7 @@ async function loadPhotos() {
   if (!res.ok) throw new Error("Supabase antwortete mit Status " + res.status);
   const rows = await res.json();
   return rows.filter((r) => r.storage_path).map((r) => ({
-    title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, category: r.cat, year: r.year, location: r.location,
+        title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, categories: (r.cat || "").split(",").map((c) => c.trim()).filter(Boolean), year: r.year, location: r.location,
     src: `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${r.storage_path.split("/").map(encodeURIComponent).join("/")}`
   }));
 }
@@ -436,7 +436,7 @@ function renderHero(p) {
 }
 
 function renderFilters() {
-  const formats = ["Alle", ...new Set(state.all.map((p) => p.category).filter(Boolean))];
+    const formats = ["Alle", ...new Set(state.all.flatMap((p) => p.categories || []))];
   const box = $("filters");
   box.innerHTML = "";
   if (formats.length <= 2) return;   // nur ein Format vorhanden → kein Filter nötig
@@ -450,7 +450,7 @@ function renderFilters() {
 }
 
 function renderGrid() {
-  state.shown = state.filter === "Alle" ? state.all : state.all.filter((p) => p.category === state.filter);
+    state.shown = state.filter === "Alle" ? state.all : state.all.filter((p) => (p.categories || []).includes(state.filter));
   const grid = $("grid");
   grid.innerHTML = "";
   state.shown.forEach((p, i) => {
