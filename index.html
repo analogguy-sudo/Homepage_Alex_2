@@ -1,437 +1,899 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f8f6f1">
-  <title>Atelier — Original Art</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Analoge Fotografie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500&family=DM+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
 
-  <style>
-    :root {
-      --bg: #f8f6f1;
-      --ink: #282720;
-      --muted: #77756d;
-      --accent: #96644e;
-      --line: #e4e0d7;
+  :root {
+    --bg: #d0b48c;
+    --bg-top: #e3d0b0;
+    --bg-bottom: #bf9a6e;
+    --ink: #3a2a1c;
+    --muted: #43372a;
+    --film: #3b2d21;
+    --edge: #e9a23b;
+    --paper: #f6f4ee;
+    --rule: rgba(90,60,30,.28);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #3f2f23;
+      --bg-top: #4a372a;
+      --bg-bottom: #2b1f17;
+      --ink: #efe4d3;
+      --muted: #c0ad94;
+      --film: #1f1812;
+      --paper: #efece4;
+      --rule: #5a4535;
     }
+  }
+  :root[data-theme="dark"] {
+    --bg: #3f2f23;
+    --bg-top: #4a372a;
+    --bg-bottom: #2b1f17;
+    --ink: #efe4d3;
+    --muted: #c0ad94;
+    --film: #1f1812;
+    --paper: #efece4;
+    --rule: #5a4535;
+  }
 
-    * { box-sizing: border-box; }
+  html { background: var(--bg-bottom); scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100%;
+    background:
+      radial-gradient(1200px 650px at 18% -8%, rgba(255,236,205,.16), transparent 62%),
+      linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    color: var(--ink);
+    font-family: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.55;
+  }
+  body.editing-on { padding-bottom: 7rem; }
+  a { color: inherit; text-underline-offset: 0.2em; }
+  :focus-visible { outline: 3px solid var(--edge); outline-offset: 3px; }
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: Arial, sans-serif;
-    }
+  .wrap { width: min(1120px, 100% - 2.5rem); margin-inline: auto; }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 22px 6%;
-      border-bottom: 1px solid var(--line);
-    }
+  .btn {
+    font: inherit; font-size: 0.95rem; padding: 0.5rem 1.15rem; border-radius: 999px; cursor: pointer;
+    transition: background .2s ease, box-shadow .2s ease;
+    background: transparent; color: inherit; border: 1px solid currentColor;
+  }
+  .btn:hover { background: rgba(127,127,127,.2); }
+  .btn.primary { background: var(--edge); border-color: var(--edge); color: #2a1d12; font-weight: 500; box-shadow: 0 6px 14px -6px rgba(120,70,10,.6); }
+  .btn.primary:hover { filter: brightness(1.07); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+  [hidden] { display: none !important; }
 
-    .logo {
-      font-family: Georgia, serif;
-      font-size: 25px;
-      letter-spacing: 3px;
-    }
+  /* Kopfzeile */
+  header.top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.4rem 0; gap: 1rem; flex-wrap: wrap;
+  }
+  header.top .mark { font-family: "Newsreader", Georgia, serif; font-size: 1.25rem; font-weight: 400; text-decoration: none; }
+  header.top nav { display: flex; gap: 1.6rem; align-items: center; flex-wrap: wrap; }
+  header.top nav a { text-decoration: none; color: var(--muted); }
+  header.top nav a:hover { color: var(--ink); text-decoration: underline; }
+  #editToggle[aria-pressed="true"] { background: var(--ink); color: var(--bg-top); }
 
-    nav { display: flex; gap: 22px; align-items: center; }
+  /* Hero */
+  .hero { padding: clamp(2.5rem, 8vw, 6rem) 0 clamp(2.5rem, 6vw, 4.5rem); }
+  .hero h1 {
+    margin: 0;
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: clamp(3.1rem, 10.5vw, 8.4rem);
+    line-height: 1;
+    letter-spacing: -0.015em;
+    font-weight: 300;
+  }
+  .hero p {
+    margin: 1.6rem 0 0;
+    max-width: 34ch;
+    font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+    line-height: 1.4;
+    color: var(--muted);
+  }
 
-    a { color: inherit; text-decoration: none; }
+  /* Kontaktbogen */
+  .sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+  h2 { margin: 0; font-family: "Newsreader", Georgia, "Times New Roman", serif; font-size: clamp(1.9rem, 4vw, 2.7rem); letter-spacing: -0.005em; font-weight: 400; line-height: 1.15; }
+  .hint { margin: 0; color: var(--muted); font-size: 1rem; }
+  .filters { display: flex; gap: .5rem; flex-wrap: wrap; margin: 0 0 1.2rem; }
+  .chip {
+    font: inherit; font-size: .95rem; padding: .4rem .95rem; border-radius: 999px; cursor: pointer;
+    border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent); background: transparent; color: var(--ink);
+    box-shadow: 0 3px 8px -3px rgba(70,42,16,.35);
+  }
+  .chip:hover { background: rgba(127,127,127,.2); }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg-top); }
+  .chip .n { opacity: .65; margin-left: .45rem; }
+  .catpick {
+    display: flex; align-items: center; gap: .4rem 1.2rem; flex-wrap: wrap; margin-top: .9rem;
+    padding: .6rem .85rem; border-radius: 12px;
+    border: 1px solid rgba(239,228,211,.25); background: rgba(239,228,211,.07);
+  }
+  .catpick .lbl { font-size: .78rem; color: #c9b79c; width: 100%; }
+  .catpick label { display: flex; align-items: center; gap: .45rem; cursor: pointer; }
+  .catpick input { accent-color: var(--edge); }
 
-    select {
-      padding: 9px;
-      background: transparent;
-      border: 1px solid var(--line);
-      color: var(--ink);
-    }
+  .sheet { display: grid; gap: 1.4rem; }
+  .strip-scroll { overflow-x: auto; max-width: 100%; padding: 6px 12px 36px; margin: -6px -12px -28px; -webkit-overflow-scrolling: touch; }
+  .strip {
+    min-width: 900px;
+    background: var(--film);
+    border-radius: 12px;
+    padding: 0 0 8px;
+    box-shadow: 0 22px 40px -16px rgba(50,28,8,.6), 0 5px 12px -2px rgba(50,28,8,.28), inset 0 1px 0 rgba(255,255,255,.07);
+  }
+  .sprockets {
+    height: 8px; margin: 8px 0;
+    background: var(--bg);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='8'%3E%3Crect x='6' width='10' height='8' rx='2'/%3E%3C/svg%3E") repeat-x 0 0 / 22px 8px;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='8'%3E%3Crect x='6' width='10' height='8' rx='2'/%3E%3C/svg%3E") repeat-x 0 0 / 22px 8px;
+  }
+  .frames { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 4px 14px 0; }
+  .cell { display: block; }
+  .cell .no {
+    display: flex; justify-content: space-between;
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 0.72rem; color: var(--edge); padding: 5px 2px 0;
+    letter-spacing: 0.04em;
+  }
+  .frame {
+    position: relative; display: block; width: 100%;
+    padding: 0; border: 0; background: #000; cursor: zoom-in; border-radius: 6px;
+    aspect-ratio: 3 / 2; overflow: visible; color: inherit;
+    box-shadow: 0 3px 10px rgba(0,0,0,.5);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .frame:disabled { cursor: default; }
+  .frame .photo { position: absolute; inset: 0; overflow: hidden; border-radius: 6px; }
+  .frame.empty .photo { background: #1a140f; }
+  .frame svg.scene { display: block; width: 100%; height: 100%; }
+  .frame:not(:disabled):hover { transform: translateY(-3px); box-shadow: 0 12px 24px -6px rgba(0,0,0,.65); }
+  .frame:not(:disabled):hover .photo { filter: brightness(1.05); }
+  @media (prefers-reduced-motion: reduce) { .frame { transition: none; } .frame:not(:disabled):hover { transform: none; } }
+  img.pic { display: block; max-width: none; user-select: none; -webkit-user-drag: none; }
+  .bw { filter: grayscale(1) contrast(1.15); }
+  .edgeprint {
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 0.7rem; color: var(--edge);
+    padding: 6px 16px 0; letter-spacing: 0.06em; opacity: .9;
+    white-space: nowrap; overflow: hidden;
+  }
+  .sheet.editing .frame { cursor: pointer; outline: 1px dashed rgba(233,162,59,.55); outline-offset: 2px; }
+  .badge {
+    position: absolute; left: 6px; bottom: 6px;
+    font-size: 0.8rem; line-height: 1; padding: 5px 10px; border-radius: 999px;
+    background: rgba(20,14,8,.78); color: #f3e7d3;
+  }
 
-    .hero {
-      padding: 75px 8%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      gap: 45px;
-    }
+  /* "Entwickeln": einmaliger Auftritt beim Laden */
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet:not(.still) .frame .photo { animation: develop 2.6s ease-out backwards; animation-delay: calc(var(--i) * 140ms + 200ms); }
+  }
+  @keyframes develop {
+    0%   { opacity: 0; filter: brightness(2.4) saturate(0); }
+    30%  { opacity: 1; }
+    100% { filter: none; }
+  }
 
-    .eyebrow {
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-size: 11px;
-    }
+  /* Über mich */
+  section { padding: clamp(3rem, 8vw, 6rem) 0 0; }
+  .about { display: grid; grid-template-columns: 1.3fr 1fr; gap: clamp(2rem, 6vw, 5rem); margin-top: 1.4rem; }
+  .about p { margin: 0 0 1em; max-width: 58ch; }
+  dl { margin: 0; border-top: 1px solid var(--rule); }
+  dl div { display: grid; grid-template-columns: 6.5rem 1fr; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid var(--rule); }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
 
-    h1, h2, h3 { font-family: Georgia, serif; font-weight: normal; }
+  .contact p { max-width: 46ch; margin: 1rem 0 1.4rem; }
+  .contact .mail {
+    display: inline-block; font-family: "Newsreader", Georgia, serif; font-size: clamp(1.5rem, 4vw, 2.3rem); font-weight: 400; letter-spacing: 0;
+    text-decoration-thickness: 3px; text-decoration-color: var(--edge);
+  }
+  .contact ul { list-style: none; padding: 0; margin: 1.4rem 0 0; display: flex; gap: 1.6rem; flex-wrap: wrap; }
+  footer { padding: 4rem 0 2.5rem; color: var(--muted); font-size: 0.95rem; }
 
-    h1 {
-      font-size: clamp(42px, 6vw, 72px);
-      line-height: 1.08;
-      margin: 20px 0;
-    }
+  /* Dialoge (Abzug und Bearbeiten) */
+  dialog.dlg {
+    border: 0; padding: 0; background: transparent; color: #efe4d3;
+    width: min(920px, 94vw); max-width: 100vw; max-height: calc(100dvh - 1.5rem); overflow: auto;
+  }
+  dialog.dlg::backdrop { background: rgba(30, 20, 12, .78); backdrop-filter: blur(6px); }
+  .paper { margin: 0; background: var(--paper); padding: clamp(10px, 3vw, 28px); border-radius: 8px; box-shadow: 0 34px 80px -22px rgba(0,0,0,.7), 0 6px 18px rgba(0,0,0,.35); }
+  .paper .img { position: relative; aspect-ratio: 3 / 2; width: 100%; overflow: hidden; background: #000; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.14); }
+  .paper .img svg { display: block; width: 100%; height: 100%; }
 
-    .hero p, .about p {
-      line-height: 1.9;
-      color: var(--muted);
-    }
+  .reveal { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s ease; }
+  .reveal.open { grid-template-rows: 1fr; }
+  .reveal > div { overflow: hidden; min-height: 0; }
+  @media (prefers-reduced-motion: reduce) { .reveal { transition: none; } }
 
-    .hero img {
-      width: 100%;
-      height: 430px;
-      object-fit: cover;
-    }
+  .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; padding-top: 0.9rem; }
+  .field {
+    display: flex; flex-direction: column; gap: 0.15rem; min-width: 0;
+    padding: 0.6rem 0.85rem; border-radius: 12px;
+    border: 1px solid rgba(239,228,211,.25); background: rgba(239,228,211,.07);
+  }
+  .field.wide { grid-column: 1 / -1; }
+  .field .lbl { font-size: 0.78rem; color: #c9b79c; }
+  .field .val { overflow-wrap: anywhere; }
+  .field input, .field textarea {
+    font: inherit; color: #efe4d3; background: transparent; width: 100%; resize: vertical;
+    border: 0; border-bottom: 1px solid rgba(239,228,211,.35); padding: 0.2rem 0; outline: none;
+  }
+  .field input:focus, .field textarea:focus { border-bottom-color: var(--edge); }
+  .nodata { margin: 0; padding-top: .9rem; color: #c9b79c; }
 
-    .button {
-      display: inline-block;
-      background: var(--ink);
-      color: white;
-      padding: 14px 20px;
-      margin-top: 16px;
-      border: 0;
-      cursor: pointer;
-      font-size: 12px;
-      letter-spacing: 1px;
-    }
+  .dlg .btn { color: #efe4d3; }
+  .dlg .btn.primary { color: #2a1d12; }
+  .lb-controls { display: flex; justify-content: space-between; margin-top: 0.9rem; gap: .6rem; }
 
-    .button:hover { background: var(--accent); }
+  /* Zuschnitt */
+  .cropbox {
+    position: relative; aspect-ratio: 3 / 2; width: 100%; overflow: hidden; background: #000;
+    cursor: grab; touch-action: none; border: 1px solid rgba(239,228,211,.3); border-radius: 10px;
+  }
+  .cropbox.nopic { cursor: default; }
+  .cropbox.dragging { cursor: grabbing; }
+  .cropbox svg { display: block; width: 100%; height: 100%; }
+  .cropbox .drop { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 1rem; color: #c9b79c; }
+  .cropbox.over { outline: 3px solid var(--edge); }
+  .cropctl { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin-top: .8rem; }
+  .cropctl label { display: flex; align-items: center; gap: .6rem; flex: 1 1 200px; font-size: .95rem; }
+  .cropctl input[type=range] { flex: 1; accent-color: var(--edge); }
+  .cropnote { margin: .6rem 0 0; font-size: .92rem; color: #c9b79c; }
+  .edbtns { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.1rem; padding-bottom: 4px; }
+  .edtitle { margin: 0 0 .8rem; font-family: "Newsreader", Georgia, serif; font-size: 1.35rem; font-weight: 400; }
 
-    .gallery { padding: 55px 6% 85px; border-top: 1px solid var(--line); }
+  /* Bearbeiten-Leiste */
+  #editbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: var(--film); color: #efe4d3;
+    padding: .7rem 1rem calc(.7rem + env(safe-area-inset-bottom, 0px));
+    display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; justify-content: center;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -10px 30px rgba(40,22,6,.35);
+  }
+  #editbar .meter { font-family: "DM Mono", ui-monospace, monospace; font-size: .78rem; color: var(--edge); }
+  #editbar .meter.warn { color: #ff8a70; }
+  #toast {
+    position: fixed; left: 50%; transform: translateX(-50%); z-index: 60;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    max-width: min(92vw, 520px); background: #efe4d3; color: #2a1d12;
+    padding: .7rem 1.1rem; border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(30,15,0,.5); font-size: 1rem;
+  }
 
-    .heading {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: 20px;
-      margin-bottom: 30px;
-    }
+  @media (max-width: 760px) {
+    .about { grid-template-columns: 1fr; }
+    header.top nav { gap: 1.1rem; }
+  }
+  @media (max-width: 560px) { .fgrid { grid-template-columns: 1fr; } }
 
-    h2 { font-size: clamp(32px, 4vw, 46px); margin: 12px 0; }
-
-    .art-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 32px 22px;
-    }
-
-    .art-card img {
-      width: 100%;
-      aspect-ratio: 4 / 5;
-      object-fit: cover;
-      background: #e8e1d7;
-    }
-
-    .art-card h3 { font-size: 21px; margin: 14px 0 8px; }
-
-    .description, .status {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .price { font-size: 15px; margin-top: 12px; }
-
-    .status {
-      display: block;
-      margin-top: 7px;
-      color: var(--accent);
-    }
-
-    .about {
-      text-align: center;
-      background: #eeebe3;
-      padding: 65px 8%;
-    }
-
-    .about p { max-width: 620px; margin: 15px auto; }
-
-    footer {
-      padding: 30px 6%;
-      display: flex;
-      justify-content: space-between;
-      gap: 15px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    #message { color: var(--muted); padding: 20px 0; }
-
-    @media (max-width: 700px) {
-      header { padding: 18px 5%; }
-      nav { gap: 12px; font-size: 13px; }
-      .hero { grid-template-columns: 1fr; padding: 45px 6%; }
-      .hero img { height: 320px; }
-      .gallery { padding: 45px 5%; }
-      .art-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; }
-      .heading { align-items: start; flex-direction: column; }
-    }
-
-    @media (max-width: 420px) {
-      .logo { font-size: 19px; }
-      nav { gap: 9px; }
-      .art-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+  /* Zusätze für die Supabase-Version */
+  .linklike { font: inherit; font-size: .95rem; background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; opacity: .75; }
+  .linklike:hover { opacity: 1; }
+  .cfgnote { margin: 0 0 1.4rem; padding: .8rem 1rem; border-radius: 12px; background: rgba(255,255,255,.35); color: var(--ink); font-size: .95rem; }
+  dialog#login { width: min(420px, 92vw); }
+  #login form { display: grid; gap: .7rem; }
+  #login .edbtns { margin-top: .4rem; }
+  .mailtext { color: var(--muted); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
 </head>
-
 <body>
-  <header>
-    <a class="logo" href="#">ATELIER.</a>
-    <nav>
-      <a href="#gallery" data-t="navGallery">Galerie</a>
-      <a href="#about" data-t="navAbout">Über mich</a>
-      <select id="language" aria-label="Sprache">
-        <option value="de">Deutsch</option>
-        <option value="es">Español</option>
-        <option value="en">English</option>
-      </select>
+
+<div class="wrap">
+  <header class="top">
+    <a class="mark" id="mark" href="#top">Name folgt</a>
+    <nav aria-label="Hauptnavigation">
+      <a href="#kontaktbogen">Kontaktbogen</a>
+      <a href="#ueber-mich">Über mich</a>
+      <a href="#kontakt">Kontakt</a>
+      <button class="btn" type="button" id="editToggle" aria-pressed="false" hidden>Bearbeiten</button>
+      <button class="btn" type="button" id="loginTop">Anmelden</button>
     </nav>
   </header>
+  <p class="cfgnote" id="cfgnote" hidden></p>
 
-  <main>
-    <section class="hero">
-      <div>
-        <span class="eyebrow" data-t="eyebrow">Originalkunst · Mit Liebe geschaffen</span>
-        <h1 data-t="heroTitle">Kunst, die Räume und Herzen berührt.</h1>
-        <p data-t="heroText">
-          Entdecke einzigartige Originalwerke, inspiriert von Farben und Natur.
-        </p>
-        <a class="button" href="#gallery" data-t="heroButton">WERKE ENTDECKEN</a>
+  <main id="top">
+    <div class="hero">
+      <h1 id="headline">Analoge<br>Fotografie</h1>
+      <p id="tagline"></p>
+    </div>
+
+    <section id="kontaktbogen" style="padding-top:0">
+      <div class="sheet-head">
+        <h2>Kontaktbogen</h2>
+        <p class="hint" id="hint">Bild antippen für den Abzug in groß.</p>
       </div>
-      <img
-        src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=1200&q=85"
-        alt="Moderne Kunst"
-      >
+      <div class="filters" id="filters" role="group" aria-label="Kategorien"></div>
+      <div class="sheet" id="sheet" aria-live="polite"></div>
     </section>
 
-    <section class="gallery" id="gallery">
-      <div class="heading">
-        <div>
-          <span class="eyebrow" data-t="collection">Die Kollektion</span>
-          <h2 data-t="galleryTitle">Ausgewählte Werke</h2>
-        </div>
-        <span data-t="gallerySubtitle">Jedes Werk ein Unikat.</span>
+    <section id="ueber-mich">
+      <h2>Über mich</h2>
+      <div class="about">
+        <div id="aboutText"></div>
+        <dl id="facts"></dl>
       </div>
-
-      <p id="message">Kunstwerke werden geladen …</p>
-      <div class="art-grid" id="artGrid"></div>
     </section>
 
-    <section class="about" id="about">
-      <span class="eyebrow" data-t="aboutEyebrow">Die Künstlerin</span>
-      <h2 data-t="aboutTitle">Kunst mit Persönlichkeit</h2>
-      <p data-t="aboutText">
-        Ich erschaffe originale Kunstwerke, die Geschichten erzählen
-        und jedem Raum eine besondere Atmosphäre verleihen.
-      </p>
-      <a class="button contact-link" href="#" data-t="contactButton">
-        KONTAKT AUFNEHMEN
-      </a>
+    <section id="kontakt" class="contact">
+      <h2>Kontakt</h2>
+      <div id="contactBody"></div>
     </section>
   </main>
 
   <footer>
-    <span>© <span id="year"></span> ATELIER.</span>
-    <span data-t="footerText">Originalkunst · Mit Liebe geschaffen</span>
+    <span id="footText"></span>
+    <button type="button" class="linklike" id="loginLink">Anmelden</button>
   </footer>
+</div>
 
-  <!-- Supabase JavaScript Bibliothek -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Abzug in groß -->
+<dialog id="print" class="dlg" aria-label="Abzug in groß">
+  <figure class="paper"><div class="img" id="printImg"></div></figure>
+  <div class="reveal" id="reveal"><div><div class="fgrid" id="printFields"></div></div></div>
+  <div class="lb-controls">
+    <button type="button" class="btn" id="prev">Zurück</button>
+    <a class="btn primary" id="buy" href="#" hidden>Kaufen</a>
+    <button type="button" class="btn" id="close">Schließen</button>
+    <button type="button" class="btn" id="next">Weiter</button>
+  </div>
+</dialog>
 
-  <script>
-    // 1. HIER DEINE SUPABASE-ZUGANGSDATEN EINTRAGEN
-    const SUPABASE_URL = "DEINE_SUPABASE_URL";
-    const SUPABASE_PUBLISHABLE_KEY = "DEIN_PUBLISHABLE_KEY";
+<!-- Bild einsetzen, zuschneiden, beschriften -->
+<dialog id="editor" class="dlg" aria-label="Bild bearbeiten">
+  <p class="edtitle" id="edTitle">Bild bearbeiten</p>
+  <div class="cropbox" id="cropBox"></div>
+  <div class="cropctl">
+    <label>Ausschnitt <input type="range" id="zoom" min="1" max="3" step="0.01" value="1" aria-label="Ausschnitt vergrößern"></label>
+    <button type="button" class="btn" id="pick">Bild auswählen</button>
+    <button type="button" class="btn" id="removeImg">Bild entfernen</button>
+  </div>
+  <p class="cropnote" id="cropNote"></p>
+  <div class="catpick" id="catPick" role="radiogroup" aria-label="Kategorie"></div>
+  <div class="fgrid" id="edFields"></div>
+  <div class="edbtns">
+    <button type="button" class="btn" id="edCancel">Abbrechen</button>
+    <button type="button" class="btn primary" id="edDone">Speichern</button>
+  </div>
+</dialog>
 
-    // 2. HIER DIE ECHTE KONTAKT-E-MAIL EINTRAGEN
-    const ARTIST_EMAIL = "kunst@example.com";
+<!-- Anmeldung -->
+<dialog id="login" class="dlg" aria-label="Anmelden">
+  <p class="edtitle">Anmelden</p>
+  <form id="loginForm">
+    <label class="field"><span class="lbl">E-Mail</span><input type="email" id="loginMail" autocomplete="username" required></label>
+    <label class="field"><span class="lbl">Passwort</span><input type="password" id="loginPass" autocomplete="current-password" required></label>
+    <p class="cropnote" id="loginErr" role="alert" hidden></p>
+    <div class="edbtns">
+      <button type="button" class="btn" id="loginCancel">Abbrechen</button>
+      <button type="submit" class="btn primary" id="loginGo">Anmelden</button>
+    </div>
+  </form>
+</dialog>
 
-    const translations = {
-      de: {
-        navGallery: "Galerie", navAbout: "Über mich",
-        eyebrow: "Originalkunst · Mit Liebe geschaffen",
-        heroTitle: "Kunst, die Räume und Herzen berührt.",
-        heroText: "Entdecke einzigartige Originalwerke, inspiriert von Farben und Natur.",
-        heroButton: "WERKE ENTDECKEN", collection: "Die Kollektion",
-        galleryTitle: "Ausgewählte Werke", gallerySubtitle: "Jedes Werk ein Unikat.",
-        aboutEyebrow: "Die Künstlerin", aboutTitle: "Kunst mit Persönlichkeit",
-        aboutText: "Ich erschaffe originale Kunstwerke, die Geschichten erzählen und jedem Raum eine besondere Atmosphäre verleihen.",
-        contactButton: "KONTAKT AUFNEHMEN",
-        footerText: "Originalkunst · Mit Liebe geschaffen",
-        available: "Verfügbar", sold: "Verkauft",
-        enquire: "Werk anfragen", loading: "Kunstwerke werden geladen …",
-        empty: "Noch keine veröffentlichten Kunstwerke vorhanden.",
-        error: "Kunstwerke konnten nicht geladen werden. Bitte prüfe die Supabase-Konfiguration.",
-        subject: "Anfrage zu"
-      },
-      es: {
-        navGallery: "Galería", navAbout: "Sobre mí",
-        eyebrow: "Arte original · Creado con amor",
-        heroTitle: "Arte que conmueve espacios y corazones.",
-        heroText: "Descubre obras originales únicas, inspiradas en los colores y la naturaleza.",
-        heroButton: "DESCUBRIR OBRAS", collection: "La colección",
-        galleryTitle: "Obras seleccionadas", gallerySubtitle: "Cada obra es única.",
-        aboutEyebrow: "La artista", aboutTitle: "Arte con personalidad",
-        aboutText: "Creo obras originales que cuentan historias y aportan una atmósfera especial a cada espacio.",
-        contactButton: "CONTACTAR",
-        footerText: "Arte original · Creado con amor",
-        available: "Disponible", sold: "Vendida",
-        enquire: "Consultar obra", loading: "Cargando obras …",
-        empty: "Todavía no hay obras publicadas.",
-        error: "No se pudieron cargar las obras. Comprueba la configuración de Supabase.",
-        subject: "Consulta sobre"
-      },
-      en: {
-        navGallery: "Gallery", navAbout: "About me",
-        eyebrow: "Original art · Made with love",
-        heroTitle: "Art that moves spaces and hearts.",
-        heroText: "Discover unique original artworks inspired by colour and nature.",
-        heroButton: "EXPLORE THE ART", collection: "The collection",
-        galleryTitle: "Selected works", gallerySubtitle: "Every piece is unique.",
-        aboutEyebrow: "The artist", aboutTitle: "Art with personality",
-        aboutText: "I create original artworks that tell stories and bring a special atmosphere to every space.",
-        contactButton: "GET IN TOUCH",
-        footerText: "Original art · Made with love",
-        available: "Available", sold: "Sold",
-        enquire: "Enquire about artwork", loading: "Loading artworks …",
-        empty: "No published artworks yet.",
-        error: "Could not load artworks. Please check the Supabase configuration.",
-        subject: "Enquiry about"
+<div id="editbar" hidden>
+  <button type="button" class="btn" id="bulk">Mehrere Bilder einfügen</button>
+  <button type="button" class="btn" id="addStrip">Streifen hinzufügen</button>
+  <button type="button" class="btn" id="delStrip">Letzten Streifen entfernen</button>
+  <span class="meter">Änderungen werden sofort gespeichert</span>
+</div>
+<div id="toast" role="status" hidden></div>
+<input type="file" id="fileOne" accept="image/*" hidden>
+<input type="file" id="fileMany" accept="image/*" multiple hidden>
+
+<script>
+  /* ---------- Einstellungen aus config.js ---------- */
+  const CFG = window.SITE_CONFIG || {};
+  const BUCKET = 'photos';
+  const CATS = (CFG.categories && CFG.categories.length ? CFG.categories
+    : [['sw','Schwarz-Weiß'],['color','Color'],['natur','Natur'],['portraet','Porträt']]).map(c => ({ k: c[0], l: c[1] }));
+  const configured = !!(CFG.supabaseUrl && CFG.supabaseAnonKey && !/DEIN/i.test(CFG.supabaseUrl + CFG.supabaseAnonKey));
+  let sb = null;
+  try { if (configured && window.supabase) sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey); } catch (e) { console.error(e); }
+
+  /* ---------- Hilfsfunktionen ---------- */
+  const $ = id => document.getElementById(id);
+  document.addEventListener('contextmenu', e => { if (e.target.closest('.frame, .paper, .cropbox, img')) e.preventDefault(); });
+  document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+  const FIELDS = [
+    { k:'title',  label:'Titel', wide:true },
+    { k:'place',  label:'Ort' },
+    { k:'date',   label:'Datum' },
+    { k:'camera', label:'Kamera und Objektiv' },
+    { k:'film',   label:'Film' },
+    { k:'cat',    label:'Kategorie', noedit:true, fmt: v => (CATS.find(c => c.k === v) || {}).l || '' },
+    { k:'note',   label:'Notiz', wide:true, multi:true }
+  ];
+
+  const blankFrame = () => ({ id:null, img:null, full:null, path:null, thumbPath:null, ar:1.5, fx:.5, fy:.5, z:1, cat:'', title:'', place:'', date:'', camera:'', film:'', note:'' });
+
+  /* Zuschnitt: exakt berechnet, damit Vorschau, Vorschaubild und Abzug identisch aussehen. */
+  function picGeom(f) {
+    const r = f.ar || 1.5;
+    const W = 100 * f.z * Math.max(1, r / 1.5);
+    const H = W * 1.5 / r;
+    return { W, H, fx: clamp(f.fx, 50 / W, 1 - 50 / W), fy: clamp(f.fy, 50 / H, 1 - 50 / H) };
+  }
+  function picStyle(f) {
+    const g = picGeom(f);
+    return `position:absolute;width:${g.W}%;height:${g.H}%;left:${50 - g.fx * g.W}%;top:${50 - g.fy * g.H}%`;
+  }
+  const mediaOf = (f, i, big) => f.img
+    ? `<img class="pic" src="${esc(big ? (f.full || f.img) : f.img)}" alt="${esc(f.title || 'Foto ' + (i + 1))}" style="${picStyle(f)}" draggable="false"${big ? '' : ' loading="lazy"'}>`
+    : '';
+
+  let toastTimer;
+  function toast(msg, ms = 4200) {
+    const t = $('toast');
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, ms);
+  }
+  const errText = e => {
+    const m = (e && (e.message || e.error_description)) || String(e);
+    return /row-level security|permission|jwt|not authorized|403|401/i.test(m)
+      ? 'Keine Berechtigung. Bist du angemeldet, und stimmt deine E-Mail in der SQL-Datei?' : m;
+  };
+
+  /* ---------- Seitentexte aus config.js ---------- */
+  function renderSiteText() {
+    const name = CFG.name || 'Name folgt';
+    document.title = CFG.title || 'Analoge Fotografie';
+    $('mark').textContent = name;
+    $('headline').innerHTML = (CFG.headline || ['Analoge', 'Fotografie']).map(esc).join('<br>');
+    $('tagline').textContent = CFG.tagline || '';
+    $('tagline').hidden = !CFG.tagline;
+    $('aboutText').innerHTML = (CFG.about && CFG.about.length ? CFG.about : ['Text folgt.']).map(p => `<p>${esc(p)}</p>`).join('');
+    $('facts').innerHTML = (CFG.facts || []).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+    $('facts').hidden = !(CFG.facts && CFG.facts.length);
+    let c = '';
+    if (CFG.contactText) c += `<p>${esc(CFG.contactText)}</p>`;
+    c += CFG.mail ? `<a class="mail" href="mailto:${esc(CFG.mail)}">${esc(CFG.mail)}</a>`
+                  : '<p class="mailtext">Kontaktangaben folgen.</p>';
+    if (CFG.links && CFG.links.length)
+      c += '<ul>' + CFG.links.map(l => `<li><a href="${esc(l.url)}" rel="noopener">${esc(l.label)}</a></li>`).join('') + '</ul>';
+    $('contactBody').innerHTML = c;
+    $('footText').textContent = CFG.footer || `© ${new Date().getFullYear()} ${name}. Alle Rechte vorbehalten. Die Bilder dürfen ohne Erlaubnis nicht verwendet werden.`;
+    $('footText').after(document.createTextNode(' '));
+  }
+  function showNote(msg) { const n = $('cfgnote'); n.textContent = msg; n.hidden = false; }
+
+  /* ---------- Daten aus Supabase ---------- */
+  let frames = [], loaded = false;
+  let editMode = false, isOwner = false, session = null;
+
+  const pubUrl = path => sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  function rowToFrame(r) {
+    return { ...blankFrame(), id:r.id, path:r.image_path, thumbPath:r.thumb_path,
+      img: pubUrl(r.thumb_path || r.image_path), full: pubUrl(r.image_path),
+      ar:r.ar || 1.5, fx:r.fx == null ? .5 : r.fx, fy:r.fy == null ? .5 : r.fy, z:r.z || 1, cat:r.cat || '',
+      title:r.title || '', place:r.place || '', date:r.date_text || '', camera:r.camera || '', film:r.film || '', note:r.note || '' };
+  }
+  function padFrames(arr) {
+    const out = [], n = Math.max(4, Math.ceil(arr.length / 4) * 4);
+    for (let i = 0; i < n; i++) out.push(arr[i] || blankFrame());
+    return out;
+  }
+  async function loadData() {
+    if (!sb) return padFrames([]);
+    const { data, error } = await sb.from('photos').select('*').order('position');
+    if (error) { console.error(error); showNote('Die Bilder konnten nicht geladen werden: ' + error.message); return padFrames([]); }
+    const arr = [];
+    data.forEach(r => { arr[r.position] = rowToFrame(r); });
+    return padFrames(arr);
+  }
+
+  async function removeFiles(f) {
+    const paths = [f.path, f.thumbPath].filter(Boolean);
+    if (paths.length) await sb.storage.from(BUCKET).remove(paths);
+  }
+
+  /* Ein Bild (Platz i) speichern: Dateien hochladen, Zeile schreiben, Altes aufräumen */
+  async function persistFrame(i, d) {
+    const old = frames[i];
+    if (!d.img) {                                   // Bild entfernt
+      if (old.id) {
+        const r = await sb.from('photos').delete().eq('id', old.id);
+        if (r.error) throw r.error;
+        await removeFiles(old);
       }
-    };
-
-    let currentLanguage = "de";
-    let artworks = [];
-
-    const grid = document.getElementById("artGrid");
-    const message = document.getElementById("message");
-
-    // Escape database text before inserting it into HTML.
-    function escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, char => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;",
-        '"': "&quot;", "'": "&#39;"
-      })[char]);
+      frames[i] = blankFrame();
+      return;
     }
-
-    function formatPrice(value, lang) {
-      return new Intl.NumberFormat(
-        lang === "de" ? "de-DE" : lang === "es" ? "es-ES" : "en-GB",
-        { style: "currency", currency: "EUR" }
-      ).format(Number(value));
+    let paths = { image_path: d.path, thumb_path: d.thumbPath };
+    if (d.pending) {
+      const token = crypto.randomUUID();
+      const fp = `full/${token}.jpg`, tp = `thumb/${token}.jpg`;
+      let r = await sb.storage.from(BUCKET).upload(fp, d.pending.full, { contentType: 'image/jpeg', cacheControl: '31536000' });
+      if (r.error) throw r.error;
+      r = await sb.storage.from(BUCKET).upload(tp, d.pending.thumb, { contentType: 'image/jpeg', cacheControl: '31536000' });
+      if (r.error) throw r.error;
+      paths = { image_path: fp, thumb_path: tp };
     }
+    const row = { position: i, ...paths, ar: d.ar, fx: d.fx, fy: d.fy, z: d.z, cat: d.cat || '',
+      title: d.title, place: d.place, date_text: d.date, camera: d.camera, film: d.film, note: d.note };
+    const res = d.id
+      ? await sb.from('photos').update(row).eq('id', d.id).select().single()
+      : await sb.from('photos').insert(row).select().single();
+    if (res.error) throw res.error;
+    if (d.pending && old.path) await removeFiles(old);
+    frames[i] = rowToFrame(res.data);
+  }
 
-    function renderArtworks() {
-      const t = translations[currentLanguage];
-      const titleField = `title_${currentLanguage}`;
-      const descriptionField = `description_${currentLanguage}`;
-
-      if (!artworks.length) {
-        grid.innerHTML = "";
-        message.textContent = t.empty;
-        message.hidden = false;
-        return;
-      }
-
-      message.hidden = true;
-
-      grid.innerHTML = artworks.map(art => {
-        const title = art[titleField] || art.title_en || art.title_de || "";
-        const description = art[descriptionField] ||
-          art.description_en || art.description_de || "";
-        const status = art.available ? t.available : t.sold;
-
-        const contactURL = "mailto:" + ARTIST_EMAIL +
-          "?subject=" + encodeURIComponent(t.subject + ": " + title) +
-          "&body=" + encodeURIComponent(title);
-
-        return `
-          <article class="art-card">
-            <img
-              src="${escapeHTML(art.image_url)}"
-              alt="${escapeHTML(title)}"
-              loading="lazy"
-            >
-            <h3>${escapeHTML(title)}</h3>
-            <div class="description">${escapeHTML(description)}</div>
-            <div class="price">${formatPrice(art.price, currentLanguage)}</div>
-            <span class="status">${status}</span>
-            ${art.available ? `
-              <a class="button" href="${contactURL}">
-                ${t.enquire}
-              </a>
-            ` : ""}
-          </article>
-        `;
-      }).join("");
-    }
-
-    function setLanguage(lang) {
-      if (!translations[lang]) return;
-      currentLanguage = lang;
-      document.documentElement.lang = lang;
-
-      document.querySelectorAll("[data-t]").forEach(el => {
-        el.textContent = translations[lang][el.dataset.t];
-      });
-
-      document.querySelectorAll(".contact-link").forEach(el => {
-        el.href = "mailto:" + ARTIST_EMAIL;
-      });
-
-      document.title = lang === "de" ? "Atelier — Originalkunst"
-        : lang === "es" ? "Atelier — Arte original"
-        : "Atelier — Original Art";
-
-      if (artworks.length) renderArtworks();
-      else message.textContent = translations[lang].loading;
-    }
-
-    async function loadArtworks() {
-      const t = translations[currentLanguage];
-
-      if (
-        !window.supabase ||
-        SUPABASE_URL === "https://vavevulydesvapopwqgd.supabase.co" ||
-        SUPABASE_PUBLISHABLE_KEY === "sb_publishable_pqNBiPM-4zQk_-Ile4fnQw_BXvrW0dN"
-      ) {
-        message.textContent =
-          "Bitte trage oben deine Supabase URL und deinen Publishable Key ein.";
-        return;
-      }
-
-      try {
-        const client = window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_PUBLISHABLE_KEY
-        );
-
-        const { data, error } = await client
-          .from("artworks")
-          .select("id,title_de,title_es,title_en,description_de,description_es,description_en,price,image_url,available")
-          .eq("published", true)
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        artworks = data || [];
-        renderArtworks();
-      } catch (error) {
-        console.error("Supabase error:", error);
-        message.textContent = t.error;
-      }
-    }
-
-    document.getElementById("language").addEventListener("change", event => {
-      setLanguage(event.target.value);
+  /* ---------- Bilder einlesen (Original bleibt bei dir, hier entstehen zwei Größen) ---------- */
+  function detectCat(src) {
+    const t = document.createElement('canvas'); t.width = t.height = 48;
+    const tc = t.getContext('2d', { willReadFrequently: true });
+    tc.drawImage(src, 0, 0, 48, 48);
+    const d = tc.getImageData(0, 0, 48, 48).data;
+    let sum = 0;
+    for (let k = 0; k < d.length; k += 4) sum += Math.max(d[k], d[k+1], d[k+2]) - Math.min(d[k], d[k+1], d[k+2]);
+    return sum / (d.length / 4) < 10 ? 'sw' : 'color';
+  }
+  async function fileToImage(file) {
+    let bmp;
+    try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+    catch (e) { bmp = await createImageBitmap(file); }
+    const make = (max, q) => new Promise((res, rej) => {
+      const sc = Math.min(1, max / Math.max(bmp.width, bmp.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc);
+      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+      c.toBlob(b => b ? res({ blob: b, w: c.width, h: c.height, canvas: c }) : rej(new Error('Bild konnte nicht umgewandelt werden')), 'image/jpeg', q);
     });
+    const full = await make(2400, 0.88), thumb = await make(900, 0.82);
+    const cat = detectCat(thumb.canvas);
+    if (bmp.close) bmp.close();
+    return { full: full.blob, thumb: thumb.blob, ar: full.w / full.h, cat };
+  }
 
-    document.getElementById("year").textContent = new Date().getFullYear();
+  /* ---------- Filter und Kontaktbogen ---------- */
+  const sheet = $('sheet');
+  let filter = 'all';
+  const pad = n => String(n).padStart(2, '0');
 
-    setLanguage("de");
-    loadArtworks();
-  </script>
+  function renderFilters() {
+    const box = $('filters');
+    const cnt = { all: 0 }; CATS.forEach(c => { cnt[c.k] = 0; });
+    frames.forEach(f => { if (f.img) { cnt.all++; if (cnt[f.cat] != null) cnt[f.cat]++; } });
+    if (filter !== 'all' && !cnt[filter]) filter = 'all';
+    box.hidden = editMode || cnt.all === 0;
+    box.innerHTML = [['all', 'Alle'], ...CATS.map(c => [c.k, c.l])].filter(([k]) => k === 'all' || cnt[k] > 0).map(([k, l]) =>
+      `<button type="button" class="chip" data-f="${k}" aria-pressed="${filter === k}">${l}<span class="n">${cnt[k]}</span></button>`).join('');
+  }
+  $('filters').addEventListener('click', e => {
+    const b = e.target.closest('.chip');
+    if (!b) return;
+    filter = b.dataset.f;
+    renderSheet(true);
+  });
+
+  function renderSheet(animate) {
+    sheet.classList.toggle('still', !animate);
+    sheet.classList.toggle('editing', editMode);
+    renderFilters();
+    let items = frames.map((f, i) => ({ f, i }));
+    if (!editMode) {
+      if (filter === 'all') {
+        const kept = [];
+        for (let g = 0; g < items.length; g += 4) {
+          const grp = items.slice(g, g + 4);
+          if (grp.some(o => o.f.img)) grp.forEach(o => kept.push(o));
+        }
+        items = kept;
+      } else {
+        items = items.filter(o => o.f.img && o.f.cat === filter);
+      }
+    }
+    let html = '';
+    if (!items.length) {
+      html = '<p class="hint">' + (filter !== 'all' ? 'In dieser Kategorie ist noch kein Bild.'
+        : (isOwner ? 'Noch keine Bilder. Tippe oben auf „Bearbeiten“, um deine ersten einzufügen.' : (loaded ? 'Bilder folgen.' : ''))) + '</p>';
+    } else {
+      while (items.length % 4) items.push(null);
+      for (let s = 0; s < items.length / 4; s++) {
+        let cells = '';
+        for (let c = 0; c < 4; c++) {
+          const pos = s * 4 + c, it = items[pos];
+          if (!it) {
+            cells += `<div class="cell"><button class="frame empty" type="button" disabled tabindex="-1" aria-hidden="true"><span class="photo"></span></button><div class="no"><span>&nbsp;</span></div></div>`;
+            continue;
+          }
+          const f = it.f, i = it.i, has = !!f.img;
+          const dis = (!editMode && !has) ? ' disabled' : '';
+          const label = editMode ? `Bild ${i + 1} bearbeiten` : (has ? `Bild ${i + 1}: ${f.title || 'ohne Titel'}. Abzug öffnen` : `Bild ${i + 1}: leer`);
+          cells += `
+            <div class="cell">
+              <button class="frame${has ? '' : ' empty'}" type="button" data-i="${i}"${dis} aria-label="${esc(label)}">
+                <span class="photo" style="--i:${pos}">${mediaOf(f, i, false)}</span>
+                ${editMode ? `<span class="badge">${has ? 'Ändern' : '+ Bild'}</span>` : ''}
+              </button>
+              <div class="no"><span>▸ ${i + 1}</span><span>${i + 1}A</span></div>
+            </div>`;
+        }
+        html += `
+          <div class="strip-scroll" role="group" aria-label="Filmstreifen ${s + 1}">
+            <div class="strip">
+              <div class="sprockets"></div>
+              <div class="frames">${cells}</div>
+              <div class="sprockets" style="margin-bottom:2px"></div>
+            </div>
+          </div>`;
+      }
+    }
+    sheet.innerHTML = html;
+    $('hint').textContent = editMode
+      ? 'Bearbeiten: Ein Bild antippen, um es einzusetzen, zuzuschneiden und zu beschriften.'
+      : 'Bild antippen für den Abzug in groß.';
+    updateBar();
+  }
+
+  sheet.addEventListener('click', e => {
+    const b = e.target.closest('.frame');
+    if (!b || b.disabled) return;
+    const i = +b.dataset.i;
+    if (editMode) openEditor(i); else showView(i);
+  });
+
+  /* ---------- Abzug in groß ---------- */
+  const dlg = $('print');
+  let cur = 0;
+  const navList = () => frames.map((f, i) => f.img && (filter === 'all' || f.cat === filter) ? i : -1).filter(i => i >= 0);
+
+  function showView(i, fresh = true) {
+    cur = i;
+    const f = frames[i];
+    $('printImg').innerHTML = mediaOf(f, i, true);
+    const buy = $('buy'), bt = f.title || ('Bild ' + (i + 1));
+    if (CFG.mail) {
+      buy.hidden = false;
+      buy.href = 'mailto:' + CFG.mail + '?subject=' + encodeURIComponent('Anfrage zum Bild: ' + bt) +
+        '&body=' + encodeURIComponent('Hallo, ich interessiere mich für das Bild „' + bt + '“.');
+    } else buy.hidden = true;
+    const rows = FIELDS.filter(F => f[F.k]).map(F =>
+      `<div class="field${F.wide ? ' wide' : ''}"><span class="lbl">${F.label}</span><span class="val">${esc(F.fmt ? F.fmt(f[F.k]) : f[F.k])}</span></div>`).join('');
+    $('printFields').innerHTML = rows || '<p class="nodata">Zu diesem Bild gibt es noch keine Angaben.</p>';
+    const rv = $('reveal');
+    if (fresh) {
+      rv.classList.remove('open');
+      dlg.showModal();
+      requestAnimationFrame(() => requestAnimationFrame(() => rv.classList.add('open')));
+    }
+  }
+  function step(d) {
+    const list = navList();
+    if (!list.length) return;
+    const p = list.indexOf(cur);
+    showView(list[(p + d + list.length) % list.length], false);
+  }
+  $('close').onclick = () => dlg.close();
+  $('prev').onclick = () => step(-1);
+  $('next').onclick = () => step(1);
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
+
+  /* ---------- Ein Bild bearbeiten ---------- */
+  const ed = $('editor'), cropBox = $('cropBox'), zoom = $('zoom');
+  let draft = null, draftIdx = -1, drag = null;
+
+  $('catPick').innerHTML = '<span class="lbl">Kategorie</span>' + CATS.concat([{ k: '', l: 'Ohne' }]).map(c =>
+    `<label><input type="radio" name="cat" value="${esc(c.k)}"> ${esc(c.l)}</label>`).join('');
+
+  function openEditor(i) {
+    draftIdx = i;
+    draft = { ...frames[i], pending: null };
+    $('edTitle').textContent = `Bild ${i + 1} bearbeiten`;
+    $('edFields').innerHTML = FIELDS.filter(F => !F.noedit).map(F =>
+      `<label class="field${F.wide ? ' wide' : ''}"><span class="lbl">${F.label}</span>` +
+      (F.multi ? `<textarea rows="3" data-k="${F.k}"></textarea>` : `<input type="text" data-k="${F.k}">`) + `</label>`).join('');
+    fillInputs();
+    renderCrop();
+    ed.showModal();
+  }
+  function fillInputs() {
+    $('edFields').querySelectorAll('[data-k]').forEach(el => { el.value = draft[el.dataset.k] || ''; });
+    document.querySelectorAll('input[name="cat"]').forEach(r => { r.checked = r.value === (draft.cat || ''); });
+  }
+  document.querySelectorAll('input[name="cat"]').forEach(r => r.addEventListener('change', () => { if (r.checked && draft) draft.cat = r.value; }));
+  $('edFields').addEventListener('input', e => {
+    const k = e.target.dataset && e.target.dataset.k;
+    if (k) draft[k] = e.target.value;
+  });
+
+  function renderCrop() {
+    cropBox.classList.toggle('nopic', !draft.img);
+    cropBox.innerHTML = draft.img
+      ? `<img class="pic" id="cropImg" src="${esc(draft.pending ? draft.img : (draft.full || draft.img))}" style="${picStyle(draft)}" draggable="false" alt="">`
+      : '<span class="drop">Bild hierher ziehen oder unten auswählen</span>';
+    zoom.value = draft.z;
+    zoom.disabled = !draft.img;
+    $('removeImg').disabled = !draft.img;
+    $('pick').textContent = draft.img ? 'Anderes Bild wählen' : 'Bild auswählen';
+    $('cropNote').textContent = draft.img
+      ? 'Zum Verschieben im Bild ziehen. Mit dem Regler wählst du den Ausschnitt.'
+      : 'Dieser Platz ist noch leer.';
+  }
+  function refreshCrop() { const im = $('cropImg'); if (im) im.style.cssText = picStyle(draft); }
+
+  async function setImage(file) {
+    if (!file) return;
+    try {
+      toast('Bild wird verarbeitet …', 15000);
+      const r = await fileToImage(file);
+      if (draft.img && draft.img.startsWith('blob:')) URL.revokeObjectURL(draft.img);
+      Object.assign(draft, { img: URL.createObjectURL(r.full), pending: { full: r.full, thumb: r.thumb }, ar: r.ar, cat: r.cat, fx: .5, fy: .5, z: 1 });
+      fillInputs(); renderCrop();
+      $('toast').hidden = true;
+    } catch (e) {
+      toast('Dieses Bild konnte nicht gelesen werden. Bitte als JPG oder PNG exportieren.');
+    }
+  }
+  $('pick').onclick = () => $('fileOne').click();
+  $('fileOne').addEventListener('change', e => { setImage(e.target.files[0]); e.target.value = ''; });
+  $('removeImg').onclick = () => { Object.assign(draft, { img: null, pending: null, fx: .5, fy: .5, z: 1, ar: 1.5 }); renderCrop(); };
+  zoom.addEventListener('input', () => { draft.z = +zoom.value; refreshCrop(); });
+
+  cropBox.addEventListener('pointerdown', e => {
+    if (!draft || !draft.img) return;
+    const g = picGeom(draft);
+    drag = { sx: e.clientX, sy: e.clientY, fx: g.fx, fy: g.fy };
+    cropBox.setPointerCapture(e.pointerId);
+    cropBox.classList.add('dragging');
+  });
+  cropBox.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const r = cropBox.getBoundingClientRect(), g = picGeom(draft);
+    draft.fx = drag.fx - (e.clientX - drag.sx) / (r.width * g.W / 100);
+    draft.fy = drag.fy - (e.clientY - drag.sy) / (r.height * g.H / 100);
+    refreshCrop();
+  });
+  const endDrag = () => {
+    if (!drag) return;
+    const g = picGeom(draft); draft.fx = g.fx; draft.fy = g.fy;
+    drag = null; cropBox.classList.remove('dragging');
+  };
+  cropBox.addEventListener('pointerup', endDrag);
+  cropBox.addEventListener('pointercancel', endDrag);
+  cropBox.addEventListener('dragover', e => { e.preventDefault(); cropBox.classList.add('over'); });
+  cropBox.addEventListener('dragleave', () => cropBox.classList.remove('over'));
+  cropBox.addEventListener('drop', e => {
+    e.preventDefault(); cropBox.classList.remove('over');
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) setImage(file);
+  });
+
+  $('edCancel').onclick = () => ed.close();
+  $('edDone').onclick = async () => {
+    const btn = $('edDone');
+    btn.disabled = true; btn.textContent = 'Speichert …';
+    try {
+      await persistFrame(draftIdx, draft);
+      ed.close();
+      renderSheet(false);
+      toast('Gespeichert.');
+    } catch (e) {
+      console.error(e);
+      toast('Speichern hat nicht geklappt: ' + errText(e), 8000);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Speichern';
+    }
+  };
+
+  /* ---------- Bearbeiten-Leiste ---------- */
+  function updateBar() {
+    const last = frames.slice(-4);
+    $('delStrip').disabled = frames.length <= 4 || last.some(f => f.img);
+  }
+  function setEditMode(on) {
+    editMode = on;
+    $('editToggle').setAttribute('aria-pressed', String(on));
+    $('editToggle').textContent = on ? 'Bearbeiten beenden' : 'Bearbeiten';
+    $('editbar').hidden = !on;
+    document.body.classList.toggle('editing-on', on);
+    renderSheet(false);
+  }
+  $('editToggle').onclick = () => setEditMode(!editMode);
+  $('addStrip').onclick = () => { for (let k = 0; k < 4; k++) frames.push(blankFrame()); renderSheet(false); };
+  $('delStrip').onclick = () => {
+    if (frames.length > 4 && !frames.slice(-4).some(f => f.img)) { frames.length -= 4; renderSheet(false); }
+  };
+
+  $('bulk').onclick = () => $('fileMany').click();
+  $('fileMany').addEventListener('change', async e => {
+    const files = [...e.target.files]; e.target.value = '';
+    if (!files.length) return;
+    let ok = 0, lastErr = null;
+    for (let n = 0; n < files.length; n++) {
+      toast(`Bild ${n + 1} von ${files.length} wird hochgeladen …`, 60000);
+      try {
+        const r = await fileToImage(files[n]);
+        let idx = frames.findIndex(f => !f.img);
+        if (idx < 0) { for (let k = 0; k < 4; k++) frames.push(blankFrame()); idx = frames.length - 4; }
+        await persistFrame(idx, { ...blankFrame(), img: 'pending', pending: { full: r.full, thumb: r.thumb }, ar: r.ar, cat: r.cat });
+        ok++; renderSheet(false);
+      } catch (err) { console.error(err); lastErr = err; }
+    }
+    renderSheet(false);
+    if (ok === files.length) toast(`${ok} Bild${ok === 1 ? '' : 'er'} gespeichert. Tippe ein Bild an, um den Ausschnitt anzupassen.`, 6000);
+    else toast(`${ok} von ${files.length} Bildern gespeichert. Fehler: ${errText(lastErr)}`, 9000);
+  });
+
+  /* ---------- Anmeldung ---------- */
+  function setLoginLabels() {
+    const t = isOwner ? 'Abmelden' : 'Anmelden';
+    $('loginLink').textContent = t; $('loginTop').textContent = t;
+  }
+  const loginDlg = $('login');
+  function setSession(s) {
+    session = s; isOwner = !!s;
+    $('editToggle').hidden = !isOwner;
+    setLoginLabels();
+    if (!isOwner && editMode) setEditMode(false);
+    else if (loaded) renderSheet(false);
+  }
+  const loginAction = async () => {
+    if (!sb) { toast('Supabase ist noch nicht eingerichtet. Siehe ANLEITUNG.md.', 6000); return; }
+    if (isOwner) { await sb.auth.signOut(); toast('Abgemeldet.'); return; }
+    $('loginErr').hidden = true;
+    loginDlg.showModal();
+  };
+  $('loginLink').onclick = loginAction;
+  $('loginTop').onclick = loginAction;
+  $('loginCancel').onclick = () => loginDlg.close();
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = $('loginGo'); btn.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: $('loginMail').value.trim(), password: $('loginPass').value });
+    btn.disabled = false;
+    if (error) { $('loginErr').textContent = 'Anmeldung fehlgeschlagen: E-Mail oder Passwort stimmt nicht.'; $('loginErr').hidden = false; return; }
+    $('loginPass').value = '';
+    loginDlg.close();
+    toast('Angemeldet. Oben erscheint jetzt „Bearbeiten“.');
+  });
+
+  /* ---------- Start ---------- */
+  (async function init() {
+    renderSiteText();
+    if (!sb) {
+      showNote(!window.SITE_CONFIG ? 'Die Datei config.js wurde nicht gefunden. Sie muss im selben Ordner liegen wie index.html (siehe ANLEITUNG.md).'
+        : configured ? 'Die Verbindung zu Supabase konnte nicht geladen werden. Bitte die Seite neu laden.'
+        : 'Einrichtung fehlt: Trage in der Datei config.js deine Supabase-Adresse und den Schlüssel ein (siehe ANLEITUNG.md).');
+      frames = padFrames([]); loaded = true; renderSheet(true);
+      return;
+    }
+    const { data } = await sb.auth.getSession();
+    session = data.session; isOwner = !!session;
+    $('editToggle').hidden = !isOwner;
+    setLoginLabels();
+    frames = await loadData();
+    loaded = true;
+    renderSheet(true);
+    sb.auth.onAuthStateChange((_event, s) => { if ((!!s) !== isOwner) setSession(s); });
+  })();
+</script>
 </body>
 </html>
