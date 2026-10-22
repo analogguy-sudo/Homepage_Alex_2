@@ -263,8 +263,8 @@
 
   /* ===== Hintergrundfoto, Ansichten, Labor, Projekte ===== */
     :root { --veil: rgba(239,239,237,.3); --rule: rgba(128,128,128,.35); }
-    :root[data-theme="dark"] { --veil: rgba(14,14,14,.35); }
-    .bgfix { position: fixed; inset: 0; z-index: -1; background: var(--bg, none) 50% 25% / cover no-repeat; filter: contrast(1.15); }
+    :root[data-theme="dark"] { --veil: rgba(14,14,14,.50); }
+    .bgfix { position: fixed; inset: 0; z-index: -1; background: var(--bg, none) 50% 10% / cover no-repeat; filter: contrast(1.15); }
   .bgfix::after { content: ""; position: absolute; inset: 0; background: var(--veil); }
   .works, .contact { background: transparent; }
   .contact { border-top: 1px solid var(--rule); }
