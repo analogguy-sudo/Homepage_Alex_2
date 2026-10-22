@@ -696,7 +696,7 @@ $("labSearch").addEventListener("input", renderLab);
 const VIEWS = ["kontaktbogen", "labor", "projekte"];
 function route() {
   const h = location.hash.slice(1), v = VIEWS.includes(h) ? h : "";
-  document.body.dataset.view = v;
+      if (v) document.body.dataset.view = v; else delete document.body.dataset.view;
   if (v === "labor" && !labLoaded) { labLoaded = true; loadLab(); }
   let t = null;
   try { if (h && !v) t = document.querySelector("#" + h); } catch (e) {}
