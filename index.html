@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A.T. Fichter – Analoge Fotografie</title>
 <meta name="description" content="Analoge Fotografie auf 35 mm und Mittelformat, von Hand entwickelt.">
@@ -231,6 +232,34 @@
     .frame img.develop { animation: none; }
   }
 
+
+  /* ===== Schwarzweiß-Look (hell/dunkel) und Kontaktbogen ===== */
+  :root { --paper:#EFEFED; --paper-deep:#E3E3E0; --print:#FAFAF8; --ink:#141414; --ink-soft:#5C5C59; --amber:#8C8C88; --safelight:#444; }
+  :root[data-theme="dark"] { --paper:#0E0E0E; --paper-deep:#151515; --print:#1B1B1B; --ink:#EDEDEB; --ink-soft:#A2A29F; --safelight:#CFCFCB; color-scheme: dark; }
+  body::after { opacity: .12; }
+  :root[data-theme="dark"] body::after { filter: invert(1); mix-blend-mode: screen; opacity: .06; }
+  .theme { font: inherit; font-weight: 600; background: none; border: 1.5px solid var(--ink); color: var(--ink); padding: 0 .8rem; border-radius: 999px; cursor: pointer; }
+  .works { display: none; }
+  body.sheet .works { display: block; }
+  body.sheet .hero, body.sheet #ueber-mich, body.sheet #kontakt { display: none; }
+  .btn:hover { background: var(--safelight); color: var(--paper); }
+  .strip { background: #070707; outline: 1px solid rgba(140,140,136,.35); }
+  .holes { background: repeating-linear-gradient(90deg, #C9C9C5 0 11px, transparent 11px 26px); }
+  .edge { color: #8C8C88; }
+  @keyframes develop { from { filter: brightness(.2) contrast(1.4) blur(6px); } 60% { filter: brightness(.8) contrast(1.15) blur(1px); } to { filter: none; } }
+  .contact { background: var(--paper-deep); color: var(--ink); }
+  .contact p { color: var(--ink-soft); }
+  .mail { text-decoration-color: var(--ink-soft); }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+  .print { background: #080808; padding: 22px 9px 0; position: relative; box-shadow: none; }
+  .print::before { content: ""; position: absolute; top: 7px; left: 9px; right: 9px; height: 7px; background: repeating-linear-gradient(90deg, #C9C9C5 0 8px, transparent 8px 19px); }
+  .print::after { content: "▸ " attr(data-n); position: absolute; right: 10px; bottom: 9px; font-family: var(--edge); font-size: .8rem; letter-spacing: .08em; color: #8C8C88; }
+  .print figcaption { padding: .55rem 2.2rem .9rem .1rem; }
+  .print .t { color: #EDEDEB; } .print .m { color: #9A9A96; }
+  dialog.lb { color: #EDEDEB; } dialog.lb::backdrop { background: rgba(8,8,8,.96); }
+  .lb-cap .m, .lb-ctrl span { color: #A8A8A5; }
+  .lb-ctrl button { color: #EDEDEB; border-color: #EDEDEB; }
+  .lb-ctrl button:hover { background: #EDEDEB; color: #0E0E0E; }
 </style>
 </head>
 
@@ -239,9 +268,10 @@
 <header class="wrap site-head">
   <a class="brand" href="#top">A T Fichter</a>
   <nav aria-label="Hauptnavigation">
-    <a href="#arbeiten">Arbeiten</a>
+    <a href="#kontaktbogen">Kontaktbogen</a>
     <a href="#ueber-mich">Über mich</a>
     <a href="#kontakt">Kontakt</a>
+    <button class="theme" id="theme" type="button" aria-label="Hell oder dunkel umschalten">Hell / Dunkel</button>
   </nav>
 </header>
 
@@ -252,7 +282,7 @@
       <h1>Licht auf Film, von Hand entwickelt.</h1>
       <p>Analoge Fotografie auf 35&nbsp;mm und Mittelformat. Aufgenommen unterwegs, entwickelt und gescannt im eigenen Labor.</p>
       <div class="hero-actions">
-        <a class="btn" href="#arbeiten">Arbeiten ansehen</a>
+        <a class="btn" href="#kontaktbogen">Kontaktbogen ansehen</a>
         <a class="link-quiet" href="#kontakt">Anfrage schreiben (z.Zt. inaktiv)</a>
       </div>
     </div>
@@ -265,10 +295,10 @@
     </div>
   </div>
 
-  <section class="works" id="arbeiten" aria-labelledby="arbeiten-titel">
+  <section class="works" id="kontaktbogen" aria-labelledby="arbeiten-titel">
     <div class="wrap">
       <div class="works-head">
-        <h2 id="arbeiten-titel">Arbeiten</h2>
+        <h2 id="arbeiten-titel">Kontaktbogen</h2>
         <div class="filters" id="filters" role="group" aria-label="Nach Kategorie filtern"></div>
       </div>
       <p class="status" id="status" role="status">Fotos werden geladen …</p>
@@ -454,7 +484,7 @@ function renderGrid() {
   grid.innerHTML = "";
   state.shown.forEach((p, i) => {
     const fig = document.createElement("figure");
-    fig.className = "print";
+    fig.className = "print"; fig.dataset.n = String(i + 1).padStart(2, "0");
     const btn = document.createElement("button");
     btn.type = "button";
     btn.setAttribute("aria-label", p.title + " vergrößern");
@@ -519,6 +549,21 @@ loadPhotos().then((photos) => {
 }).catch((err) => {
   console.error(err);
   $("status").textContent = "Die Fotos konnten nicht geladen werden. Prüfe URL und Key in index.html sowie die Lese-Richtlinie in Supabase.";
+});
+
+/* ---------- Ansicht (Start / Kontaktbogen) und Hell-Dunkel ---------- */
+function route() {
+  const sheet = location.hash === "#kontaktbogen";
+  document.body.classList.toggle("sheet", sheet);
+  let t = null;
+  try { if (location.hash.length > 1 && !sheet) t = document.querySelector(location.hash); } catch (e) {}
+  if (t) t.scrollIntoView(); else window.scrollTo(0, 0);
+}
+addEventListener("hashchange", route); route();
+$("theme").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("theme", next); } catch (e) {}
 });
 </script>
 </body>
