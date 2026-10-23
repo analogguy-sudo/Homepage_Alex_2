@@ -703,7 +703,11 @@ function route() {
   if (t) t.scrollIntoView(); else window.scrollTo(0, 0);
 }
 addEventListener("hashchange", route);
-if (CONFIG.bgImage && CONFIG.supabaseUrl) document.documentElement.style.setProperty("--bg", `url("${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(CONFIG.bgImage)}")`);
+if if (CONFIG.bgImage) {
+  const b = CONFIG.bgImage;
+  const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
+  document.documentElement.style.setProperty("--bg", `url("${u}")`);
+}
 $("theme").addEventListener("click", () => {
   const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   document.documentElement.dataset.theme = next;
