@@ -524,19 +524,20 @@ function renderHero(p) {
 }
 
 function renderFilters() {
-  const formats = ["Alle", ...new Set(state.all.flatMap((p) => p.categories || []))];
+  const cats = [...new Set(state.all.flatMap((p) => p.categories || []))]
+    .sort((a, b) => (b === "schwarz-weiss") - (a === "schwarz-weiss"));
   const box = $("filters");
   box.innerHTML = "";
-  if (formats.length <= 2) return;   // nur ein Format vorhanden → kein Filter nötig
-  formats.forEach((f) => {
+  if (cats.length < 2) { state.filter = "Alle"; return; }
+  if (!cats.includes(state.filter)) state.filter = cats[0];
+  cats.forEach((f) => {
     const b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.textContent = f === "Alle" ? tr("Alle") : f;
+    b.type = "button"; b.className = "chip"; b.textContent = tr(f);
     b.setAttribute("aria-pressed", String(f === state.filter));
     b.addEventListener("click", () => { state.filter = f; renderFilters(); renderGrid(); });
     box.appendChild(b);
   });
 }
-
 function renderGrid() {
   state.shown = state.filter === "Alle" ? state.all : state.all.filter((p) => (p.categories || []).includes(state.filter));
   const grid = $("grid");
