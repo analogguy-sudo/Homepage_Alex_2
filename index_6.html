@@ -105,7 +105,7 @@
 
   /* Filmstreifen im Hero */
   .strip {
-    width: min(100%, 200px);
+    width: min(100%, 300px);
     justify-self: end;
     background: var(--ink);
     padding: 0 14px;
@@ -276,8 +276,8 @@
   .site-head nav a { font-family: var(--edge); text-transform: uppercase; letter-spacing: .12em; font-size: .95rem; }
   .theme { font-family: var(--edge); letter-spacing: .1em; text-transform: uppercase; font-size: .85rem; }
   h2::before { display: block; font-family: var(--edge); font-size: .85rem; letter-spacing: .14em; color: var(--amber); margin-bottom: .4rem; }
-  #kontaktbogen h2::before { content: "▸ 01"; } #labor h2::before { content: "▸ 02"; } #projekte h2::before { content: "▸ 03"; }
-  #ueber-mich h2::before { content: "▸ 04"; } #equipment h2::before { content: "▸ 05"; } #kontakt h2::before { content: "▸ 06"; }
+  #kontaktbogen h2::before { content: "▸ 01"; } #projekte h2::before { content: "▸ 02"; }
+  #ueber-mich h2::before { content: "▸ 03"; } #equipment h2::before { content: "▸ 04"; } #kontakt h2::before { content: "▸ 05"; }
   .about { grid-template-columns: minmax(0, 1fr); } .gear { max-width: 640px; }
   .lead { max-width: 60ch; color: var(--ink-soft); margin: 0 0 1.2rem; }
   .search { font: inherit; width: min(100%, 360px); padding: .5rem .8rem; background: var(--print); color: var(--ink); border: 1px solid var(--rule); border-radius: 2px; margin-bottom: 1rem; }
@@ -301,6 +301,17 @@
   .hint { color: var(--ink-soft); margin: 0 0 1rem; }
   .labframe { width: 100%; height: 78vh; border: 1px solid var(--rule); background: #fff; }
   @media (max-width: 760px) { .sheet { grid-template-columns: 1fr; gap: 1rem; } .sheet .filters { position: static; } }
+
+  /* ===== Layout: Text links, Porträt rechts und ohne Filmstreifen; Projektkarten ===== */
+  .wrap.site-head, .wrap.hero, footer .wrap { width: min(1760px, 100% - 4rem); }
+  @media (min-width: 821px) { .hero > div:first-child { max-width: min(600px, 42vw); } }
+  .bgfix { background-position: 75% 50%; }
+  .strip { width: min(100%, 380px); justify-self: end; background: none; padding: 0; outline: none; box-shadow: none; transform: none; border-radius: 0; }
+  .holes, .edge { display: none; }
+  .frame { background: none; aspect-ratio: 5 / 4; }
+  .frame img { box-shadow: 0 18px 40px -18px rgba(0,0,0,.6); }
+  .other span { display: block; }
+  .card img { display: block; width: calc(100% + 2.4rem); margin: -1.2rem -1.2rem 1rem; aspect-ratio: 16 / 10; object-fit: cover; }
 </style>
 </head>
 
@@ -311,7 +322,7 @@
   <a class="brand" href="#top">A T Fichter</a>
   <nav aria-label="Hauptnavigation">
     <a href="#kontaktbogen">Kontaktbogen</a>
-    <a href="#labor">Das Labor</a>
+    <a href="#" id="labLink" target="_blank" rel="noopener">Das Labor</a>
     <a href="#projekte">Projekte</a>
     <a href="#ueber-mich">Über mich</a>
     <a href="#equipment">Equipment</a>
@@ -326,7 +337,7 @@
   <div class="wrap hero">
     <div>
       <h1>Licht auf Film, von Hand entwickelt.</h1>
-      <p>Analoge Fotografie auf 35&nbsp;mm und Mittelformat. Aufgenommen unterwegs, entwickelt und gescannt im eigenen Labor.</p>
+      <p data-en="Analogue photography on 35 mm and medium format.<br>Shot on the road, developed and scanned in my own lab.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.<br>Aufgenommen unterwegs, entwickelt und gescannt im eigenen Labor.</p>
     </div>
 
     <div class="strip" aria-hidden="false">
@@ -351,15 +362,7 @@
     </div>
   </section>
 
-  <section class="view" id="labor" aria-labelledby="labor-titel"><div class="wrap">
-  <h2 id="labor-titel">Das Labor</h2>
-  <p class="lead">Meine ausgetesteten Entwicklungszeiten für Filme und Entwickler.</p>
-  <p class="status" id="labStatus" role="status"></p>
-  <p><a class="btn" id="labOpen" target="_blank" rel="noopener">Projektseite in neuem Tab öffnen</a></p>
-  <iframe class="labframe" id="labFrame" title="Das Labor"></iframe>
-</div></section>
-
-<section class="view" id="projekte" aria-labelledby="proj-titel"><div class="wrap">
+  <section class="view" id="projekte" aria-labelledby="proj-titel"><div class="wrap">
   <h2 id="proj-titel">Projekte</h2>
   <p class="lead">Weitere Projekte und Seiten von mir.</p>
   <div class="cards" id="cards"></div>
@@ -392,11 +395,11 @@
     <div class="wrap">
       <h2 id="kontakt-titel">Kontakt</h2>
       <p>Für Aufträge, Prints oder Fragen zu meinen Arbeiten schreib mir eine E-Mail. Ich antworte in der Regel innerhalb von zwei Tagen.</p>
-      <a class="mail" href="mailto:hallo@example.com">hallo@example.com</a>
+      <a class="mail" id="mail"></a>
       <p class="other">
-        Instagram: <a href="https://instagram.com/dein_profilname" rel="noopener">@dein_profilname</a><br>
-        Pixelfed: <a href="https://pixelfed.social/@dein_profilname" rel="noopener">@dein_profilname</a><br>
-        Flickr: <a href="https://www.flickr.com/photos/dein_profilname" rel="noopener">dein_profilname</a>
+        <span id="insta">Instagram: <a rel="noopener"></a></span>
+        <span id="pixel">Pixelfed: <a rel="noopener"></a></span>
+        <span id="flickr">Flickr: <a rel="noopener"></a></span>
       </p>
     </div>
   </section>
@@ -405,7 +408,7 @@
 
 <footer>
   <div class="wrap">
-    <span>© <span id="year"></span> A.T. Fichter</span>
+    <span>© <span id="year"></span> <span id="copyName"></span></span>
   </div>
 </footer>
 
@@ -436,12 +439,23 @@ const CONFIG = {
   bucket: "photos",  // öffentlicher Storage-Bucket mit den Bilddateien
   bgImage: "seagull_4a.jpg",       // Dateiname deines Seagull-4A-Fotos im Bucket (Hintergrund, bleibt beim Scrollen fest)
   heroImage: "Alex_Vintage.jpg",     // Dateiname deines Porträts im Bucket, ZWISCHEN den Anführungszeichen, z. B. "portrait.jpg" (leer = erstes Galerie-Foto)
-  heroPosition: "70% 30%"  // Bildausschnitt, z. B. "50% 25%" rückt den Ausschnitt nach oben
+  heroPosition: "70% 50%"  // Bildausschnitt, z. B. "50% 25%" rückt den Ausschnitt nach oben
 };
 
 /* Datenbank aus dem anderen Projekt (Entwicklungszeiten), nur lesend */
+/* Deine Daten: hier einmal eintragen, die Seite übernimmt sie überall */
+const PROFILE = {
+  name: "A T Fichter",                      // Logo oben links
+  copyright: "A.T. Fichter",                // Fußzeile
+  title: "A T F – Analoge Fotografie",      // Titel im Browser-Tab
+  email: "",                                // z. B. "name@beispiel.de"
+  instagram: "",                            // nur der Profilname, ohne @
+  pixelfed: "", pixelfedServer: "pixelfed.social",
+  flickr: ""
+};
+
 const LAB = {
-  page: "https://analogguy-sudo.github.io/Analoge-Welt/datenbank.html"   // Adresse deiner Projektseite, z. B. "https://analogguy-sudo.github.io/entwicklungszeiten/"
+  page: "https://analogguy-sudo.github.io/Analoge-Welt/index.html"   // Adresse deiner Projektseite, z. B. "https://analogguy-sudo.github.io/entwicklungszeiten/"
 };
 
 /* ---------- Demo-Motive (erscheinen, solange Supabase nicht verbunden ist) ---------- */
@@ -639,7 +653,7 @@ const EN = {
   "Weitere Projekte und Seiten von mir.": "More projects and sites of mine.",
   "Die Datenbank ist noch nicht verbunden.": "The database is not connected yet.",
   "Die Daten konnten nicht geladen werden.": "The data could not be loaded.",
-  "Keine Treffer.": "No results.",
+  "Keine Treffer.": "No results.", "Noch keine Projekte.": "No projects yet.",
   "Wähle links eine Kategorie.": "Choose a category on the left.", "Projektseite in neuem Tab öffnen": "Open project page in a new tab",
   "Die Projektseite ist noch nicht eingetragen.": "The project page has not been entered yet."
 };
@@ -667,37 +681,53 @@ function setLang(l) {
 }
 $("lang").addEventListener("click", () => setLang(lang === "en" ? "de" : "en"));
 
-/* ---------- Projekte (Karten) ---------- */
-const PROJECTS = [
-  { title: "Ausgetestete Entwicklungszeiten", de: "Meine Entwicklungszeiten für Schwarzweißfilm zum Nachschlagen.", en: "My tested development times for black-and-white film.", url: "#labor" },
-  { title: "Weiteres Projekt", de: "Kurze Beschreibung des Projekts.", en: "Short description of the project.", url: "https://example.com" }
-];
+/* ---------- Projekte (aus Supabase, im Admin bearbeitbar) ---------- */
+let projects = [], projLoaded = false;
+async function loadProjects() {
+  try {
+    const h = { apikey: CONFIG.supabaseKey };
+    if (CONFIG.supabaseKey.startsWith("eyJ")) h.Authorization = "Bearer " + CONFIG.supabaseKey;
+    const r = await fetch(`${CONFIG.supabaseUrl}/rest/v1/projects?select=*&order=sort.asc`, { headers: h });
+    if (r.ok) projects = await r.json();
+  } catch (e) {}
+  projLoaded = true; renderCards();
+}
 function renderCards() {
   const box = $("cards"); box.innerHTML = "";
-  PROJECTS.forEach((p) => {
-    const a = document.createElement("a"); a.className = "card"; a.href = p.url;
-    if (/^https?:/.test(p.url)) { a.target = "_blank"; a.rel = "noopener"; }
+  if (!projLoaded) return;
+  if (!projects.length) { box.textContent = tr("Noch keine Projekte."); return; }
+  projects.forEach((p) => {
+    const a = document.createElement(p.url ? "a" : "div"); a.className = "card";
+    if (p.url) { a.href = p.url; if (/^https?:/.test(p.url)) { a.target = "_blank"; a.rel = "noopener"; } }
+    if (p.image) { const im = document.createElement("img"); im.alt = ""; im.loading = "lazy"; im.src = `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${p.image.split("/").map(encodeURIComponent).join("/")}`; a.appendChild(im); }
     const h = document.createElement("h3"); h.textContent = p.title;
-    const t = document.createElement("p"); t.textContent = lang === "en" ? p.en : p.de;
-    const g = document.createElement("span"); g.className = "go"; g.textContent = tr("Öffnen") + " ▸";
-    a.append(h, t, g); box.appendChild(a);
+    const t = document.createElement("p"); t.textContent = (lang === "en" && p.text_en) || p.text_de || "";
+    a.append(h, t);
+    if (p.url) { const g = document.createElement("span"); g.className = "go"; g.textContent = tr("Öffnen") + " ▸"; a.appendChild(g); }
+    box.appendChild(a);
   });
 }
 
-/* ---------- Labor (Projektseite einbetten) ---------- */
-function initLab() {
-  const f = $("labFrame"), a = $("labOpen");
-  if (!LAB.page) { $("labStatus").textContent = tr("Die Projektseite ist noch nicht eingetragen."); f.hidden = true; a.hidden = true; return; }
-  a.href = LAB.page;
-  if (!f.getAttribute("src")) f.src = LAB.page;
+/* ---------- Deine Daten (Logo, Kontakt, Profile) ---------- */
+function applyProfile() {
+  document.title = PROFILE.title;
+  document.querySelector(".brand").textContent = PROFILE.name;
+  $("copyName").textContent = PROFILE.copyright;
+  const m = $("mail"); m.hidden = !PROFILE.email; m.href = "mailto:" + PROFILE.email; m.textContent = PROFILE.email;
+  [["insta", PROFILE.instagram, "https://instagram.com/" + PROFILE.instagram, "@" + PROFILE.instagram],
+   ["pixel", PROFILE.pixelfed, `https://${PROFILE.pixelfedServer}/@${PROFILE.pixelfed}`, "@" + PROFILE.pixelfed],
+   ["flickr", PROFILE.flickr, "https://www.flickr.com/photos/" + PROFILE.flickr, PROFILE.flickr]].forEach(([id, v, url, txt]) => {
+    const el = $(id); el.hidden = !v; if (!v) return;
+    const a = el.querySelector("a"); a.href = url; a.textContent = txt;
+  });
+  $("labLink").href = LAB.page || "#";
 }
 
 /* ---------- Ansichten, Hintergrund, Hell-Dunkel ---------- */
-const VIEWS = ["kontaktbogen", "labor", "projekte", "ueber-mich", "equipment", "kontakt"];
+const VIEWS = ["kontaktbogen", "projekte", "ueber-mich", "equipment", "kontakt"];
 function route() {
   const h = location.hash.slice(1), v = VIEWS.includes(h) ? h : "";
   if (v) document.body.dataset.view = v; else delete document.body.dataset.view;
-  if (v === "labor") initLab();
   let t = null;
   try { if (h && !v) t = document.querySelector("#" + h); } catch (e) {}
   if (t) t.scrollIntoView(); else window.scrollTo(0, 0);
@@ -713,7 +743,7 @@ $("theme").addEventListener("click", () => {
   document.documentElement.dataset.theme = next;
   try { localStorage.setItem("theme", next); } catch (e) {}
 });
-renderCards(); setLang(lang); route();
+applyProfile(); loadProjects(); setLang(lang); route();
 </script>
 </body>
 </html>
