@@ -5,7 +5,7 @@
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A T F – Analoge Fotografie</title>
-<meta name="description" content="Analoge Fotografie auf 35 mm und Mittelformat, von Hand entwickelt.">
+<meta name="description" content="Analoge Fotografie auf 35 mm und Mittelformat, von Hand entwickelt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Crimson+Pro:wght@400;500;600&family=League+Gothic&display=swap" rel="stylesheet">
@@ -325,8 +325,8 @@
 
   <div class="wrap hero">
     <div>
-      <h1>Licht auf Film, von Hand entwickelt.</h1>
-      <p>Analoge Fotografie auf 35&nbsp;mm und Mittelformat. Aufgenommen unterwegs, entwickelt und gescannt im eigenen Labor.</p>
+      <h1>Licht auf Film,<br> von Hand entwickelt.</h1>
+      <p> data-en="Analogue photography on 35 mm and medium format.<br>Shot on the road, developed and scanned in my own lab.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.<br>Aufgenommen unterwegs, entwickelt und gescannt im eigenen Labor.</p>">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.<br>Aufgenommen unterwegs, entwickelt und gescannt im eigenen Labor.</p></p>
     </div>
 
     <div class="strip" aria-hidden="false">
@@ -434,14 +434,14 @@ const CONFIG = {
   supabaseKey: "sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga",
   table:  "photos",  // Tabelle mit den Foto-Infos
   bucket: "photos",  // öffentlicher Storage-Bucket mit den Bilddateien
-  bgImage: "9906b7195613bf7b3736a20364b599de-13466737.jpeg",       // Dateiname deines Seagull-4A-Fotos im Bucket (Hintergrund, bleibt beim Scrollen fest)
+  bgImage: "seagull.jpeg",       // Dateiname deines Seagull-4A-Fotos im Bucket (Hintergrund, bleibt beim Scrollen fest)
   heroImage: "Alex_Vintage.jpg",     // Dateiname deines Porträts im Bucket, ZWISCHEN den Anführungszeichen, z. B. "portrait.jpg" (leer = erstes Galerie-Foto)
-  heroPosition: "50% 50%"  // Bildausschnitt, z. B. "50% 25%" rückt den Ausschnitt nach oben
+  heroPosition: "70% 50%"  // Bildausschnitt, z. B. "50% 25%" rückt den Ausschnitt nach oben
 };
 
 /* Datenbank aus dem anderen Projekt (Entwicklungszeiten), nur lesend */
 const LAB = {
-  page: ""   // Adresse deiner Projektseite, z. B. "https://analogguy-sudo.github.io/entwicklungszeiten/"
+  page: "https://analogguy-sudo.github.io/Analoge-Welt/datenbank.html"   // Adresse deiner Projektseite, z. B. "https://analogguy-sudo.github.io/entwicklungszeiten/"
 };
 
 /* ---------- Demo-Motive (erscheinen, solange Supabase nicht verbunden ist) ---------- */
