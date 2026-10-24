@@ -16,7 +16,7 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 <p><button class="s" id="out" type="button">Abmelden</button> &nbsp; <a href="index.html">zur Seite</a></p>
 <form id="up" class="box"><b>Neues Foto</b>
 <div class="row"><input id="f" type="file" accept="image/*" required></div>
-<div class="row"><input name="title" placeholder="Titel" required><input name="film" placeholder="Film"><input name="camera" placeholder="Kamera"><input name="format" placeholder="Format (35 mm)"><input name="year" type="number" placeholder="Jahr"><input name="location" placeholder="Ort"><input name="cat" placeholder="Kategorien, mit Komma"><input name="sort" type="number" placeholder="Reihenfolge (leer = ans Ende)"></div>
+<div class="row"><input name="title" placeholder="Titel" required><input name="film" placeholder="Film"><input name="camera" placeholder="Kamera"><input name="format" placeholder="Format (35 mm)"><input name="year" type="number" placeholder="Jahr"><input name="location" placeholder="Ort"><input name="focal" placeholder="Brennweite (50 mm)"><input name="shutter" placeholder="Zeit (1/125)"><input name="aperture" placeholder="Blende (f/8)"><input name="cat" placeholder="Kategorien, mit Komma"><input name="sort" type="number" placeholder="Reihenfolge (leer = ans Ende)"></div>
 <button>Hochladen</button></form>
 <div id="list"></div>
 <h1 style="margin-top:2.5rem">Projekte</h1>
@@ -28,7 +28,7 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 <div id="plist"></div></div>
 <script>
 const U="https://owbbsnujnkhyyqvagtai.supabase.co",KEY="sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga";
-const $=i=>document.getElementById(i),F=["title","film","camera","format","year","location","cat","sort"];
+const $=i=>document.getElementById(i),F=["title","film","camera","format","year","location","cat","sort","focal","shutter","aperture"];
 const enc=p=>p.split("/").map(encodeURIComponent).join("/"),say=t=>$("msg").textContent=t||"";
 let tok=null,rows=[];try{tok=sessionStorage.getItem("tok")}catch(e){}
 function show(on){$("login").classList.toggle("hide",on);$("app").classList.toggle("hide",!on)}
