@@ -9,6 +9,9 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem;margin:.5rem 0}
 .item{display:grid;grid-template-columns:90px 1fr;gap:1rem;align-items:start}.item img{width:90px;height:90px;object-fit:cover;border-radius:3px}
 .msg{min-height:1.5rem;color:#c9c9c5}.hide{display:none}
+.strip{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.9rem;align-items:center;color:#a8a8a5}
+.th{position:relative}.th img{width:64px;height:64px;object-fit:cover;border-radius:3px;display:block}
+.th button{position:absolute;top:-7px;right:-7px;width:20px;height:20px;padding:0;border-radius:50%;line-height:1;font-size:.9rem}
 </style></head><body><main>
 <h1>Admin: Kontaktbogen</h1><p class="msg" id="msg" role="status"></p>
 <form id="login" class="box"><div class="row"><input id="em" type="email" placeholder="E-Mail" autocomplete="username" required><input id="pw" type="password" placeholder="Passwort" autocomplete="current-password" required><button>Anmelden</button></div></form>
@@ -21,7 +24,7 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 <div id="list"></div>
 <h1 style="margin-top:2.5rem">Projekte</h1>
 <form id="pf" class="box"><b>Neues Projekt</b>
-<div class="row"><input id="pimg" type="file" accept="image/*"></div>
+<div class="row"><input id="pimg" type="file" accept="image/*" multiple></div>
 <div class="row"><input name="title" placeholder="Titel (z. B. Cyanotypie)" required><input name="url" placeholder="Link (https://… oder leer)"><input name="sort" type="number" placeholder="Reihenfolge"></div>
 <div class="row"><textarea name="text_de" rows="3" placeholder="Text deutsch"></textarea><textarea name="text_en" rows="3" placeholder="Text englisch"></textarea></div>
 <button>Projekt anlegen</button></form>
@@ -50,10 +53,11 @@ function draw(){const L=$("list");L.innerHTML="";rows.forEach(r=>{const d=docume
   d.innerHTML='<img alt=""><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"||k==="sort"?"number":"text")+'" placeholder="'+k+'">').join("")+'</div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);
   d.querySelectorAll("input").forEach(i=>i.value=r[i.dataset.k]??"");
+  {const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"photos","details",null,"detail_")}
   d.querySelector(".sv").onclick=async()=>{try{const o=body(k=>d.querySelector('[data-k="'+k+'"]').value.trim());if(o.sort===null)o.sort=o.position=0;
     await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});say("Gespeichert.")}catch(x){say(x.message)}};
   d.querySelector(".dl").onclick=async()=>{if(!confirm("Foto löschen?"))return;try{
-    await api("/rest/v1/photos?id=eq."+r.id,{method:"DELETE"});await api("/storage/v1/object/photos/"+enc(r.storage_path),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");load()}catch(x){say(x.message)}};
+    await api("/rest/v1/photos?id=eq."+r.id,{method:"DELETE"});for(const n of r.details||[])await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});await api("/storage/v1/object/photos/"+enc(r.storage_path),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");load()}catch(x){say(x.message)}};
   L.appendChild(d)})}
 $("up").onsubmit=async e=>{e.preventDefault();say("Lade hoch …");
   try{const file=$("f").files[0],bmp=await createImageBitmap(file),sc=Math.min(1,2000/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");
@@ -67,22 +71,44 @@ $("up").onsubmit=async e=>{e.preventDefault();say("Lade hoch …");
   await api("/rest/v1/photos",{method:"POST",headers:J,body:JSON.stringify(o)});
   e.target.reset();say("Hochgeladen.");load()}catch(x){say(x.message)}};
 const PF=["title","url","text_de","text_en","sort"];let prows=[];
-async function putImage(file){const bmp=await createImageBitmap(file),sc=Math.min(1,2000/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");
+async function putImage(file,prefix="projekt_"){const bmp=await createImageBitmap(file),sc=Math.min(1,2000/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");
   c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
-  const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.88)),slug=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\.[^.]+$/,"").replace(/[^\w-]+/g,"_"),name="projekt_"+Date.now()+"_"+slug+".jpg";
+  const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.88)),slug=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\.[^.]+$/,"").replace(/[^\w-]+/g,"_"),name=prefix+Date.now()+"_"+slug+".jpg";
   await api("/storage/v1/object/photos/"+name,{method:"POST",headers:{"Content-Type":"image/jpeg"},body:blob});return name}
 async function loadP(){try{prows=await(await api("/rest/v1/projects?select=*&order=sort.asc")).json();drawP()}catch(x){say(x.message)}}
 function drawP(){const L=$("plist");L.innerHTML="";prows.forEach(r=>{const d=document.createElement("div");d.className="box item";
   d.innerHTML='<img alt=""><div><div class="row">'+PF.map(k=>k.startsWith("text")?'<textarea data-k="'+k+'" rows="3" placeholder="'+k+'"></textarea>':'<input data-k="'+k+'" type="'+(k==="sort"?"number":"text")+'" placeholder="'+k+'">').join("")+'</div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   if(r.image)d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.image);
   d.querySelectorAll("[data-k]").forEach(i=>i.value=r[i.dataset.k]??"");
+  {const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"projects","images","image","bild_")}
   d.querySelector(".sv").onclick=async()=>{try{const o={};d.querySelectorAll("[data-k]").forEach(i=>{const v=i.value.trim();o[i.dataset.k]=i.dataset.k==="sort"?(v===""?0:Number(v)):(v||null)});
     await api("/rest/v1/projects?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});say("Gespeichert.")}catch(x){say(x.message)}};
-  d.querySelector(".dl").onclick=async()=>{if(!confirm("Projekt löschen?"))return;try{await api("/rest/v1/projects?id=eq."+r.id,{method:"DELETE"});say("Gelöscht.");loadP()}catch(x){say(x.message)}};
+  d.querySelector(".dl").onclick=async()=>{if(!confirm("Projekt löschen?"))return;try{await api("/rest/v1/projects?id=eq."+r.id,{method:"DELETE"});for(const n of [r.image,...(r.images||[])].filter(Boolean))await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");loadP()}catch(x){say(x.message)}};
   L.appendChild(d)})}
 $("pf").onsubmit=async e=>{e.preventDefault();say("Speichere …");try{const f=e.target.elements,file=$("pimg").files[0];
   const o={title:f.title.value.trim(),url:f.url.value.trim()||null,text_de:f.text_de.value.trim()||null,text_en:f.text_en.value.trim()||null,sort:f.sort.value===""?Math.max(0,...prows.map(r=>r.sort||0))+1:Number(f.sort.value)};
-  if(file)o.image=await putImage(file);
+  const names=[];for(const x of $("pimg").files)names.push(await putImage(x));if(names.length){o.image=names[0];o.images=names.slice(1)}
   await api("/rest/v1/projects",{method:"POST",headers:J,body:JSON.stringify(o)});e.target.reset();say("Projekt angelegt.");loadP()}catch(x){say(x.message)}};
+function strip(host,r,table,field,legacy,prefix){
+  const list=()=>[...(legacy&&r[legacy]?[r[legacy]]:[]),...(r[field]||[])];
+  const draw2=()=>{host.innerHTML="";
+    const lab=document.createElement("span");lab.textContent=prefix==="detail_"?"Detailbilder:":"Bilder:";host.appendChild(lab);
+    list().forEach(n=>{const t=document.createElement("div");t.className="th";
+      const im=document.createElement("img");im.alt="";im.src=U+"/storage/v1/object/public/photos/"+enc(n);
+      const x=document.createElement("button");x.type="button";x.className="s";x.textContent="×";x.title="Nur dieses Bild entfernen";
+      x.onclick=async()=>{if(!confirm("Dieses Bild entfernen?"))return;try{
+        const o={};if(legacy&&r[legacy]===n)o[legacy]=null;else o[field]=(r[field]||[]).filter(v=>v!==n);
+        await api("/rest/v1/"+table+"?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});
+        await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});
+        Object.assign(r,o);draw2();say("Bild entfernt.")}catch(e){say(e.message)}};
+      t.append(im,x);host.appendChild(t)});
+    const inp=document.createElement("input");inp.type="file";inp.accept="image/*";inp.multiple=true;inp.hidden=true;
+    const b=document.createElement("button");b.type="button";b.className="s";b.textContent="+ Bild";b.onclick=()=>inp.click();
+    inp.onchange=async()=>{try{say("Lade hoch …");const names=[];for(const f of inp.files)names.push(await putImage(f,prefix));
+      const arr=[...(r[field]||[]),...names];
+      await api("/rest/v1/"+table+"?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify({[field]:arr})});
+      r[field]=arr;draw2();say("Hinzugefügt.")}catch(e){say(e.message)}};
+    host.append(b,inp)};
+  draw2()}
 if(tok)load();
 </script></main></body></html>
