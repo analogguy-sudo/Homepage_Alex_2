@@ -594,7 +594,7 @@ const CONFIG = {
   table:  "photos",  // Tabelle mit den Foto-Infos
   bucket: "photos",  // öffentlicher Storage-Bucket mit den Bilddateien
   bgImage: "seagull_4a.jpg",       // Dateiname deines Seagull-4A-Fotos im Bucket (Hintergrund, bleibt beim Scrollen fest)
-  heroImage: "",     // Dateiname deines Porträts im Bucket, ZWISCHEN den Anführungszeichen, z. B. "portrait.jpg" (leer = erstes Galerie-Foto)
+  heroImage: "Alex_Vintage.jpg",     // Dateiname deines Porträts im Bucket, ZWISCHEN den Anführungszeichen, z. B. "portrait.jpg" (leer = erstes Galerie-Foto)
   heroPosition: "70% 50%"  // Bildausschnitt, z. B. "50% 25%" rückt den Ausschnitt nach oben
 };
 
@@ -610,7 +610,8 @@ const PROFILE = {
   flickr: "Alexander Tobias Fichter",
   langFlags: true                          // true = Flaggen statt DE / EN
 };
-
+const LAB = {
+  page: "https://analogguy-sudo.github.io/Analoge-Welt/index.html"  //adresse der Datenbank als url
 /* ---------- Demo-Motive (erscheinen, solange Supabase nicht verbunden ist) ---------- */
 function scene(w, h, c, sun) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">
