@@ -454,6 +454,10 @@
     #ueber-mich .about { flex-direction: column; }
     #ueber-mich .about > .strip { width: min(100%, 220px); }
   }
+
+  /* ===== Bilderschutz: kein Ziehen, kein Auswählen, kein Speichermenü per Langdruck (iOS) ===== */
+  img, .print button, .pimgs button, .lb-stage, .strip { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  img { -webkit-user-drag: none; user-drag: none; }
 </style>
 </head>
 
@@ -517,7 +521,7 @@
       <div>
         <h2 id="about-titel">Über mich</h2>
         <p>Ich fotografiere seit über zehn Jahren auf Film. Mich reizt, dass jede Aufnahme Zeit kostet: Man schaut länger hin, wartet aufs richtige Licht und sieht das Ergebnis erst Tage später.</p>
-        <p>Meine Schwarzweißfilme entwickle ich selbst, Farbfilme gebe ich z.Zt. noch an ein Fachlabor.</p>
+        <p>Meine Schwarzweißfilme entwickle ich selbst, Farbfilme gebe ich an ein Fachlabor. Gescannt wird alles zu Hause, damit der Look des Negativs erhalten bleibt.</p>
       </div>
       <div class="strip"><div class="frame"><img id="heroImg" alt="" width="1200" height="800"></div><div class="edge" hidden><span id="edgeLeft"></span><span id="edgeRight"></span></div></div>
       
@@ -607,11 +611,12 @@ const PROFILE = {
   name: "A T Fichter",                      // Logo oben links
   copyright: "A.T. Fichter",                // Fußzeile
   title: "A T F – Analoge Fotografie",      // Titel im Browser-Tab
-  email: "a_t_f@outlook.de",                                // z. B. "name@beispiel.de"
-  instagram: "a_t_f_analog",                            // nur der Profilname, ohne @
-  pixelfed: "atf_analog", pixelfedServer: "pixelfed.social",
+  email: "",                                // z. B. "name@beispiel.de"
+  instagram: "",                            // nur der Profilname, ohne @
+  pixelfed: "", pixelfedServer: "pixelfed.social",
   flickr: "",
-  langFlags: true                          // true = Flaggen statt DE / EN
+  langFlags: false,                         // true = Flaggen statt DE / EN
+  schutz: "bilder"                          // Rechtsklick sperren: "bilder" (nur auf Fotos), "alles" (ganze Seite) oder "aus"
 };
 
 /* ---------- Demo-Motive (erscheinen, solange Supabase nicht verbunden ist) ---------- */
@@ -948,6 +953,13 @@ $("theme").addEventListener("click", () => {
   try { localStorage.setItem("theme", next); } catch (e) {}
 });
 applyProfile(); loadProjects(); setLang(lang); route();
+
+/* ---------- Bilderschutz: Rechtsklick und Ziehen sperren ---------- */
+document.addEventListener("contextmenu", (e) => {
+  const mode = PROFILE.schutz || "bilder";
+  if (mode === "alles" || (mode === "bilder" && e.target.closest && e.target.closest("img, .print, .pimgs, .lb-stage, .strip"))) e.preventDefault();
+});
+document.addEventListener("dragstart", (e) => { if (e.target.tagName === "IMG") e.preventDefault(); });
 </script>
 </body>
 </html>
