@@ -539,6 +539,11 @@
     body[data-view="kontakt"] #kontakt { display: block; }
   }
 
+  /* Desktop: Startseitentext leicht nach links versetzen. */
+  @media (min-width: 1101px) and (min-height: 501px) {
+    body:not([data-view]) .hero > div:first-child { transform: translateX(-18px); }
+  }
+
   /* iPhone-Startseite: Seagull vollständig vor der Beschriftung; Desktop unverändert. */
   .mobile-hero-copy { display: none; }
   @media (max-width: 820px) and (orientation: portrait) {
