@@ -518,6 +518,27 @@
     .lb-side { flex: none; width: 280px; }
   }
 
+  /* iPhone-Unterseiten: Seagull zuerst, jeweilige Inhalte darunter. */
+  @media (max-width: 820px) and (orientation: portrait) {
+    body[data-view="equipment"] .bgfix,
+    body[data-view="projekte"] .bgfix,
+    body[data-view="ueber-mich"] .bgfix,
+    body[data-view="kontakt"] .bgfix { display: none; }
+    body[data-view="equipment"] #equipment,
+    body[data-view="projekte"] #projekte,
+    body[data-view="ueber-mich"] #ueber-mich,
+    body[data-view="kontakt"] #kontakt { padding-top: 0; }
+    body[data-view="equipment"] #equipment::before,
+    body[data-view="projekte"] #projekte::before,
+    body[data-view="ueber-mich"] #ueber-mich::before,
+    body[data-view="kontakt"] #kontakt::before {
+      content: ""; display: block; width: min(100% - 4rem, 1760px);
+      margin: 0 auto 1.25rem; aspect-ratio: 1 / 1;
+      background: var(--bg, none) center / contain no-repeat;
+    }
+    body[data-view="kontakt"] #kontakt { display: block; }
+  }
+
   /* iPhone-Startseite: Seagull vollständig vor der Beschriftung; Desktop unverändert. */
   .mobile-hero-copy { display: none; }
   @media (max-width: 820px) and (orientation: portrait) {
