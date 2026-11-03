@@ -324,13 +324,12 @@
   .hero p { font-size: 1.05rem; }
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) { .hero > div:first-child { max-width: min(460px, 34vw); } }
   /* Desktop: Text bleibt links neben dem eingepassten Seagull-Foto (Seitenverhältnis 1978:2000).
-     --free = Platz zwischen Textanfang und linker Bildkante, Schrift und Spalte richten sich danach. */
+     --free = Platz zwischen Textanfang und linker Bildkante, Schrift und Spalte richten sich danach.
+     Die Überschriften der Unterseiten (Kontaktbogen, Equipment …) haben dieselbe Größe wie die Startseite. */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
-    .hero > div:first-child {
-      --free: calc((100vw - 98.9vh) / 2 - max(2rem, 50vw - 880px) - 1rem);
-      max-width: min(460px, 34vw, max(12rem, var(--free)));
-    }
-    .hero h1 { font-size: min(3.2vw, clamp(1.25rem, var(--free) / 6.6, 2.8rem)); }
+    :root { --free: calc((100vw - 98.9vh) / 2 - max(2rem, 50vw - 880px) - 1rem); }
+    .hero > div:first-child { max-width: min(460px, 34vw, max(12rem, var(--free))); }
+    .hero h1, .view h2 { font-size: min(3.2vw, clamp(1.25rem, var(--free) / 6.6, 2.8rem)); }
   }
   .strip { width: min(100%, 260px); }
   #kontakt { border-top: 0; }
@@ -421,6 +420,7 @@
     .site-head nav a { padding: .85rem 1.2rem; font-size: 1.05rem; }
     .tools { margin-left: 0; gap: .5rem; }
     .hero h1 { font-size: 2.3rem; line-height: 1.02; }
+    .view h2 { font-size: 2.3rem; }
     .hero { padding-block: 1.5rem 2.5rem; }
     .strip { justify-self: start; }
     .print button { padding: 14px; border-width: 8px; }
@@ -578,7 +578,7 @@
 <div class="bgfix" aria-hidden="true"></div>
 
 <header class="wrap site-head">
-  <a class="brand" href="#top">A T Fichter</a>
+  <a class="brand" href="#top">Analoge Welt</a>
   <div class="head-right">
     <nav id="mainNav" aria-label="Hauptnavigation">
       <a href="#kontaktbogen">Kontaktbogen</a>
@@ -728,8 +728,8 @@ const CONFIG = {
 /* Datenbank aus dem anderen Projekt (Entwicklungszeiten), nur lesend */
 /* Deine Daten: hier einmal eintragen, die Seite übernimmt sie überall */
 const PROFILE = {
-  name: "A T Fichter",                      // Logo oben links
-  copyright: "A.T. Fichter",                // Fußzeile
+  name: "Analoge Welt",                     // Logo oben links
+  copyright: "A.T. Fichter · Analoge Welt", // Fußzeile
   title: "A T F – Analoge Fotografie",      // Titel im Browser-Tab
   email: "a_t_f@outlook.de",                // z. B. "name@beispiel.de"
   instagram: "a_t_f_analog",                // nur der Profilname, ohne @
@@ -1083,9 +1083,6 @@ $("theme").addEventListener("click", () => {
   document.documentElement.dataset.theme = next;
   try { localStorage.setItem("theme", next); } catch (e) {}
 });
-/* Bilderschutz: kein Rechtsklick auf Bildern, kein Herausziehen */
-document.addEventListener("contextmenu", (e) => { if (e.target.closest("img, .lb-stage")) e.preventDefault(); });
-document.addEventListener("dragstart", (e) => { if (e.target.tagName === "IMG") e.preventDefault(); });
 applyProfile(); loadProjects(); setLang(lang); route();
 
 /* ---------- Bilderschutz: Rechtsklick und Ziehen sperren ---------- */
