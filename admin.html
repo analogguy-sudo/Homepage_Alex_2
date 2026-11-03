@@ -64,10 +64,18 @@ function draw(){const L=$("list");L.innerHTML="";rows.forEach(r=>{const d=docume
   d.querySelector(".dl").onclick=async()=>{if(!confirm("Foto löschen?"))return;try{
     await api("/rest/v1/photos?id=eq."+r.id,{method:"DELETE"});for(const n of r.details||[])await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});await api("/storage/v1/object/photos/"+enc(r.storage_path),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");load()}catch(x){say(x.message)}};
   L.appendChild(d)})}
+/* Urheber und Copyright als EXIF in das verkleinerte JPEG schreiben (Canvas entfernt alle Metadaten) */
+const META=[[0x013B,"Alexander Fichter"],[0x8298,"© Alexander Fichter"]];   // wie in Lightroom
+async function withMeta(blob){const b=new Uint8Array(await blob.arrayBuffer()),d=META.map(([,s])=>new TextEncoder().encode(s+"\0")),n=META.length,t=new Uint8Array(14+n*12+d.reduce((a,x)=>a+x.length,0)),v=new DataView(t.buffer);
+  v.setUint16(0,0x4D4D);v.setUint16(2,42);v.setUint32(4,8);v.setUint16(8,n);let o=14+n*12;
+  META.forEach(([tag],i)=>{const p=10+i*12;v.setUint16(p,tag);v.setUint16(p+2,2);v.setUint32(p+4,d[i].length);v.setUint32(p+8,o);t.set(d[i],o);o+=d[i].length});
+  const h=new Uint8Array(10),hv=new DataView(h.buffer);hv.setUint16(0,0xFFE1);hv.setUint16(2,8+t.length);h.set([69,120,105,102,0,0],4);
+  const at=b[2]===0xFF&&b[3]===0xE0?4+(b[4]<<8|b[5]):2;   // nach dem JFIF-Block einfügen
+  return new Blob([b.subarray(0,at),h,t,b.subarray(at)],{type:"image/jpeg"})}
 $("up").onsubmit=async e=>{e.preventDefault();say("Lade hoch …");
   try{const file=$("f").files[0],bmp=await decode(file),sc=Math.min(1,2000/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");
   c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
-  const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.88));
+  const blob=await withMeta(await new Promise(r=>c.toBlob(r,"image/jpeg",.88)));
   const slug=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\.[^.]+$/,"").replace(/[^\w-]+/g,"_");
   const name=Date.now()+"_"+slug+".jpg";
   await api("/storage/v1/object/photos/"+name,{method:"POST",headers:{"Content-Type":"image/jpeg"},body:blob});
@@ -78,7 +86,7 @@ $("up").onsubmit=async e=>{e.preventDefault();say("Lade hoch …");
 const PF=["title","url","text_de","text_en","sort"];let prows=[];
 async function putImage(file,prefix="projekt_"){const bmp=await decode(file),sc=Math.min(1,2000/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");
   c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
-  const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.88)),slug=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\.[^.]+$/,"").replace(/[^\w-]+/g,"_"),name=prefix+Date.now()+"_"+slug+".jpg";
+  const blob=await withMeta(await new Promise(r=>c.toBlob(r,"image/jpeg",.88))),slug=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\.[^.]+$/,"").replace(/[^\w-]+/g,"_"),name=prefix+Date.now()+"_"+slug+".jpg";
   await api("/storage/v1/object/photos/"+name,{method:"POST",headers:{"Content-Type":"image/jpeg"},body:blob});return name}
 async function loadP(){try{prows=await(await api("/rest/v1/projects?select=*&order=sort.asc")).json();drawP()}catch(x){say(x.message)}}
 function drawP(){const L=$("plist");L.innerHTML="";prows.forEach(r=>{const d=document.createElement("div");d.className="box item";
