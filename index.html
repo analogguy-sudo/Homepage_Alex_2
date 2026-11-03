@@ -12,9 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="A T F">
 <title>A T F – Analoge Fotografie</title>
 <meta name="description" content="Analoge Fotografie auf 35 mm und Mittelformat, von Hand entwickelt.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Crimson+Pro:wght@400;500;600&family=League+Gothic&display=swap" rel="stylesheet">
+<link href="fonts/fonts.css" rel="stylesheet">
 
 <style>
   :root {
@@ -317,6 +315,7 @@
   .frame { background: none; aspect-ratio: 5 / 4; }
   .frame img { box-shadow: 0 18px 40px -18px rgba(0,0,0,.6); }
   .other span { display: block; }
+  .other span[hidden] { display: none; }
   .card img { display: block; width: calc(100% + 2.4rem); margin: -1.2rem -1.2rem 1rem; aspect-ratio: 16 / 10; object-fit: cover; }
 
   /* ===== Feinschliff: kleinerer Text links, Hintergrund mittig, kleineres Porträt, Kontakt als Kasten ===== */
@@ -682,6 +681,7 @@
 <footer>
   <div class="wrap">
     <span>© <span id="year"></span> <span id="copyName"></span></span>
+    <a href="datenschutz.html">Datenschutz</a>
   </div>
 </footer>
 
@@ -722,9 +722,9 @@ const PROFILE = {
   name: "A T Fichter",                      // Logo oben links
   copyright: "A.T. Fichter",                // Fußzeile
   title: "A T F – Analoge Fotografie",      // Titel im Browser-Tab
-  email: "",                                // z. B. "name@beispiel.de"
-  instagram: "",                            // nur der Profilname, ohne @
-  pixelfed: "", pixelfedServer: "pixelfed.social",
+  email: "a_t_f@outlook.de",                // z. B. "name@beispiel.de"
+  instagram: "a_t_f_analog",                // nur der Profilname, ohne @
+  pixelfed: "atf_analog", pixelfedServer: "pixelfed.social",
   flickr: "",
   langFlags: false,                         // true = Flaggen statt DE / EN
   schutz: "bilder"                          // Rechtsklick sperren: "bilder" (nur auf Fotos), "alles" (ganze Seite) oder "aus"
