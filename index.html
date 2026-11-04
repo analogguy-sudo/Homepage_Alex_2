@@ -612,8 +612,9 @@
   .site-head nav a[aria-current="page"] { border-color: var(--ink); }
 
   /* Startseite: Überschrift oben links, Menü untereinander rechts neben dem Seagull-Foto (bündig mit der
-     Überschrift, Kopfzeile ≈ 7rem + Abstand der .hero), Beschreibung links unter der Überschrift. Nur bei genug Platz. */
-  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) {
+     Überschrift, Kopfzeile ≈ 7rem + Abstand der .hero), Beschreibung links unter der Überschrift. Nur bei genug Platz
+     und mit Maus oder Trackpad – Touch-Tablets wie das iPad quer behalten den ruhigeren Tablet-Aufbau. */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
     /* ohne Versatz steht die Überschrift bündig unter dem Logo */
     body:not([data-view]) .hero > div:first-child, body:not([data-view]) .hero > div:first-child > p { margin-left: 0; }
     body:not([data-view]) .site-head nav {
@@ -662,7 +663,7 @@
 
   /* Bei genug Platz neben dem Seagull: Über mich – Titel links, Text rechts im freien Feld (oben bündig mit
      dem Titel), Porträt unten rechts über der Fußzeile. Dazu Equipment und Projekte. */
-  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) {
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
     body[data-view="ueber-mich"] #ueber-mich .about-text {
       position: fixed; z-index: 2; top: 12.5rem;
       left: calc(50vw + 49.45vh + 2.5rem); right: 2rem;
@@ -710,7 +711,7 @@
     body[data-view] .site-head nav a + a { border-left: 1px solid var(--rule); }
     body[data-view] .site-head nav a[aria-current="page"] { border-bottom-color: var(--ink); }
   }
-  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) {
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
     /* Datumszeile nur, wenn links neben dem Foto genug Platz ist */
     .dateline { display: block; }
     /* Logo so groß, wie es links neben dem Foto Platz hat (Schriftzug ≈ 4,7 × Schriftgröße breit) */
