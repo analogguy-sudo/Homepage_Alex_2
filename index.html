@@ -331,9 +331,19 @@
      --free = Platz zwischen Textanfang und linker Bildkante, Schrift und Spalte richten sich danach.
      Die Überschriften der Unterseiten (Kontaktbogen, Equipment …) haben dieselbe Größe wie die Startseite. */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
-    :root { --free: calc((100vw - 98.9vh) / 2 - max(2rem, 50vw - 880px) - 1rem); }
+    :root {
+      --minleft: 0px;                                      /* Mindestplatz links vom Bild (Tablet siehe unten) */
+      --imgw: min(100vw, 98.9vh);                          /* Breite des eingepassten Fotos */
+      --imgl: max((100vw - var(--imgw)) / 2, min(var(--minleft), 100vw - var(--imgw)));   /* linke Bildkante */
+      --free: calc(var(--imgl) - max(2rem, 50vw - 880px) - 1rem);
+    }
+    .bgfix { background-size: var(--imgw) auto; background-position: var(--imgl) 50%; }
     .hero > div:first-child { max-width: min(460px, 34vw, max(12rem, var(--free))); }
     .hero h1, .view h2 { font-size: min(3.2vw, clamp(1.25rem, var(--free) / 6.6, 2.8rem)); }
+  }
+  /* Tablet quer (Touch): Foto nach rechts rücken, damit links Platz für Logo und Text bleibt */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (pointer: coarse) {
+    :root { --minleft: 300px; }
   }
   .strip { width: min(100%, 260px); }
   #kontakt { border-top: 0; }
@@ -436,6 +446,13 @@
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
     .brand { font-size: 2rem; letter-spacing: .03em; }
     #kontakt .wrap { width: min(100% - 4rem, 520px); margin-inline: 2rem auto; }
+  }
+  /* Tablet hoch (iPad): größere Schrift als auf dem Handy, Fotos zweispaltig */
+  @media (min-width: 700px) and (max-width: 1100px) and (orientation: portrait) {
+    .brand { font-size: 2.4rem; }
+    .hero h1, .view h2 { font-size: 3.2rem; }
+    .hero p { font-size: 1.3rem; }
+    .grid { grid-template-columns: 1fr 1fr; }
   }
 
   /* ===== Reiter mittig, kleinere Schalter, Projekte mit Namensliste, Kontaktbogen ruhiger ===== */
