@@ -266,7 +266,7 @@
   .lb-ctrl button:hover { background: #EDEDEB; color: #0E0E0E; }
 
   /* ===== Hintergrundfoto, Ansichten, Labor, Projekte ===== */
-  :root { --veil: rgba(239,239,237,.3); --rule: rgba(128,128,128,.35); }
+  :root { --veil: rgba(239,239,237,.1); --rule: rgba(128,128,128,.35); }
   :root[data-theme="dark"] { --veil: rgba(14,14,14,.35); }
   .bgfix { position: fixed; inset: 0; z-index: -1; background: var(--bg, none) 50% 50% / contain no-repeat; }
   .bgfix::after { content: ""; position: absolute; inset: 0; background: var(--veil); }
@@ -280,8 +280,12 @@
   .site-head nav a { font-family: var(--edge); text-transform: uppercase; letter-spacing: .12em; font-size: .95rem; }
   .theme { font-family: var(--edge); letter-spacing: .1em; text-transform: uppercase; font-size: .85rem; }
   h2::before { display: block; font-family: var(--edge); font-size: .85rem; letter-spacing: .14em; color: var(--amber); margin-bottom: .4rem; }
-  #kontaktbogen h2::before { content: "▸ 01"; } #projekte h2::before { content: "▸ 03"; }
-  #ueber-mich h2::before { content: "▸ 04"; } #equipment h2::before { content: "▸ 02"; } #kontakt h2::before { content: "▸ 05"; }
+  /* Seitenzahl wie in der Zeitung, Reihenfolge wie im Menü (Titelblatt = Seite 1) */
+  #kontaktbogen h2::before { content: "Seite 2"; } #equipment h2::before { content: "Seite 3"; } #projekte h2::before { content: "Seite 4"; }
+  #ueber-mich h2::before { content: "Seite 5"; } #kontakt h2::before { content: "Seite 6"; }
+  :root[lang="en"] #kontaktbogen h2::before { content: "Page 2"; } :root[lang="en"] #equipment h2::before { content: "Page 3"; }
+  :root[lang="en"] #projekte h2::before { content: "Page 4"; } :root[lang="en"] #ueber-mich h2::before { content: "Page 5"; }
+  :root[lang="en"] #kontakt h2::before { content: "Page 6"; }
   .about { grid-template-columns: minmax(0, 1fr); } .gear { max-width: 640px; }
   .lead { max-width: 60ch; color: var(--ink-soft); margin: 0 0 1.2rem; }
   .search { font: inherit; width: min(100%, 360px); padding: .5rem .8rem; background: var(--print); color: var(--ink); border: 1px solid var(--rule); border-radius: 2px; margin-bottom: 1rem; }
@@ -410,7 +414,7 @@
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
     body::after { inset: 0; animation: none; }
     .bgfix { background-size: cover; background-position: 50% 35%; }
-    :root { --veil: rgba(239,239,237,.5); }
+    :root { --veil: rgba(239,239,237,.25); }
     :root[data-theme="dark"] { --veil: rgba(14,14,14,.6); }
     .wrap.site-head { flex-wrap: nowrap; padding-block: 1rem; position: relative; }
     .head-right { gap: .5rem; }
@@ -430,12 +434,12 @@
   }
   .brand { white-space: nowrap; }
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
-    .brand { font-size: 1.7rem; letter-spacing: .03em; }
+    .brand { font-size: 2rem; letter-spacing: .03em; }
     #kontakt .wrap { width: min(100% - 4rem, 520px); margin-inline: 2rem auto; }
   }
 
   /* ===== Reiter mittig, kleinere Schalter, Projekte mit Namensliste, Kontaktbogen ruhiger ===== */
-  :root { --veil-strong: rgba(239,239,237,.94); }
+  :root { --veil-strong: rgba(239,239,237,.86); }
   :root[data-theme="dark"] { --veil-strong: rgba(14,14,14,.94); }
   body[data-view="kontaktbogen"] .bgfix::after { background: var(--veil-strong); }
   #projekte .wrap { width: min(1760px, 100% - 4rem); }
@@ -634,8 +638,12 @@
     }
     body[data-view="ueber-mich"] #ueber-mich .about-text p { max-width: none; }
     body[data-view="ueber-mich"] #ueber-mich .about > .strip {
-      position: fixed; z-index: 2; right: 2rem; bottom: 5.5rem; width: 125px; margin: 0;
+      position: fixed; z-index: 2; right: 2rem; bottom: 5.5rem; width: min(190px, 100vw - 50vw - 49.45vh - 4.5rem); margin: 0;
     }
+    /* Texte im schmalen Feld rechts gut lesbar */
+    body[data-view="ueber-mich"] #ueber-mich .about-text p { font-size: 1.18rem; line-height: 1.5; }
+    body[data-view="equipment"] .equip li { font-size: 1.25rem; }
+    body:not([data-view]) .hero > div:first-child > p { font-size: 1.18rem; }
     /* Equipment: Titel links, Kameras und Filme untereinander rechts neben dem Seagull, oben bündig mit dem Titel */
     body[data-view="equipment"] .equip {
       position: fixed; z-index: 2; top: 12.5rem; margin: 0;
@@ -651,10 +659,19 @@
   /* ===== Zeitungsstil (Test): Zeitungskopf mit Doppellinie und Datumszeile, Rubriken, Spaltenlinien ===== */
   .dateline { display: none; }
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
-    .wrap.site-head { position: relative; border-bottom: 3px double var(--rule); }
+    /* Doppellinie unter dem Kopf, über dem Seagull unterbrochen (Bildkanten 50vw ± 49.45vh, Kopf beginnt beim Seitenrand) */
+    .wrap.site-head { position: relative; border-bottom: 0; }
+    .wrap.site-head::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; pointer-events: none;
+      border-block: 2px solid var(--rule);
+      --cut-l: calc(50vw - 49.45vh - max(2rem, 50vw - 880px) - 1.25rem);
+      --cut-r: calc(50vw + 49.45vh - max(2rem, 50vw - 880px) + 1.25rem);
+      -webkit-mask: linear-gradient(to right, #000 var(--cut-l), transparent var(--cut-l), transparent var(--cut-r), #000 var(--cut-r));
+      mask: linear-gradient(to right, #000 var(--cut-l), transparent var(--cut-l), transparent var(--cut-r), #000 var(--cut-r));
+    }
     .dateline {
-      display: block; position: absolute; left: 0; bottom: .3rem; margin: 0;
-      font-family: var(--edge); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft);
+      position: absolute; left: 0; bottom: .45rem; margin: 0;
+      font-family: var(--edge); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
     }
     /* Rubriken in der Kopfzeile (Unterseiten): feine senkrechte Trennstriche wie zwischen Zeitungsrubriken */
     body[data-view] .site-head nav { gap: 0; }
@@ -663,6 +680,10 @@
     body[data-view] .site-head nav a[aria-current="page"] { border-bottom-color: var(--ink); }
   }
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) {
+    /* Datumszeile nur, wenn links neben dem Foto genug Platz ist */
+    .dateline { display: block; }
+    /* Logo so groß, wie es links neben dem Foto Platz hat (Schriftzug ≈ 4,7 × Schriftgröße breit) */
+    .brand { font-size: clamp(2.2rem, (50vw - 49.45vh - max(2rem, 50vw - 880px) - 1.5rem) / 4.7, 3.2rem); }
     /* Startseite: Menü als Inhaltsverzeichnis „In dieser Ausgabe" mit feinen Linien zwischen den Rubriken */
     body:not([data-view]) .site-head nav { gap: 0; }
     body:not([data-view]) .site-head nav::before {
@@ -674,20 +695,19 @@
     body:not([data-view]) .site-head nav a { padding-block: .45rem; align-self: stretch; text-align: right; border-bottom: 1px solid var(--rule); }
     /* Startseite: linke Textspalte endet mit Abstand vor der linken Spaltenlinie */
     :root { --free: calc((100vw - 98.9vh) / 2 - max(2rem, 50vw - 880px) - 3rem); }
-    /* Spaltenlinien: feine senkrechte Linien links und rechts neben dem Seagull */
-    .bgfix::before {
-      content: ""; position: absolute; top: 0; bottom: 0; z-index: 1; pointer-events: none;
-      left: calc(50vw - 49.45vh - 1.25rem); width: calc(98.9vh + 2.5rem);
-      border-inline: 1px solid var(--rule);
-    }
   }
-  /* iPhone und iPad: Doppellinie unter dem Kopf, feine Randlinien links und rechts, Linien zwischen den Menüpunkten */
+  /* iPhone und iPad: Doppellinie unter dem Kopf, Linien zwischen den Menüpunkten */
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
-    .wrap.site-head { border-bottom: 3px double var(--rule); margin-bottom: 1.25rem; }
-    html::before {
-      content: ""; position: fixed; top: 0; bottom: 0; left: 1rem; right: 1rem; z-index: 30; pointer-events: none;
-      border-inline: 1px solid var(--rule);
+    .wrap.site-head { border-bottom: 5px double var(--rule); margin-bottom: 1.25rem; padding-bottom: 2rem; }
+    .dateline {
+      display: block; position: absolute; left: 0; right: 0; bottom: .45rem; margin: 0; white-space: nowrap; overflow: hidden;
+      font-family: var(--edge); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
     }
+    .site-head nav::before {
+      content: "In dieser Ausgabe"; align-self: stretch; padding: .3rem 1.2rem .6rem; text-align: center; border-bottom: 3px double var(--rule);
+      font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--ink-soft);
+    }
+    :root[lang="en"] .site-head nav::before { content: "In this issue"; }
     .site-head nav a { align-self: stretch; text-align: center; }
     .site-head nav a:not(:last-child) { border-bottom: 1px solid var(--rule); }
   }
@@ -1090,10 +1110,12 @@ let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
 const orig = new WeakMap();
 const tr = (k) => (lang === "en" && EN[k]) || k;
+function setDateline() {   // Datumszeile im Zeitungskopf: immer das heutige Datum
+  $("dateline").textContent = new Date().toLocaleDateString(lang === "en" ? "en-GB" : "de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
 function setLang(l) {
   lang = l; document.documentElement.lang = l;
-  $("dateline").textContent = (l === "en" ? "Analogue photography · " : "Analoge Fotografie · ") +
-    new Date().toLocaleDateString(l === "en" ? "en-GB" : "de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  setDateline();
   try { localStorage.setItem("lang", l); } catch (e) {}
   document.querySelectorAll("[data-en]").forEach((el) => {   // Elemente mit eigener englischer Fassung (z. B. mit <br>)
     if (el.dataset.de === undefined) el.dataset.de = el.innerHTML;
