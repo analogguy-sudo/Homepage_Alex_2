@@ -571,6 +571,126 @@
     #equipment .equip-col, #equipment .equip-right { width: auto; min-width: 0; text-align: left; }
     #equipment .equip li { overflow-wrap: anywhere; font-size: clamp(.85rem, 3.5vw, 1.1rem); }
   }
+
+  /* ===== Desktop: Startseite als Titelblatt, Unterseiten ruhig ===== */
+  /* „Start" im Menü nur auf den Unterseiten – auf der Startseite selbst überflüssig */
+  body:not([data-view]) .site-head nav .nav-home { display: none; }
+  .site-head nav a[aria-current="page"] { border-color: var(--ink); }
+
+  /* Startseite: Überschrift oben links, Menü untereinander rechts neben dem Seagull-Foto (bündig mit der
+     Überschrift, Kopfzeile ≈ 7rem + Abstand der .hero), Beschreibung unten rechts. Nur bei genug Platz. */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) {
+    /* transform würde den fixierten Absatz an die Textspalte binden; ohne ihn steht die Überschrift bündig unter dem Logo */
+    body:not([data-view]) .hero > div:first-child { transform: none; }
+    body:not([data-view]) .hero > div:first-child > p {
+      position: fixed; z-index: 2; margin: 0;
+      left: calc(50vw + 49.45vh + 2.5rem); right: 2rem; bottom: 6rem;
+      max-width: none; text-align: right;
+      padding-top: 1rem; border-top: 1px solid var(--rule);
+    }
+    body:not([data-view]) .site-head nav {
+      position: fixed; z-index: 5;
+      left: calc(50vw + 49.45vh + 2.5rem); right: 2rem;
+      top: calc(7rem + clamp(1.5rem, 5vw, 4rem));
+      flex-direction: column; flex-wrap: nowrap; align-items: flex-end; gap: .55rem;
+    }
+    body:not([data-view]) .site-head nav a {
+      font-size: 1.05rem; border-bottom: 0; border-right: 2px solid transparent; padding: .1rem .8rem .1rem 0;
+      transition: border-color .2s, padding-right .2s;
+    }
+    body:not([data-view]) .site-head nav a:hover,
+    body:not([data-view]) .site-head nav a:focus-visible { border-right-color: var(--safelight); padding-right: 1.05rem; }
+  }
+
+  /* Unterseiten wie der Kontaktbogen: Seagull nur als Hauch, Titel ganz links, links eine schmale Spalte
+     (220px wie die Kategorien), daneben der Inhalt. Menü bleibt oben in der Kopfzeile. */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    body[data-view] .bgfix::after { background: var(--veil-strong); }
+    body[data-view] #equipment .wrap, body[data-view] #ueber-mich .wrap,
+    body[data-view] #projekte .wrap, body[data-view] #kontakt .wrap {
+      width: min(1760px, 100% - 4rem); margin-inline: auto;
+    }
+    /* Equipment: Titel links, Kameras und Filme als zwei gleich breite Listen mittig auf der Seite (wie der Text bei Über mich) */
+    body[data-view] .equip { justify-content: center; gap: 5rem; }
+    body[data-view] .equip-col { width: 240px; }
+    body[data-view] .equip-right { text-align: left; }
+    /* Über mich: Titel und Text links, kleines, gedämpftes Porträt rechts außen auf Höhe des Texts */
+    body[data-view] #ueber-mich .about { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
+    body[data-view] #ueber-mich .about > div:first-child { width: auto; max-width: 56ch; }
+    body[data-view] #ueber-mich .about > .strip { width: 110px; flex: none; margin: 3.4rem 0 0; opacity: .75; filter: grayscale(1); }
+    body[data-view] #ueber-mich .about > .strip img { box-shadow: none; }
+    /* Kontakt: Titel oben links, Kontaktdaten unten links am Rand mit Abstand zur Fußzeile */
+    body[data-view] #kontakt .wrap { display: flex; flex-direction: column; align-items: flex-start; align-self: stretch; text-align: left; padding-bottom: 1.5rem; }
+    body[data-view] #kontakt .wrap > .mail { margin-top: auto; }
+    body[data-view] #kontakt .other { margin-bottom: 0; }
+  }
+
+  /* Bei genug Platz neben dem Seagull: Über mich – Titel links, Text rechts im freien Feld (oben bündig mit
+     dem Titel), Porträt unten rechts über der Fußzeile. Dazu Equipment und Projekte. */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) {
+    body[data-view="ueber-mich"] #ueber-mich .about-text {
+      position: fixed; z-index: 2; top: 12.5rem;
+      left: calc(50vw + 49.45vh + 2.5rem); right: 2rem;
+    }
+    body[data-view="ueber-mich"] #ueber-mich .about-text p { max-width: none; }
+    body[data-view="ueber-mich"] #ueber-mich .about > .strip {
+      position: fixed; z-index: 2; right: 2rem; bottom: 5.5rem; width: 125px; margin: 0;
+    }
+    /* Equipment: Titel links, Kameras und Filme untereinander rechts neben dem Seagull, oben bündig mit dem Titel */
+    body[data-view="equipment"] .equip {
+      position: fixed; z-index: 2; top: 12.5rem; margin: 0;
+      left: calc(50vw + 49.45vh + 2.5rem); right: 2rem;
+      flex-direction: column; justify-content: flex-start; gap: 2rem;
+    }
+    body[data-view="equipment"] .equip-col { width: auto; }
+    /* Projekte: Liste links, der Projektkasten beginnt an der linken Kante des Seagull
+       (Bildkante minus Seitenrand, Listenspalte 220px und Abstand 2.5rem) */
+    body[data-view="projekte"] #projDetail { margin-left: calc(50vw - 49.45vh - max(2rem, (100vw - 1760px) / 2) - 220px - 2.5rem); }
+  }
+
+  /* ===== Zeitungsstil (Test): Zeitungskopf mit Doppellinie und Datumszeile, Rubriken, Spaltenlinien ===== */
+  .dateline { display: none; }
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    .wrap.site-head { position: relative; border-bottom: 3px double var(--rule); }
+    .dateline {
+      display: block; position: absolute; left: 0; bottom: .3rem; margin: 0;
+      font-family: var(--edge); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft);
+    }
+    /* Rubriken in der Kopfzeile (Unterseiten): feine senkrechte Trennstriche wie zwischen Zeitungsrubriken */
+    body[data-view] .site-head nav { gap: 0; }
+    body[data-view] .site-head nav a { padding-inline: .9rem; }
+    body[data-view] .site-head nav a + a { border-left: 1px solid var(--rule); }
+    body[data-view] .site-head nav a[aria-current="page"] { border-bottom-color: var(--ink); }
+  }
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) {
+    /* Startseite: Menü als Inhaltsverzeichnis „In dieser Ausgabe" mit feinen Linien zwischen den Rubriken */
+    body:not([data-view]) .site-head nav { gap: 0; }
+    body:not([data-view]) .site-head nav::before {
+      content: "In dieser Ausgabe"; display: block; padding-bottom: .5rem; margin-bottom: .2rem;
+      font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0; font-size: .95rem; color: var(--ink-soft);
+      border-bottom: 3px double var(--rule); align-self: stretch; text-align: right;
+    }
+    :root[lang="en"] body:not([data-view]) .site-head nav::before { content: "In this issue"; }
+    body:not([data-view]) .site-head nav a { padding-block: .45rem; align-self: stretch; text-align: right; border-bottom: 1px solid var(--rule); }
+    /* Startseite: linke Textspalte endet mit Abstand vor der linken Spaltenlinie */
+    :root { --free: calc((100vw - 98.9vh) / 2 - max(2rem, 50vw - 880px) - 3rem); }
+    /* Spaltenlinien: feine senkrechte Linien links und rechts neben dem Seagull */
+    .bgfix::before {
+      content: ""; position: absolute; top: 0; bottom: 0; z-index: 1; pointer-events: none;
+      left: calc(50vw - 49.45vh - 1.25rem); width: calc(98.9vh + 2.5rem);
+      border-inline: 1px solid var(--rule);
+    }
+  }
+  /* iPhone und iPad: Doppellinie unter dem Kopf, feine Randlinien links und rechts, Linien zwischen den Menüpunkten */
+  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
+    .wrap.site-head { border-bottom: 3px double var(--rule); margin-bottom: 1.25rem; }
+    html::before {
+      content: ""; position: fixed; top: 0; bottom: 0; left: 1rem; right: 1rem; z-index: 30; pointer-events: none;
+      border-inline: 1px solid var(--rule);
+    }
+    .site-head nav a { align-self: stretch; text-align: center; }
+    .site-head nav a:not(:last-child) { border-bottom: 1px solid var(--rule); }
+  }
 </style>
 </head>
 
@@ -579,8 +699,10 @@
 
 <header class="wrap site-head">
   <a class="brand" href="#top">Analoge Welt</a>
+  <p class="dateline" id="dateline" aria-hidden="true"></p>
   <div class="head-right">
     <nav id="mainNav" aria-label="Hauptnavigation">
+      <a href="#top" class="nav-home">Titelblatt</a>
       <a href="#kontaktbogen">Kontaktbogen</a>
       <a href="#equipment">Equipment</a>
       <a href="#projekte">Projekte</a>
@@ -639,8 +761,10 @@
     <div class="wrap about">
       <div>
         <h2 id="about-titel">Über mich</h2>
+        <div class="about-text">
         <p>Ich fotografiere seit über zehn Jahren auf Film. Mich reizt, dass jede Aufnahme Zeit kostet: Man schaut länger hin, wartet aufs richtige Licht und sieht das Ergebnis erst Tage später.</p>
         <p>Meine Schwarzweißfilme entwickle ich selbst, Farbfilme gebe ich aktuell noch an ein Farblabor.</p>
+        </div>
       </div>
       <div class="strip"><div class="frame"><img id="heroImg" alt="" width="1200" height="800"></div><div class="edge" hidden><span id="edgeLeft"></span><span id="edgeRight"></span></div></div>
       
@@ -660,14 +784,6 @@
         <li>Regula 3</li>
         <li>Voigtländer Vitoret DR</li>
         <li>Agfa Isolette 2</li>
-      </ul>
-    </div>
-    <div class="equip-col equip-right">
-      <h3>Filme</h3>
-      <ul>
-        <li>Kodak Portra 400</li>
-        <li>Ilford HP5 Plus</li>
-        <li>Fuji Pro 400H</li>
       </ul>
     </div>
   </div>
@@ -950,7 +1066,7 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
-  "Kontaktbogen": "Contact sheet", "Wähle links ein Projekt.": "Choose a project on the left.", "Projekte": "Projects", "Über mich": "About me", "Kontakt": "Contact",
+  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle links ein Projekt.": "Choose a project on the left.", "Projekte": "Projects", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "schwarz-weiss": "black and white", "farbe": "colour", "color": "colour", "Öffnen": "Open",
   "Licht auf Film, von Hand entwickelt.": "Light on film, developed by hand.",
   "Analoge Fotografie auf 35 mm und Mittelformat. Aufgenommen unterwegs, entwickelt und gescannt im eigenen Labor.": "Analogue photography on 35 mm and medium format. Shot on the road, developed and scanned in my own lab.",
@@ -976,6 +1092,8 @@ const orig = new WeakMap();
 const tr = (k) => (lang === "en" && EN[k]) || k;
 function setLang(l) {
   lang = l; document.documentElement.lang = l;
+  $("dateline").textContent = (l === "en" ? "Analogue photography · " : "Analoge Fotografie · ") +
+    new Date().toLocaleDateString(l === "en" ? "en-GB" : "de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   try { localStorage.setItem("lang", l); } catch (e) {}
   document.querySelectorAll("[data-en]").forEach((el) => {   // Elemente mit eigener englischer Fassung (z. B. mit <br>)
     if (el.dataset.de === undefined) el.dataset.de = el.innerHTML;
@@ -1060,6 +1178,9 @@ const VIEWS = ["kontaktbogen", "projekte", "ueber-mich", "equipment", "kontakt"]
 function route() {
   const h = location.hash.slice(1), v = VIEWS.includes(h) ? h : "";
   if (v) document.body.dataset.view = v; else delete document.body.dataset.view;
+  document.querySelectorAll("#mainNav a").forEach((a) => {   // aktuelle Seite im Menü markieren
+    if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
   if (v === "ueber-mich") { const im = $("heroImg"); im.classList.remove("develop"); void im.offsetWidth; im.classList.add("develop"); }
   let t = null;
   try { if (h && !v) t = document.querySelector("#" + h); } catch (e) {}
