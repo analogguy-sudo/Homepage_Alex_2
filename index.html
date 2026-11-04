@@ -332,18 +332,26 @@
      Die Überschriften der Unterseiten (Kontaktbogen, Equipment …) haben dieselbe Größe wie die Startseite. */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
     :root {
-      --minleft: 0px;                                      /* Mindestplatz links vom Bild (Tablet siehe unten) */
-      --imgw: min(100vw, 98.9vh);                          /* Breite des eingepassten Fotos */
+      --minleft: 0px; --minright: 0px; --minbottom: 0px;   /* Mindestplatz um das Bild (Tablet siehe unten) */
+      --imgw: min(100vw, 98.9vh, 100vw - var(--minleft) - var(--minright), (100vh - 2 * var(--minbottom)) * .989);   /* Breite des eingepassten Fotos */
       --imgl: max((100vw - var(--imgw)) / 2, min(var(--minleft), 100vw - var(--imgw)));   /* linke Bildkante */
       --free: calc(var(--imgl) - max(2rem, 50vw - 880px) - 1rem);
     }
     .bgfix { background-size: var(--imgw) auto; background-position: var(--imgl) 50%; }
-    .hero > div:first-child { max-width: min(460px, 34vw, max(12rem, var(--free))); }
+    .hero > div:first-child { max-width: min(460px, 34vw, max(8rem, var(--free) + .5rem)); }
+    footer .wrap > span:first-child { max-width: max(8rem, var(--free) + 1rem); }   /* Copyright bricht vor dem Foto um */
+    /* Startseite: Beschreibung unten links, mit Abstand über der Fußzeile */
+    body:not([data-view]) .hero > div:first-child > p {
+      position: fixed; z-index: 2; left: max(2rem, 50vw - 880px); bottom: 8rem; margin: 0;
+      width: max(8rem, var(--free) + .5rem); max-width: none;
+      padding-top: 1rem; border-top: 1px solid var(--rule);
+    }
     .hero h1, .view h2 { font-size: min(3.2vw, clamp(1.25rem, var(--free) / 6.6, 2.8rem)); }
   }
-  /* Tablet quer (Touch): Foto nach rechts rücken, damit links Platz für Logo und Text bleibt */
+  /* Tablet quer (Touch): Foto etwas kleiner und nach rechts gerückt – links Platz für Logo und Text,
+     rechts für Hell/Dunkel und DE/EN, oben und unten für Kopf- und Fußzeile */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (pointer: coarse) {
-    :root { --minleft: 300px; }
+    :root { --minleft: 300px; --minright: 160px; --minbottom: 4.5rem; }
   }
   .strip { width: min(100%, 260px); }
   #kontakt { border-top: 0; }
@@ -570,7 +578,8 @@
 
   /* Desktop: Startseitentext leicht nach links versetzen. */
   @media (min-width: 1101px) and (min-height: 501px) {
-    body:not([data-view]) .hero > div:first-child { transform: translateX(-18px); }
+    /* margin statt transform: ein transform würde die fixierte Beschreibung an die Textspalte binden */
+    body:not([data-view]) .hero > div:first-child, body:not([data-view]) .hero > div:first-child > p { margin-left: -18px; }
   }
 
   /* iPhone-Startseite: Seagull vollständig vor der Beschriftung; Desktop unverändert. */
@@ -599,16 +608,10 @@
   .site-head nav a[aria-current="page"] { border-color: var(--ink); }
 
   /* Startseite: Überschrift oben links, Menü untereinander rechts neben dem Seagull-Foto (bündig mit der
-     Überschrift, Kopfzeile ≈ 7rem + Abstand der .hero), Beschreibung unten rechts. Nur bei genug Platz. */
+     Überschrift, Kopfzeile ≈ 7rem + Abstand der .hero), Beschreibung links unter der Überschrift. Nur bei genug Platz. */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) {
-    /* transform würde den fixierten Absatz an die Textspalte binden; ohne ihn steht die Überschrift bündig unter dem Logo */
-    body:not([data-view]) .hero > div:first-child { transform: none; }
-    body:not([data-view]) .hero > div:first-child > p {
-      position: fixed; z-index: 2; margin: 0;
-      left: calc(50vw + 49.45vh + 2.5rem); right: 2rem; bottom: 6rem;
-      max-width: none; text-align: right;
-      padding-top: 1rem; border-top: 1px solid var(--rule);
-    }
+    /* ohne Versatz steht die Überschrift bündig unter dem Logo */
+    body:not([data-view]) .hero > div:first-child, body:not([data-view]) .hero > div:first-child > p { margin-left: 0; }
     body:not([data-view]) .site-head nav {
       position: fixed; z-index: 5;
       left: calc(50vw + 49.45vh + 2.5rem); right: 2rem;
@@ -681,8 +684,8 @@
     .wrap.site-head::after {
       content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; pointer-events: none;
       border-block: 2px solid var(--rule);
-      --cut-l: calc(50vw - 49.45vh - max(2rem, 50vw - 880px) - 1.25rem);
-      --cut-r: calc(50vw + 49.45vh - max(2rem, 50vw - 880px) + 1.25rem);
+      --cut-l: calc(var(--imgl) - max(2rem, 50vw - 880px) - 1.25rem);
+      --cut-r: calc(var(--imgl) + var(--imgw) - max(2rem, 50vw - 880px) + 1.25rem);
       -webkit-mask: linear-gradient(to right, #000 var(--cut-l), transparent var(--cut-l), transparent var(--cut-r), #000 var(--cut-r));
       mask: linear-gradient(to right, #000 var(--cut-l), transparent var(--cut-l), transparent var(--cut-r), #000 var(--cut-r));
     }
@@ -728,10 +731,27 @@
     .site-head nav a { align-self: stretch; text-align: center; }
     .site-head nav a:not(:last-child) { border-bottom: 1px solid var(--rule); }
   }
+
+  /* Handy nur im Hochformat: quer gehaltene Handys sehen einen Hinweis zum Drehen (Tablets und Computer nicht) */
+  .rotate-hint { display: none; }
+  @media (orientation: landscape) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
+    .rotate-hint {
+      display: flex; position: fixed; inset: 0; z-index: 1000;
+      flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem;
+      background: var(--paper); color: var(--ink); text-align: center; padding: 2rem;
+    }
+    .rotate-hint svg { width: 64px; height: 64px; }
+    .rotate-hint p { margin: 0; font-family: var(--display); text-transform: uppercase; letter-spacing: .04em; font-size: 1.6rem; line-height: 1.1; }
+    body { overflow: hidden; }
+  }
 </style>
 </head>
 
 <body>
+<div class="rotate-hint" role="alert">
+  <svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="22" y="8" width="20" height="36" rx="3"/><path d="M30 39h4"/><path d="M10 34a22 22 0 0 0 18 20"/><path d="M24 50l4 4-5 3"/></svg>
+  <p data-en="Please turn your phone<br>to portrait">Bitte das Handy<br>ins Hochformat drehen</p>
+</div>
 <div class="bgfix" aria-hidden="true"></div>
 
 <header class="wrap site-head">
