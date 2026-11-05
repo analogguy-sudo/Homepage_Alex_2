@@ -52,3 +52,19 @@ Den `service_role`-Key trägst du niemals in die Seite ein.
 - Farben stehen oben im CSS unter `:root`.
 - Als deutsche Website brauchst du eine `impressum.html` und eine `datenschutz.html`
   (die Links im Footer zeigen bereits darauf).
+
+## 5. Kamerafotos auf der Equipment-Seite
+
+Jede Kamera steht in `index.html` als eigene Zeile im Abschnitt `Equipment`:
+
+```html
+<li class="cam" data-img=""><span class="cam-name">Nikon FE</span></li>
+```
+
+Für ein Foto den Dateinamen zwischen die Anführungszeichen bei `data-img` schreiben:
+
+- **Foto im Supabase-Bucket** (wie das Porträt): nur der Dateiname, z. B. `data-img="nikon-fe.jpg"`
+- **Foto im Repository**: Pfad mit `./` davor, z. B. `data-img="./kameras/nikon-fe.jpg"`
+
+Die Fotos werden im Format 4:3 zugeschnitten (am besten ca. 1200 × 900 px, unter 300 KB).
+Ohne Foto, oder wenn die Datei fehlt, steht nur der Name da. Eine neue Kamera ist eine weitere `<li>`-Zeile.

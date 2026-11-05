@@ -355,19 +355,8 @@
     /* Überschriften kräftiger, Fließtext etwas kleiner als am Computer */
     .hero h1, .view h2 { font-size: clamp(2.4rem, var(--free) / 6.6, 3.2rem); }
     .hero p { font-size: 1rem; }
-    :root body[data-view] #ueber-mich .about-text p { font-size: 1.05rem; }
   }
   .strip { width: min(100%, 260px); }
-  #kontakt { border-top: 0; }
-  #kontakt .wrap { width: min(520px, 100% - 3rem); margin-left: max(2rem, calc((100vw - 1760px) / 2)); margin-right: auto; background: var(--print); border: 1px solid var(--rule); padding: 1.6rem; }
-  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) { #kontakt .wrap { margin-inline: auto; } }
-
-  /* ===== Kontakt: rechts im schwarzen Feld, unten ===== */
-  body[data-view="kontakt"] main { display: flex; flex-direction: column; }
-  body[data-view="kontakt"] #kontakt { display: flex; flex: 1; align-items: flex-end; }
-  #kontakt .wrap { width: max(210px, calc((100vw - 98.9vh) / 2 - 3rem)); margin-left: auto; margin-right: 2rem; background: none; border: 0; padding: 0; text-align: right; }
-  #kontakt .mail { font-size: 1rem; }
-  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) { #kontakt .wrap { width: min(100%, 520px); margin-inline: auto; text-align: left; } }
 
   /* ===== Kontaktbogen mit Bilderrahmen, Detailansicht, Kopfzeile ===== */
   #kontaktbogen .wrap { width: min(1760px, 100% - 4rem); }
@@ -398,26 +387,6 @@
     .lb-inner { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow: auto; align-items: start; }
     .lb-stage img { max-height: 60dvh; }
     .sheet { grid-template-columns: 1fr; }
-  }
-
-  /* ===== Equipment, Über mich, Kontakt: Texte bleiben in den schwarzen Feldern neben dem Bild ===== */
-  :root { --bar: calc((100vw - 98.9vh) / 2 - 4rem); }
-  #equipment .wrap, #ueber-mich .wrap { width: min(1760px, 100% - 4rem); }
-  .equip { display: flex; justify-content: space-between; gap: 2rem; margin-top: 1.5rem; }
-  .equip-col { width: max(170px, var(--bar)); }
-  .equip-right { text-align: right; }
-  .equip h3 { font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .14em; font-size: .85rem; color: var(--amber); margin: 0 0 .8rem; }
-  .equip ul { list-style: none; margin: 0; padding: 0; }
-  .equip li { padding: .3rem 0; font-size: 1.1rem; }
-  #ueber-mich .about { display: block; }
-  #ueber-mich .about > div { width: max(200px, var(--bar)); }
-  #ueber-mich .about p { font-size: 1.02rem; }
-  body[data-view="kontakt"] #kontakt { padding-bottom: .5rem; }
-  #kontakt .wrap > :last-child { margin-bottom: 0; }
-  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
-    .equip { flex-direction: column; }
-    .equip-col, .equip-right { width: auto; text-align: left; }
-    #ueber-mich .about > div { width: auto; }
   }
 
   /* ===== Detailbilder und Projektgalerien ===== */
@@ -457,7 +426,6 @@
   .brand { white-space: nowrap; }
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
     .brand { font-size: 2rem; letter-spacing: .03em; }
-    #kontakt .wrap { width: min(100% - 4rem, 520px); margin-inline: 2rem auto; }
   }
   /* Tablet hoch (iPad): Aufbau wie am Handy, Überschriften größer, Fließtext nur leicht größer, Fotos zweispaltig */
   @media (min-width: 700px) and (max-width: 1100px) and (orientation: portrait) {
@@ -468,10 +436,6 @@
   }
 
   /* ===== Reiter mittig, kleinere Schalter, Projekte mit Namensliste, Kontaktbogen ruhiger ===== */
-  :root { --veil-strong: rgba(239,239,237,.86); }
-  :root[data-theme="dark"] { --veil-strong: rgba(14,14,14,.94); }
-  body[data-view="kontaktbogen"] .bgfix::after { background: var(--veil-strong); }
-  #projekte .wrap { width: min(1760px, 100% - 4rem); }
   .pbox { max-width: 760px; background: var(--print); border: 1px solid var(--rule); padding: 1.4rem; }
   .pbox h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: 1.8rem; margin: 0 0 .5rem; }
   .pbox p { margin: 0 0 .9rem; color: var(--ink-soft); }
@@ -494,20 +458,9 @@
     .icon, .langs button { font-size: .85rem; padding: .2rem .3rem; }
   }
 
-  /* ===== Porträt unter "Über mich", rechts ===== */
-  #ueber-mich .about { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
-  #ueber-mich .about > .strip { width: max(150px, min(200px, var(--bar))); flex: none; }
-  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
-    #ueber-mich .about { flex-direction: column; }
-    #ueber-mich .about > .strip { width: min(100%, 220px); }
-  }
-
   /* ===== Bilderschutz: kein Ziehen, kein Auswählen, kein Speichermenü per Langdruck (iOS) ===== */
   img, .print button, .pimgs button, .lb-stage, .strip { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   img { -webkit-user-drag: none; user-drag: none; }
-
-  /* ===== Bilderschutz ===== */
-  img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 
   /* ===== Detailansicht auf dem Handy: kompakt, Bedienknöpfe immer sichtbar ===== */
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
@@ -559,27 +512,6 @@
     .lb-side { flex: none; width: 280px; }
   }
 
-  /* iPhone und iPad hoch – Unterseiten: Seagull zuerst, jeweilige Inhalte darunter. */
-  @media (max-width: 1100px) and (orientation: portrait) {
-    body[data-view="equipment"] .bgfix,
-    body[data-view="projekte"] .bgfix,
-    body[data-view="ueber-mich"] .bgfix,
-    body[data-view="kontakt"] .bgfix { display: none; }
-    body[data-view="equipment"] #equipment,
-    body[data-view="projekte"] #projekte,
-    body[data-view="ueber-mich"] #ueber-mich,
-    body[data-view="kontakt"] #kontakt { padding-top: 0; }
-    body[data-view="equipment"] #equipment::before,
-    body[data-view="projekte"] #projekte::before,
-    body[data-view="ueber-mich"] #ueber-mich::before,
-    body[data-view="kontakt"] #kontakt::before {
-      content: ""; display: block; width: min(100% - 4rem, 1760px);
-      margin: 0 auto 1.25rem; aspect-ratio: 1978 / 1315;
-      background: var(--bg, none) center 19% / cover no-repeat;
-    }
-    body[data-view="kontakt"] #kontakt { display: block; }
-  }
-
   /* Desktop: Startseitentext leicht nach links versetzen. */
   @media (min-width: 1101px) and (min-height: 501px) {
     /* margin statt transform: ein transform würde die fixierte Beschreibung an die Textspalte binden */
@@ -597,13 +529,6 @@
     }
     body:not([data-view]) .hero > div:first-child { display: none; }
     body:not([data-view]) .hero > .mobile-hero-copy { display: block; padding-top: 1.25rem; }
-  }
-
-  /* iPhone und iPad hoch: Kameras und Filme nebeneinander. */
-  @media (max-width: 1100px) and (orientation: portrait) {
-    #equipment .equip { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; }
-    #equipment .equip-col, #equipment .equip-right { width: auto; min-width: 0; text-align: left; }
-    #equipment .equip li { overflow-wrap: anywhere; font-size: clamp(.85rem, 3.5vw, 1.1rem); }
   }
 
   /* ===== Desktop: Startseite als Titelblatt, Unterseiten ruhig ===== */
@@ -631,76 +556,9 @@
     body:not([data-view]) .site-head nav a:focus-visible { border-right-color: var(--safelight); padding-right: 1.05rem; }
   }
 
-  /* Unterseiten wie der Kontaktbogen: Seagull nur als Hauch, Titel ganz links, links eine schmale Spalte
-     (220px wie die Kategorien), daneben der Inhalt. Menü bleibt oben in der Kopfzeile. */
-  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
-    body[data-view] .bgfix::after { background: var(--veil-strong); }
-    body[data-view] #equipment .wrap, body[data-view] #ueber-mich .wrap,
-    body[data-view] #projekte .wrap, body[data-view] #kontakt .wrap {
-      width: min(1760px, 100% - 4rem); margin-inline: auto;
-    }
-    /* Equipment: Titel links, die Kameraliste rechts außen, bündig mit der Kopfzeile (wie am großen Bildschirm) */
-    body[data-view] .equip { justify-content: flex-end; gap: 5rem; }
-    body[data-view] .equip-col { width: auto; }
-    body[data-view] .equip-right { text-align: left; }
-    /* Über mich: Titel und Text links, kleines, gedämpftes Porträt rechts außen auf Höhe des Texts */
-    /* Über mich: Titel oben, darunter Text als lesbare Spalte und direkt daneben das Porträt, oben bündig */
-    body[data-view] #ueber-mich .about {
-      display: grid; grid-template-columns: minmax(0, 56ch) clamp(160px, 20vw, 240px);
-      column-gap: clamp(2rem, 4vw, 4rem); justify-content: start; align-items: start;
-    }
-    body[data-view] #ueber-mich .about > div:first-child { display: contents; }
-    body[data-view] #ueber-mich .about h2 { grid-column: 1 / -1; }
-    body[data-view] #ueber-mich .about-text { grid-column: 1; }
-    body[data-view] #ueber-mich .about-text p { font-size: 1.15rem; line-height: 1.55; }
-    body[data-view] #ueber-mich .about > .strip { grid-column: 2; grid-row: 2; width: auto; margin: .35rem 0 0; opacity: .9; filter: grayscale(1); }
-    body[data-view] #ueber-mich .about > .strip img { box-shadow: none; }
-    /* Kontakt: Titel oben links, Kontaktdaten unten links am Rand mit Abstand zur Fußzeile */
-    body[data-view] #kontakt .wrap { display: flex; flex-direction: column; align-items: flex-start; align-self: stretch; text-align: left; padding-bottom: 1.5rem; }
-    body[data-view] #kontakt .wrap > .mail { margin-top: auto; }
-    body[data-view] #kontakt .other { margin-bottom: 0; }
-  }
-
-  /* Tablets quer (und Bildschirme ohne den breiten 3:2-Aufbau): Auf „Über mich“ ist neben dem Seagull kein Platz
-     für den Text. Deshalb hier ohne Seagull: Text links, größeres Porträt rechts daneben, oben bündig. */
-  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (hover: none),
-         (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (max-aspect-ratio: 1499/1000),
-         (min-width: 821px) and (max-width: 1100px) and (orientation: landscape) and (min-height: 501px) {
-    body[data-view="ueber-mich"] .bgfix { display: none; }
-    body[data-view="ueber-mich"] #ueber-mich .about {
-      display: grid; grid-template-columns: minmax(0, 52ch) auto;
-      column-gap: clamp(2.5rem, 6vw, 6rem); justify-content: space-between; align-items: start;
-    }
-    body[data-view="ueber-mich"] #ueber-mich .about > .strip {
-      grid-column: 2; grid-row: 2; width: min(340px, 34vw); margin: .35rem 0 0; opacity: 1;
-    }
-  }
-
-  /* Bei genug Platz neben dem Seagull: Über mich – Titel links, Text rechts im freien Feld (oben bündig mit
-     dem Titel), Porträt unten rechts über der Fußzeile, beide rechts bündig mit der Kopfzeile. Dazu Equipment und Projekte. */
+  /* Startseite am Computer: Beschreibung im schmalen Feld links gut lesbar */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
-    body[data-view="ueber-mich"] #ueber-mich .about-text {
-      position: fixed; z-index: 2; top: 12.5rem;
-      left: calc(50vw + 49.45vh + 2.5rem); right: max(2rem, (100vw - 1760px) / 2);
-    }
-    body[data-view="ueber-mich"] #ueber-mich .about-text p { max-width: 42ch; }
-    body[data-view="ueber-mich"] #ueber-mich .about > .strip {
-      position: fixed; z-index: 2; right: max(2rem, (100vw - 1760px) / 2); bottom: 5.5rem; width: min(190px, 100vw - 50vw - 49.45vh - 4.5rem); margin: 0;
-    }
-    /* Texte im schmalen Feld rechts gut lesbar */
-    body[data-view="ueber-mich"] #ueber-mich .about-text p { font-size: 1.18rem; line-height: 1.5; }
-    body[data-view="equipment"] .equip li { font-size: 1.25rem; }
     body:not([data-view]) .hero > div:first-child > p { font-size: 1.18rem; }
-    /* Equipment: Titel links, Kameras und Filme untereinander rechts neben dem Seagull, oben bündig mit dem Titel */
-    body[data-view="equipment"] .equip {
-      position: fixed; z-index: 2; top: 12.5rem; margin: 0;
-      left: calc(50vw + 49.45vh + 2.5rem); right: 2rem;
-      flex-direction: column; justify-content: flex-start; gap: 2rem;
-    }
-    body[data-view="equipment"] .equip-col { width: auto; }
-    /* Projekte: Liste links, der Projektkasten beginnt an der linken Kante des Seagull
-       (Bildkante minus Seitenrand, Listenspalte 220px und Abstand 2.5rem) */
-    body[data-view="projekte"] #projDetail { margin-left: calc(50vw - 49.45vh - max(2rem, (100vw - 1760px) / 2) - 220px - 2.5rem); }
   }
 
   /* ===== Zeitungsstil (Test): Zeitungskopf mit Doppellinie und Datumszeile, Rubriken, Spaltenlinien ===== */
@@ -791,6 +649,48 @@
     :root[lang="en"] .site-head nav::before { content: "In this issue"; }
     .site-head nav a { align-self: stretch; text-align: center; }
     .site-head nav a:not(:last-child) { border-bottom: 1px solid var(--rule); }
+  }
+
+
+  /* ===== Unterseiten (Kontaktbogen, Equipment, Projekte, Über mich, Kontakt) – für alle Geräte =====
+     Der Seagull gehört nur aufs Titelblatt. Unterseiten haben einen ruhigen Hintergrund und normalen Seitenfluss:
+     oben links der Titel mit Seitenzahl, darunter der Inhalt, so breit wie die Kopfzeile. Nichts ist fest
+     verankert, längere Texte schieben die Seite einfach nach unten. Nur die Spaltenzahl wechselt mit der Breite. */
+  body[data-view] .bgfix { display: none; }
+  body[data-view] .wrap.site-head::after { -webkit-mask: none; mask: none; }   /* Doppellinie ohne Lücke fürs Foto */
+  .view { padding-block: clamp(1.5rem, 4vw, 3.5rem) clamp(2.5rem, 6vw, 5rem); }
+  .view > .wrap { width: min(1760px, 100% - 4rem); margin-inline: auto; }
+
+  /* Über mich: Text als lesbare Spalte, Porträt darunter (Handy) bzw. rechts daneben (Tablet quer, Computer) */
+  #ueber-mich .about { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 clamp(3rem, 7vw, 7rem); align-items: start; }
+  #ueber-mich .about > div:first-child { display: contents; }
+  #ueber-mich .about h2 { grid-column: 1 / -1; }
+  #ueber-mich .about-text p { max-width: 60ch; font-size: 1.1rem; line-height: 1.6; }
+  #ueber-mich .about > .strip { width: min(100%, 320px); margin: 1rem 0 0; justify-self: start; }
+  #ueber-mich .about > .strip img { box-shadow: none; }
+
+  /* Equipment: Kameras als Raster. Mit Foto (data-img am Eintrag) erscheint das Bild über dem Namen,
+     ohne Foto steht nur der Name unter einer feinen Linie – beides sieht fertig aus. */
+  .equip h3 { font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .14em; font-size: .85rem; color: var(--amber); margin: 0 0 1rem; }
+  .cams { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1.5rem 1.25rem; }
+  .cam { margin: 0; padding-top: .7rem; border-top: 1px solid var(--rule); }
+  .cam img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; margin-bottom: .7rem; background: var(--paper-deep); }
+  .cam-name { display: block; font-family: var(--serif); font-size: 1.15rem; line-height: 1.3; }
+  .cam-note { display: block; color: var(--ink-soft); font-size: .92rem; }
+
+  /* Kontakt: Titel, darunter E-Mail und Profile */
+  #kontakt { border-top: 0; }
+  #kontakt .mail { font-size: clamp(1.1rem, 2vw, 1.35rem); }
+  #kontakt .other { margin: 1.25rem 0 0; }
+
+  /* Tablet quer und Computer: zweispaltig, wo es passt. Überschrift und Copyright richten sich hier nicht
+     nach dem Platz neben dem Seagull (den gibt es nur auf dem Titelblatt). */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    .view h2 { font-size: clamp(2.2rem, 3vw, 2.8rem); }
+    body[data-view] footer .wrap > span:first-child { max-width: none; }
+    #ueber-mich .about { grid-template-columns: minmax(0, 60ch) min(360px, 30vw); justify-content: start; }
+    #ueber-mich .about > .strip { grid-column: 2; grid-row: 2; width: 100%; margin: .35rem 0 0; filter: grayscale(1); }   /* wie bisher: Porträt schwarzweiß */
+    .cams { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem 2rem; }
   }
 
   /* Handy nur im Hochformat: quer gehaltene Handys sehen einen Hinweis zum Drehen (Tablets und Computer nicht) */
@@ -892,18 +792,18 @@
   <section class="view" id="equipment" aria-labelledby="equip-titel"><div class="wrap">
   <h2 id="equip-titel">Equipment</h2>
   <div class="equip">
-    <div class="equip-col">
-      <h3>Kameras</h3>
-      <ul>
-        <li>Nikon FE</li>
-        <li>Canon AV</li>
-        <li>Seagull 4A</li>
-        <li>Canonet 28</li>
-        <li>Regula 3</li>
-        <li>Voigtländer Vitoret DR</li>
-        <li>Agfa Isolette 2</li>
-      </ul>
-    </div>
+    <h3>Kameras</h3>
+    <!-- Kamerafotos: Dateiname aus dem Supabase-Bucket (wie beim Porträt) oder ein Pfad wie ./kameras/nikon-fe.jpg
+         zwischen die Anführungszeichen bei data-img schreiben. Leer = nur der Name. -->
+    <ul class="cams">
+      <li class="cam" data-img=""><span class="cam-name">Nikon FE</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Canon AV</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Seagull 4A</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Canonet 28</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Regula 3</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Voigtländer Vitoret DR</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Agfa Isolette 2</span></li>
+    </ul>
   </div>
 </div></section>
 
@@ -1079,7 +979,7 @@ function renderFilters() {
 
 function renderGrid() {
   state.shown = state.filter ? state.all.filter((p) => (p.categories || []).includes(state.filter)) : [];
-  $("hint").textContent = state.filter ? "" : tr("Wähle links eine Kategorie.");
+  $("hint").textContent = state.filter ? "" : tr("Wähle eine Kategorie.");
   const grid = $("grid");
   grid.innerHTML = "";
   state.shown.forEach((p, i) => {
@@ -1184,7 +1084,7 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
-  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle links ein Projekt.": "Choose a project on the left.", "Projekte": "Projects", "Über mich": "About me", "Kontakt": "Contact",
+  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "schwarz-weiss": "black and white", "farbe": "colour", "color": "colour", "Öffnen": "Open",
   "Licht auf Film, von Hand entwickelt.": "Light on film, developed by hand.",
   "Analoge Fotografie auf 35 mm und Mittelformat. Aufgenommen unterwegs, entwickelt und gescannt im eigenen Labor.": "Analogue photography on 35 mm and medium format. Shot on the road, developed and scanned in my own lab.",
@@ -1201,7 +1101,7 @@ const EN = {
   "Die Datenbank ist noch nicht verbunden.": "The database is not connected yet.",
   "Die Daten konnten nicht geladen werden.": "The data could not be loaded.",
   "Keine Treffer.": "No results.", "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Info": "Info", "Bilder": "images", "Ansehen": "View", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
-  "Wähle links eine Kategorie.": "Choose a category on the left.", "Projektseite in neuem Tab öffnen": "Open project page in a new tab",
+  "Wähle eine Kategorie.": "Choose a category.", "Projektseite in neuem Tab öffnen": "Open project page in a new tab",
   "Die Projektseite ist noch nicht eingetragen.": "The project page has not been entered yet."
 };
 let lang = "de";
@@ -1247,7 +1147,7 @@ let projSel = null;
 function renderCards() {
   const list = $("projList"), det = $("projDetail"); list.innerHTML = ""; det.innerHTML = "";
   if (!projLoaded) return;
-  $("projHint").textContent = !projects.length ? tr("Noch keine Projekte.") : projSel === null ? tr("Wähle links ein Projekt.") : "";
+  $("projHint").textContent = !projects.length ? tr("Noch keine Projekte.") : projSel === null ? tr("Wähle ein Projekt.") : "";
   const pub = (n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`;
   projects.forEach((p, i) => {
     const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = p.title;
@@ -1312,6 +1212,17 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
   const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
   document.documentElement.style.setProperty("--bg", `url("${u}")`);
 }
+/* Kamerafotos auf der Equipment-Seite: data-img = Dateiname im Bucket ODER Adresse (https://… oder ./datei.jpg) */
+document.querySelectorAll(".cam[data-img]").forEach((li) => {
+  const f = li.dataset.img.trim();
+  if (!f) return;
+  const img = new Image();
+  img.src = /^(https?:|\.?\/)/.test(f) ? f : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${f.split("/").map(encodeURIComponent).join("/")}`;
+  img.alt = li.querySelector(".cam-name").textContent;
+  img.loading = "lazy"; img.width = 800; img.height = 600;
+  img.onerror = () => img.remove();   // fehlt die Datei, bleibt nur der Name stehen
+  li.prepend(img);
+});
 $("menuBtn").addEventListener("click", () => {
   const open = $("mainNav").classList.toggle("open");
   $("menuBtn").setAttribute("aria-expanded", String(open));
