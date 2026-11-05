@@ -743,6 +743,31 @@
     /* Startseite: linke Textspalte endet mit Abstand vor der linken Spaltenlinie */
     :root { --free: calc((100vw - 98.9vh) / 2 - max(2rem, 50vw - 880px) - 3rem); }
   }
+  /* Touch-Tablets: Startseiten-Überschrift ohne Versatz, bündig unter dem Logo (wie am Desktop) */
+  @media (min-width: 1101px) and (min-height: 501px) and (hover: none) {
+    body:not([data-view]) .hero > div:first-child, body:not([data-view]) .hero > div:first-child > p { margin-left: 0; }
+  }
+
+  /* Tablets quer mit genug Platz neben dem Seagull (z. B. Android-Tablets 16:10): Startseiten-Menü wie am Desktop
+     als Inhaltsverzeichnis rechts neben dem Foto statt quer darüber. Der übrige Tablet-Aufbau bleibt. */
+  @media (min-width: 1024px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: none) {
+    body:not([data-view]) .hero > div:first-child, body:not([data-view]) .hero > div:first-child > p { margin-left: 0; }
+    body:not([data-view]) .site-head nav {
+      position: fixed; z-index: 5;
+      left: calc(50vw + 49.45vh + 1.5rem); right: max(2rem, 50vw - 880px);
+      top: calc(7rem + clamp(1.5rem, 5vw, 4rem));
+      flex-direction: column; flex-wrap: nowrap; align-items: flex-end; gap: 0;
+    }
+    body:not([data-view]) .site-head nav::before {
+      content: "In dieser Ausgabe"; display: block; padding-bottom: .5rem; margin-bottom: .2rem;
+      font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0; font-size: .95rem; color: var(--ink-soft);
+      border-bottom: 3px double var(--rule); align-self: stretch; text-align: right;
+    }
+    :root[lang="en"] body:not([data-view]) .site-head nav::before { content: "In this issue"; }
+    body:not([data-view]) .site-head nav a {
+      font-size: 1rem; padding: .45rem 0; align-self: stretch; text-align: right; border-bottom: 1px solid var(--rule);
+    }
+  }
   /* iPhone und iPad: Doppellinie unter dem Kopf, Linien zwischen den Menüpunkten */
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
     .wrap.site-head { border-bottom: 5px double var(--rule); margin-bottom: 1.25rem; padding-bottom: 2rem; }
