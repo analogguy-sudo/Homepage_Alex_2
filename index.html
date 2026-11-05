@@ -639,9 +639,9 @@
     body[data-view] #projekte .wrap, body[data-view] #kontakt .wrap {
       width: min(1760px, 100% - 4rem); margin-inline: auto;
     }
-    /* Equipment: Titel links, Kameras und Filme als zwei gleich breite Listen mittig auf der Seite (wie der Text bei Über mich) */
-    body[data-view] .equip { justify-content: center; gap: 5rem; }
-    body[data-view] .equip-col { width: 240px; }
+    /* Equipment: Titel links, die Kameraliste rechts außen, bündig mit der Kopfzeile (wie am großen Bildschirm) */
+    body[data-view] .equip { justify-content: flex-end; gap: 5rem; }
+    body[data-view] .equip-col { width: auto; }
     body[data-view] .equip-right { text-align: left; }
     /* Über mich: Titel und Text links, kleines, gedämpftes Porträt rechts außen auf Höhe des Texts */
     /* Über mich: Titel oben, darunter Text als lesbare Spalte und direkt daneben das Porträt, oben bündig */
@@ -661,16 +661,25 @@
     body[data-view] #kontakt .other { margin-bottom: 0; }
   }
 
+  /* Tablets quer (und Bildschirme ohne 3:2): Porträt rechts unten in der freien Fläche neben dem Seagull,
+     mit Abstand zur Fußzeile, damit es das Foto nicht verdeckt. Bei 3:2 mit Maus übernimmt die Regel darunter. */
+  @media (min-width: 1024px) and (min-height: 501px) and (orientation: landscape) {
+    body[data-view="ueber-mich"] #ueber-mich .about > .strip {
+      position: fixed; z-index: 2; right: max(2rem, (100vw - 1760px) / 2); bottom: 5.5rem; margin: 0;
+      width: min(200px, max(150px, 50vw - 49.45vh - 3rem));
+    }
+  }
+
   /* Bei genug Platz neben dem Seagull: Über mich – Titel links, Text rechts im freien Feld (oben bündig mit
-     dem Titel), Porträt unten rechts über der Fußzeile. Dazu Equipment und Projekte. */
+     dem Titel), Porträt unten rechts über der Fußzeile, beide rechts bündig mit der Kopfzeile. Dazu Equipment und Projekte. */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
     body[data-view="ueber-mich"] #ueber-mich .about-text {
       position: fixed; z-index: 2; top: 12.5rem;
-      left: calc(50vw + 49.45vh + 2.5rem); right: 2rem;
+      left: calc(50vw + 49.45vh + 2.5rem); right: max(2rem, (100vw - 1760px) / 2);
     }
-    body[data-view="ueber-mich"] #ueber-mich .about-text p { max-width: none; }
+    body[data-view="ueber-mich"] #ueber-mich .about-text p { max-width: 42ch; }
     body[data-view="ueber-mich"] #ueber-mich .about > .strip {
-      position: fixed; z-index: 2; right: 2rem; bottom: 5.5rem; width: min(190px, 100vw - 50vw - 49.45vh - 4.5rem); margin: 0;
+      position: fixed; z-index: 2; right: max(2rem, (100vw - 1760px) / 2); bottom: 5.5rem; width: min(190px, 100vw - 50vw - 49.45vh - 4.5rem); margin: 0;
     }
     /* Texte im schmalen Feld rechts gut lesbar */
     body[data-view="ueber-mich"] #ueber-mich .about-text p { font-size: 1.18rem; line-height: 1.5; }
