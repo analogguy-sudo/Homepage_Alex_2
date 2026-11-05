@@ -768,6 +768,13 @@
       font-size: 1rem; padding: .45rem 0; align-self: stretch; text-align: right; border-bottom: 1px solid var(--rule);
     }
   }
+  /* Tablets quer: Datumszeile unter dem Logo wie am Desktop – einzeilig und nie breiter als der Platz links neben dem Foto */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (hover: none) {
+    .dateline {
+      display: block; white-space: nowrap; overflow: hidden; font-size: .74rem; letter-spacing: .1em;
+      max-width: calc(var(--imgl, 50vw - 49.45vh) - max(2rem, 50vw - 880px) - 1.25rem);   /* so breit wie die Doppellinie darunter */
+    }
+  }
   /* iPhone und iPad: Doppellinie unter dem Kopf, Linien zwischen den Menüpunkten */
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
     .wrap.site-head { border-bottom: 5px double var(--rule); margin-bottom: 1.25rem; padding-bottom: 2rem; }
