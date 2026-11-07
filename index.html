@@ -134,17 +134,17 @@
      oben links der Titel mit Seitenzahl, darunter der Inhalt, so breit wie die Kopfzeile. Nichts ist fest
      verankert, längere Texte schieben die Seite einfach nach unten. Nur die Spaltenzahl wechselt mit der Breite. */
   .view { display: none; padding-block: clamp(1.5rem, 4vw, 3.5rem) clamp(2.5rem, 6vw, 5rem); }
-  body[data-view="kontaktbogen"] #kontaktbogen, body[data-view="projekte"] #projekte, body[data-view="ueber-mich"] #ueber-mich,
+  body[data-view="kontaktbogen"] #kontaktbogen, body[data-view="projekte"] #projekte, body[data-view="bildstrecken"] #bildstrecken, body[data-view="ueber-mich"] #ueber-mich,
   body[data-view="equipment"] #equipment, body[data-view="kontakt"] #kontakt { display: block; }
   body[data-view] .bgfix { display: none; }
   h2 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; line-height: 1; margin: 0 0 1.5rem; }
   /* Seitenzahl wie in der Zeitung, Reihenfolge wie im Menü (Titelblatt = Seite 1) */
   h2::before { display: block; font-family: var(--edge); font-size: .85rem; letter-spacing: .14em; color: var(--amber); margin-bottom: .4rem; }
-  #kontaktbogen h2::before { content: "Seite 2"; } #equipment h2::before { content: "Seite 3"; } #projekte h2::before { content: "Seite 4"; }
-  #ueber-mich h2::before { content: "Seite 5"; } #kontakt h2::before { content: "Seite 6"; }
-  :root[lang="en"] #kontaktbogen h2::before { content: "Page 2"; } :root[lang="en"] #equipment h2::before { content: "Page 3"; }
-  :root[lang="en"] #projekte h2::before { content: "Page 4"; } :root[lang="en"] #ueber-mich h2::before { content: "Page 5"; }
-  :root[lang="en"] #kontakt h2::before { content: "Page 6"; }
+  #kontaktbogen h2::before { content: "Seite 2"; } #bildstrecken h2::before { content: "Seite 3"; } #projekte h2::before { content: "Seite 4"; }
+  #equipment h2::before { content: "Seite 5"; } #ueber-mich h2::before { content: "Seite 6"; } #kontakt h2::before { content: "Seite 7"; }
+  :root[lang="en"] #kontaktbogen h2::before { content: "Page 2"; } :root[lang="en"] #bildstrecken h2::before { content: "Page 3"; }
+  :root[lang="en"] #projekte h2::before { content: "Page 4"; } :root[lang="en"] #equipment h2::before { content: "Page 5"; }
+  :root[lang="en"] #ueber-mich h2::before { content: "Page 6"; } :root[lang="en"] #kontakt h2::before { content: "Page 7"; }
   .hint { font-style: italic; font-size: .95rem; color: var(--ink); margin: -.6rem 0 1.6rem; }
 
   /* Kontaktbogen und Projekte: Liste (Kategorien bzw. Projekte) links, Inhalt rechts */
@@ -175,6 +175,29 @@
   .pimgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: .8rem; }
   .pimgs button { padding: 0; border: 0; background: none; cursor: zoom-in; }
   .pimgs img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  /* Bildstrecken: Abzüge mit weißem Rand und Fotoecken, leicht schräg eingeklebt wie im Album; beim Überfahren heben sie sich an */
+  .strecke h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: 1.8rem; margin: 0 0 .4rem; }
+  .strecke > p { max-width: 62ch; margin: 0 0 .4rem; font-family: var(--serif); font-style: italic; color: var(--ink-soft); }
+  .abzuege { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 2.4rem 2rem; padding: 1.6rem .6rem 2rem; perspective: 1400px; }
+  .abzug { margin: 0; }
+  .abzug:nth-child(4n+1) { --tilt: -1.6deg; } .abzug:nth-child(4n+2) { --tilt: 1.2deg; } .abzug:nth-child(4n+3) { --tilt: -.6deg; } .abzug:nth-child(4n) { --tilt: 1.9deg; }
+  .abzug button {
+    position: relative; display: block; width: 100%; padding: 10px 10px 30px; border: 0; cursor: zoom-in; color: #6b6a66;
+    background: linear-gradient(180deg, #faf8f2, #efece4); transform: rotate(var(--tilt, 0deg)); transform-origin: 50% 60%;
+    box-shadow: 0 1px 1px rgba(0,0,0,.18), 0 8px 16px -6px rgba(0,0,0,.45), 0 24px 40px -20px rgba(0,0,0,.6);
+    transition: transform .4s cubic-bezier(.2,.8,.3,1), box-shadow .4s ease;
+  }
+  .abzug button::before, .abzug button::after { content: ""; position: absolute; width: 28px; height: 28px; background: #232322; opacity: .92; }
+  .abzug button::before { top: -5px; left: -5px; clip-path: polygon(0 0, 100% 0, 0 100%); }
+  .abzug button::after { right: -5px; bottom: -5px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  .abzug img { display: block; width: 100%; height: auto; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .abzug .nr { position: absolute; left: 12px; bottom: 7px; font-family: var(--edge); font-size: .7rem; letter-spacing: .14em; }
+  .abzug button:hover, .abzug button:focus-visible {
+    transform: translateY(-10px) rotateX(7deg) rotate(0deg) scale(1.03);
+    box-shadow: 0 2px 2px rgba(0,0,0,.15), 0 18px 28px -10px rgba(0,0,0,.5), 0 40px 60px -26px rgba(0,0,0,.65);
+  }
+  @media (prefers-reduced-motion: reduce) { .abzug button { transition: none; } .abzug button:hover { transform: rotate(var(--tilt, 0deg)); } }
+  @media (max-width: 820px) { .abzuege { grid-template-columns: 1fr; gap: 2rem; padding-inline: 1rem; } .abzug { --tilt: 0deg !important; } .abzug:nth-child(odd) button { transform: rotate(-.8deg); } .abzug:nth-child(even) button { transform: rotate(.8deg); } }
 
   /* Über mich: Text als lesbare Spalte, Porträt darunter (Handy) bzw. rechts daneben (Tablet quer, Computer) */
   #ueber-mich .about { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 clamp(3rem, 7vw, 7rem); align-items: start; }
@@ -502,8 +525,9 @@
     <nav id="mainNav" aria-label="Hauptnavigation">
       <a href="#top" class="nav-home">Titelblatt</a>
       <a href="#kontaktbogen">Kontaktbogen</a>
+      <a href="#bildstrecken">Bildstrecken</a>
+      <a href="#projekte">Projekte</a>
       <a href="#equipment">Equipment</a>
-      <a href="#projekte">Serien</a>
       <a href="#ueber-mich">Über mich</a>
       <a href="#kontakt">Kontakt</a>
     </nav>
@@ -546,11 +570,20 @@
     </div>
   </section>
 
+  <section class="view" id="bildstrecken" aria-labelledby="strk-titel"><div class="wrap">
+  <h2 id="strk-titel">Bildstrecken</h2>
+  <p class="hint" id="strkHint"></p>
+  <div class="sheet">
+    <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"></div>
+    <div id="strkDetail"></div>
+  </div>
+</div></section>
+
   <section class="view" id="projekte" aria-labelledby="proj-titel"><div class="wrap">
-  <h2 id="proj-titel">Serien</h2>
+  <h2 id="proj-titel">Projekte</h2>
   <p class="hint" id="projHint"></p>
   <div class="sheet">
-    <div class="filters" id="projList" role="group" aria-label="Serien"></div>
+    <div class="filters" id="projList" role="group" aria-label="Projekte"></div>
     <div id="projDetail"></div>
   </div>
 </div></section>
@@ -866,7 +899,7 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
-  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle eine Serie.": "Choose a series.", "Serien": "Series", "Über mich": "About me", "Kontakt": "Contact",
+  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Stadt": "City", "Menschen": "People", "Landschaft": "Landscape", "Tiere": "Animals", "Öffnen": "Open",
   "Licht auf Film, von Hand entwickelt.": "Light on film, developed by hand.",
   "Kontaktbogen ansehen": "View contact sheet", "Anfrage schreiben (z.Zt. inaktiv)": "Get in touch (currently inactive)",
@@ -880,8 +913,8 @@ const EN = {
   "Weitere Projekte und Seiten von mir.": "More projects and sites of mine.",
   "Die Datenbank ist noch nicht verbunden.": "The database is not connected yet.",
   "Die Daten konnten nicht geladen werden.": "The data could not be loaded.",
-  "Keine Treffer.": "No results.", "Noch keine Serien.": "No series yet.", "Serie": "Series", "Info": "Info", "Bilder": "images", "Ansehen": "View", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
-  "Wähle eine Kategorie.": "Choose a category.", "Projektseite in neuem Tab öffnen": "Open the series page in a new tab",
+  "Keine Treffer.": "No results.", "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Ansehen": "View", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
+  "Wähle eine Kategorie.": "Choose a category.", "Projektseite in neuem Tab öffnen": "Open project page in a new tab",
   "Die Projektseite ist noch nicht eingetragen.": "The project page has not been entered yet."
 };
 let lang = "de";
@@ -923,35 +956,41 @@ async function loadProjects() {
   } catch (e) {}
   projLoaded = true; renderCards();
 }
-let projSel = null;
-function renderCards() {
-  const list = $("projList"), det = $("projDetail"); list.innerHTML = ""; det.innerHTML = "";
+/* Projekte und Bildstrecken liegen in derselben Tabelle, unterschieden durch "kind" */
+const projSel = { projekt: null, bildstrecke: null };
+function renderCards() { renderKind("projekt", "proj"); renderKind("bildstrecke", "strk"); }
+function renderKind(kind, pre) {
+  const list = $(pre + "List"), det = $(pre + "Detail"); list.innerHTML = ""; det.innerHTML = "";
   if (!projLoaded) return;
-  $("projHint").textContent = !projects.length ? tr("Noch keine Serien.") : projSel === null ? tr("Wähle eine Serie.") : "";
+  const items = projects.filter((p) => (p.kind || "projekt") === kind), sel = projSel[kind];
+  const strecke = kind === "bildstrecke";
+  $(pre + "Hint").textContent = !items.length ? tr(strecke ? "Noch keine Bildstrecken." : "Noch keine Projekte.")
+    : sel === null ? tr(strecke ? "Wähle eine Bildstrecke." : "Wähle ein Projekt.") : "";
   const pub = (n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`;
-  projects.forEach((p, i) => {
+  items.forEach((p, i) => {
     const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = p.title;
-    b.setAttribute("aria-pressed", String(i === projSel));
-    b.addEventListener("click", () => { projSel = projSel === i ? null : i; renderCards(); });
+    b.setAttribute("aria-pressed", String(i === sel));
+    b.addEventListener("click", () => { projSel[kind] = sel === i ? null : i; renderKind(kind, pre); });
     list.appendChild(b);
   });
-  const p = projects[projSel]; if (!p) return;
+  const p = items[sel]; if (!p) return;
   const imgs = [p.image, ...(p.images || [])].filter(Boolean).map(pub);
   const text = (lang === "en" && p.text_en) || p.text_de || "";
-  const box = document.createElement("article"); box.className = "pbox";
+  const open = (k) => { state.lb = imgs.map((s2) => ({ src: s2, title: p.title, rows: [[strecke ? "Bildstrecke" : "Projekt", p.title], ["Info", text]], link: p.url })); state.index = k; showLightbox(); lb.showModal(); };
+  const box = document.createElement("article"); box.className = strecke ? "strecke" : "pbox";
   const h = document.createElement("h3"); h.textContent = p.title; box.appendChild(h);
   if (text) { const t = document.createElement("p"); t.textContent = text; box.appendChild(t); }
   if (p.url) { const a = document.createElement("a"); a.className = "plink"; a.href = p.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸"; box.appendChild(a); }
   if (imgs.length) {
-    const g = document.createElement("div"); g.className = "pimgs";
+    const g = document.createElement("div"); g.className = strecke ? "abzuege" : "pimgs";
     imgs.forEach((src, k) => {
       const b = document.createElement("button"), im = document.createElement("img");
       b.type = "button"; im.alt = ""; im.loading = "lazy"; im.src = src; b.appendChild(im);
-      b.addEventListener("click", () => {
-        state.lb = imgs.map((s2) => ({ src: s2, title: p.title, rows: [["Serie", p.title], ["Info", text]], link: p.url }));
-        state.index = k; showLightbox(); lb.showModal();
-      });
-      g.appendChild(b);
+      b.addEventListener("click", () => open(k));
+      if (strecke) {   // Abzug mit Nummer auf dem weißen Rand
+        const nr = document.createElement("span"); nr.className = "nr"; nr.textContent = String(k + 1).padStart(2, "0"); b.appendChild(nr);
+        const f = document.createElement("figure"); f.className = "abzug"; f.appendChild(b); g.appendChild(f);
+      } else g.appendChild(b);
     });
     box.appendChild(g);
   }
@@ -974,7 +1013,7 @@ function applyProfile() {
 }
 
 /* ---------- Ansichten, Hintergrund, Hell-Dunkel ---------- */
-const VIEWS = ["kontaktbogen", "projekte", "ueber-mich", "equipment", "kontakt"];
+const VIEWS = ["kontaktbogen", "bildstrecken", "projekte", "ueber-mich", "equipment", "kontakt"];
 function route() {
   const h = location.hash.slice(1), v = VIEWS.includes(h) ? h : "";
   if (v) document.body.dataset.view = v; else delete document.body.dataset.view;
