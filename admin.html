@@ -16,6 +16,8 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 .msg{min-height:1.5rem;color:#c9c9c5}.hide{display:none}
 .strip{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.9rem;align-items:center;color:#a8a8a5}
 .th{position:relative}.th img{width:64px;height:64px;object-fit:cover;border-radius:3px;display:block}
+.rules{margin:.6rem 0 1rem;padding:.7rem 1rem;border-left:3px solid #444;background:#111;color:#c9c9c5;font-size:.92rem}
+.rules summary{cursor:pointer;color:#ededeb;font-weight:600}.rules p,.rules ul{margin:.45rem 0}.rules ul{padding-left:1.2rem}
 .th button{position:absolute;top:-7px;right:-7px;width:20px;height:20px;padding:0;border-radius:50%;line-height:1;font-size:.9rem}
 </style></head><body><main>
 <h1>Admin: Kontaktbogen</h1><p class="msg" id="msg" role="status"></p>
@@ -24,7 +26,13 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 <p><button class="s" id="out" type="button">Abmelden</button> &nbsp; <a href="index.html">zur Seite</a></p>
 <form id="up" class="box"><b>Neues Foto</b>
 <div class="row"><input id="f" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" required></div>
-<div class="row"><input name="title" placeholder="Titel" required><input name="film" placeholder="Film"><input name="camera" placeholder="Kamera"><input name="format" placeholder="Format (35 mm)"><input name="year" type="number" placeholder="Jahr"><input name="location" placeholder="Ort"><input name="focal" placeholder="Brennweite (50 mm)"><input name="shutter" placeholder="Zeit (1/125)"><input name="aperture" placeholder="Blende (f/8)"><select name="kfilm" id="up-kfilm" required><option value="">Film: bitte wählen</option></select><select name="kmotiv" id="up-kmotiv" required><option value="">Motiv: bitte wählen</option></select><input name="sort" type="number" placeholder="Reihenfolge (leer = ans Ende)"></div>
+<div class="row"><input name="title" placeholder="Titel" required><input name="film" placeholder="Film"><input name="camera" placeholder="Kamera"><input name="format" placeholder="Format (35 mm)"><input name="year" type="number" placeholder="Jahr"><input name="location" placeholder="Ort"><input name="focal" placeholder="Brennweite (50 mm)"><input name="shutter" placeholder="Zeit (1/125)"><input name="aperture" placeholder="Blende (f/8)"><select name="kfilm" id="up-kfilm" required><option value="">Film wählen</option></select><select name="kmotiv" id="up-kmotiv" required><option value="">Motiv wählen</option></select><input name="sort" type="number" placeholder="Reihenfolge (leer = ans Ende)"></div>
+<details class="rules" open><summary>Kategorien: so wird eingeordnet</summary>
+<p>Jedes Foto bekommt genau zwei Kategorien: <b>Film</b> (Schwarzweiß oder Farbe) und <b>Motiv</b>.</p>
+<ul><li><b>Stadt:</b> Gebäude, Straßen, Plätze, auch mit Menschen darin</li>
+<li><b>Menschen:</b> Die Person ist das Thema, also Porträts</li>
+<li><b>Landschaft:</b> Natur, Parks, Aussicht</li></ul>
+<p>Ein neues Motiv gibt es erst ab etwa 5 passenden Bildern. Ort, Kamera, Film und Format sind keine Kategorien, sie stehen in den Feldern oben. Serien wie eine Reise oder ein Thema gehören unter <b>Projekte</b>.</p></details>
 <button>Hochladen</button></form>
 <div id="list"></div>
 <h1 style="margin-top:2.5rem">Projekte</h1>
@@ -68,7 +76,7 @@ $("login").onsubmit=async e=>{e.preventDefault();say("Anmelden …");
   tok=d.access_token;try{sessionStorage.setItem("tok",tok)}catch(x){}say("");load()}catch(x){say(x.message)}};
 async function load(){try{rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc")).json();draw();show(true);loadP()}catch(x){say(x.message)}}
 function draw(){const L=$("list");L.innerHTML="";rows.forEach(r=>{const d=document.createElement("div");d.className="box item";
-  d.innerHTML='<img alt=""><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"||k==="sort"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film: bitte wählen</option></select><select data-k="kmotiv"><option value="">Motiv: bitte wählen</option></select></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
+  d.innerHTML='<img alt=""><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"||k==="sort"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="kmotiv"><option value="">Motiv wählen</option></select></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   {const c=splitCat(r.cat);fillSel(d.querySelector('[data-k="kfilm"]'),KFILM,c.kfilm);fillSel(d.querySelector('[data-k="kmotiv"]'),KMOTIV,c.kmotiv)}
   d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);
   d.querySelectorAll("input").forEach(i=>i.value=r[i.dataset.k]??"");
