@@ -743,9 +743,11 @@ function renderHero(p) {
   img.classList.add("develop");
 }
 
+/* Kategorien: erst der Film, dann das Motiv (wie im Admin-Bereich); unbekannte ans Ende */
+const CATS = ["Schwarzweiß", "Farbe", "Stadt", "Menschen", "Landschaft"];
 function renderFilters() {
-  const cats = [...new Set(state.all.flatMap((p) => p.categories || []))]
-    .sort((a, b) => (b === "schwarz-weiss") - (a === "schwarz-weiss"));   // schwarz-weiss zuerst
+  const rank = (c) => (CATS.includes(c) ? CATS.indexOf(c) : CATS.length);
+  const cats = [...new Set(state.all.flatMap((p) => p.categories || []))].sort((a, b) => rank(a) - rank(b));
   const box = $("filters");
   box.innerHTML = "";
   cats.forEach((f) => {
@@ -865,7 +867,7 @@ loadPhotos().then((photos) => {
 /* ---------- Sprache ---------- */
 const EN = {
   "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Über mich": "About me", "Kontakt": "Contact",
-  "Hell / Dunkel": "Light / Dark", "schwarz-weiss": "black and white", "farbe": "colour", "color": "colour", "Öffnen": "Open",
+  "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Stadt": "City", "Menschen": "People", "Landschaft": "Landscape", "Öffnen": "Open",
   "Licht auf Film, von Hand entwickelt.": "Light on film, developed by hand.",
   "Kontaktbogen ansehen": "View contact sheet", "Anfrage schreiben (z.Zt. inaktiv)": "Get in touch (currently inactive)",
   "Fotos werden geladen …": "Loading photos …",
