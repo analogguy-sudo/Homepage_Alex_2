@@ -128,10 +128,11 @@ function sortDraw(){const F2=$("sfilter");F2.innerHTML="";SF.forEach(([k,l])=>{c
     G.appendChild(t)})}
 $("osave").onclick=async()=>{try{say("Speichere Reihenfolge …");
   const todo=ord.map((id,i)=>[rows.find(x=>x.id===id),i+1]).filter(([r,n])=>r.sort!==n||r.position!==n);
-  // position ist in der Datenbank eindeutig: erst auf freie negative Zwischenwerte, dann auf die endgültigen Nummern
+  // position ist in der Datenbank eindeutig und nicht negativ: erst auf freie hohe Zwischenwerte, dann auf die endgültigen Nummern
   const patch=async(r,o)=>{const res=await(await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:{"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(o)})).json();
     if(!res.length)throw new Error("Nicht gespeichert. Bitte ab- und wieder anmelden.")};   // ohne gültige Anmeldung ändert die Datenbank still keine Zeile
-  for(const [r,n] of todo)await patch(r,{position:-n});
+  const tmp=Math.max(0,...rows.map(r=>r.position||0))+1000;
+  for(const [r,n] of todo)await patch(r,{position:tmp+n});
   for(const [r,n] of todo){await patch(r,{sort:n,position:n});r.sort=r.position=n}
   rows.sort((a,b)=>a.sort-b.sort);draw();sortInit();say("Reihenfolge gespeichert ("+todo.length+" Fotos verschoben).")}catch(x){say("Fehler: "+x.message)}};
 $("oreset").onclick=()=>{sortInit();say("")};
