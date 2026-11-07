@@ -50,9 +50,14 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 <p>Jedes Foto bekommt genau zwei Kategorien: <b>Film</b> (Schwarzweiß oder Farbe) und <b>Motiv</b>.</p>
 <ul><li><b>Stadt:</b> Gebäude, Straßen, Plätze, auch mit Menschen darin</li>
 <li><b>Menschen:</b> Die Person ist das Thema, also Porträts</li>
-<li><b>Landschaft:</b> Natur, Parks, Aussicht</li></ul>
+<li><b>Landschaft:</b> Natur, Parks, Aussicht</li>
+<li><b>Tiere:</b> Das Tier ist das Thema</li></ul>
 <p>Ein neues Motiv gibt es erst ab etwa 5 passenden Bildern. Ort, Kamera, Film und Format sind keine Kategorien, sie stehen in den Feldern oben. Serien wie eine Reise oder ein Thema gehören unter <b>Projekte</b>.</p></details>
 <button>Hochladen</button></form>
+<form id="bulk" class="box"><b>Mehrere Fotos auf einmal</b>
+<p class="hint">Titel wird der Dateiname. Kategorien und Angaben danach unten beim jeweiligen Foto ergänzen.</p>
+<div class="row"><input id="bf" type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" required></div>
+<button>Alle hochladen</button></form>
 <div id="list"></div>
 <h1 style="margin-top:2.5rem">Projekte</h1>
 <form id="pf" class="box"><b>Neues Projekt</b>
@@ -66,7 +71,7 @@ const U="https://owbbsnujnkhyyqvagtai.supabase.co",KEY="sb_publishable_29TK9hJ-e
 const $=i=>document.getElementById(i),F=["title","film","camera","format","year","location","focal","shutter","aperture"];
 /* Kategorien im Kontaktbogen: genau eine für den Film und eine für das Motiv. Neue Motive erst ab etwa fünf Bildern
    hier ergänzen (und in index.html bei CATS und der englischen Übersetzung). */
-const KFILM=["Schwarzweiß","Farbe"],KMOTIV=["Stadt","Menschen","Landschaft"];
+const KFILM=["Schwarzweiß","Farbe"],KMOTIV=["Stadt","Menschen","Landschaft","Tiere"];
 function fillSel(sel,list,cur){list.concat(cur&&!list.includes(cur)?[cur]:[]).forEach(v=>sel.add(new Option(v,v)));sel.value=cur||""}
 function splitCat(c){const a=(c||"").split(",").map(x=>x.trim()).filter(Boolean),f=a.find(x=>KFILM.includes(x))||a[0]||"";
   return{kfilm:f,kmotiv:a.find(x=>KMOTIV.includes(x))||a.find(x=>x!==f&&!KFILM.includes(x))||""}}
@@ -157,6 +162,11 @@ $("up").onsubmit=async e=>{e.preventDefault();say("Lade hoch …");
   o.title=o.title||"Ohne Titel";o.storage_path=name;o.image_path=name;
   await api("/rest/v1/photos",{method:"POST",headers:J,body:JSON.stringify(o)});
   e.target.reset();say("Hochgeladen.");load()}catch(x){say(x.message)}};
+$("bulk").onsubmit=async e=>{e.preventDefault();const fs=[...$("bf").files];let pos=Math.max(0,...rows.map(r=>r.position||0)),n=0;
+  try{for(const file of fs){say("Lade hoch … "+(++n)+" von "+fs.length);const name=await putImage(file,"");pos++;
+    const o={title:file.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").trim()||"Ohne Titel",storage_path:name,image_path:name,sort:pos,position:pos};
+    await api("/rest/v1/photos",{method:"POST",headers:J,body:JSON.stringify(o)})}
+  e.target.reset();say(fs.length+" Fotos hochgeladen.");load()}catch(x){say("Fehler bei Foto "+n+": "+x.message);load()}};
 const PF=["title","url","text_de","text_en","sort"];let prows=[];
 async function putImage(file,prefix="projekt_"){const bmp=await decode(file),sc=Math.min(1,2000/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");
   c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
