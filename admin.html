@@ -104,8 +104,13 @@ function draw(){const L=$("list");L.innerHTML="";$("order").classList.add("hide"
   d.querySelector(".dl").onclick=async()=>{if(!confirm("Foto löschen?"))return;try{
     await api("/rest/v1/photos?id=eq."+r.id,{method:"DELETE"});for(const n of r.details||[])await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});await api("/storage/v1/object/photos/"+enc(r.storage_path),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");load()}catch(x){say(x.message)}};
   L.appendChild(d)})}
-$("osave").onclick=async()=>{try{say("Speichere Reihenfolge …");const ids=[...$("list").children].map(x=>x.dataset.id);
-  for(let i=0;i<ids.length;i++){const r=rows.find(x=>x.id===ids[i]);if(r.sort!==i+1||r.position!==i+1){await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify({sort:i+1,position:i+1})});r.sort=r.position=i+1}}
+$("osave").onclick=async()=>{try{say("Speichere Reihenfolge …");
+  const ids=[...$("list").children].map(x=>x.dataset.id),todo=ids.map((id,i)=>[rows.find(x=>x.id===id),i+1]).filter(([r,n])=>r.sort!==n||r.position!==n);
+  // position ist in der Datenbank eindeutig: erst auf freie negative Zwischenwerte, dann auf die endgültigen Nummern
+  const patch=async(r,o)=>{const res=await(await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:{"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(o)})).json();
+    if(!res.length)throw new Error("Nicht gespeichert. Bitte ab- und wieder anmelden.")};   // ohne gültige Anmeldung ändert die Datenbank still keine Zeile
+  for(const [r,n] of todo)await patch(r,{position:-n});
+  for(const [r,n] of todo){await patch(r,{sort:n,position:n});r.sort=r.position=n}
   rows.sort((a,b)=>a.sort-b.sort);$("order").classList.add("hide");say("Reihenfolge gespeichert.")}catch(x){say(x.message)}};
 $("oreset").onclick=()=>{draw();say("")};
 $("compact").onchange=e=>$("list").classList.toggle("compact",e.target.checked);
