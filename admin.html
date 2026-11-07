@@ -52,19 +52,19 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 <li><b>Menschen:</b> Die Person ist das Thema, also Porträts</li>
 <li><b>Landschaft:</b> Natur, Parks, Aussicht</li>
 <li><b>Tiere:</b> Das Tier ist das Thema</li></ul>
-<p>Ein neues Motiv gibt es erst ab etwa 5 passenden Bildern. Ort, Kamera, Film und Format sind keine Kategorien, sie stehen in den Feldern oben. Serien wie eine Reise oder ein Thema gehören unter <b>Projekte</b>.</p></details>
+<p>Ein neues Motiv gibt es erst ab etwa 5 passenden Bildern. Ort, Kamera, Film und Format sind keine Kategorien, sie stehen in den Feldern oben. Zusammenhängende Bilder wie eine Reise oder ein Thema gehören unter <b>Serien</b>.</p></details>
 <button>Hochladen</button></form>
 <form id="bulk" class="box"><b>Mehrere Fotos auf einmal</b>
 <p class="hint">Titel wird der Dateiname. Kategorien und Angaben danach unten beim jeweiligen Foto ergänzen.</p>
 <div class="row"><input id="bf" type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" required></div>
 <button>Alle hochladen</button></form>
 <div id="list"></div>
-<h1 style="margin-top:2.5rem">Projekte</h1>
-<form id="pf" class="box"><b>Neues Projekt</b>
+<h1 style="margin-top:2.5rem">Serien</h1>
+<form id="pf" class="box"><b>Neue Serie</b>
 <div class="row"><input id="pimg" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" multiple></div>
 <div class="row"><input name="title" placeholder="Titel (z. B. Cyanotypie)" required><input name="url" placeholder="Link (https://… oder leer)"><input name="sort" type="number" placeholder="Reihenfolge"></div>
 <div class="row"><textarea name="text_de" rows="3" placeholder="Text deutsch"></textarea><textarea name="text_en" rows="3" placeholder="Text englisch"></textarea></div>
-<button>Projekt anlegen</button></form>
+<button>Serie anlegen</button></form>
 <div id="plist"></div></div></div>
 <script>
 const U="https://owbbsnujnkhyyqvagtai.supabase.co",KEY="sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga";
@@ -180,12 +180,12 @@ function drawP(){const L=$("plist");L.innerHTML="";prows.forEach(r=>{const d=doc
   {const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"projects","images","image","bild_")}
   d.querySelector(".sv").onclick=async()=>{try{const o={};d.querySelectorAll("[data-k]").forEach(i=>{const v=i.value.trim();o[i.dataset.k]=i.dataset.k==="sort"?(v===""?0:Number(v)):(v||null)});
     await api("/rest/v1/projects?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});say("Gespeichert.")}catch(x){say(x.message)}};
-  d.querySelector(".dl").onclick=async()=>{if(!confirm("Projekt löschen?"))return;try{await api("/rest/v1/projects?id=eq."+r.id,{method:"DELETE"});for(const n of [r.image,...(r.images||[])].filter(Boolean))await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");loadP()}catch(x){say(x.message)}};
+  d.querySelector(".dl").onclick=async()=>{if(!confirm("Serie löschen?"))return;try{await api("/rest/v1/projects?id=eq."+r.id,{method:"DELETE"});for(const n of [r.image,...(r.images||[])].filter(Boolean))await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");loadP()}catch(x){say(x.message)}};
   L.appendChild(d)})}
 $("pf").onsubmit=async e=>{e.preventDefault();say("Speichere …");try{const f=e.target.elements,file=$("pimg").files[0];
   const o={title:f.title.value.trim(),url:f.url.value.trim()||null,text_de:f.text_de.value.trim()||null,text_en:f.text_en.value.trim()||null,sort:f.sort.value===""?Math.max(0,...prows.map(r=>r.sort||0))+1:Number(f.sort.value)};
   const names=[];for(const x of $("pimg").files)names.push(await putImage(x));if(names.length){o.image=names[0];o.images=names.slice(1)}
-  await api("/rest/v1/projects",{method:"POST",headers:J,body:JSON.stringify(o)});e.target.reset();say("Projekt angelegt.");loadP()}catch(x){say(x.message)}};
+  await api("/rest/v1/projects",{method:"POST",headers:J,body:JSON.stringify(o)});e.target.reset();say("Serie angelegt.");loadP()}catch(x){say(x.message)}};
 function strip(host,r,table,field,legacy,prefix){
   const list=()=>[...(legacy&&r[legacy]?[r[legacy]]:[]),...(r[field]||[])];
   const draw2=()=>{host.innerHTML="";

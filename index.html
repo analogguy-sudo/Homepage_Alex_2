@@ -503,7 +503,7 @@
       <a href="#top" class="nav-home">Titelblatt</a>
       <a href="#kontaktbogen">Kontaktbogen</a>
       <a href="#equipment">Equipment</a>
-      <a href="#projekte">Projekte</a>
+      <a href="#projekte">Serien</a>
       <a href="#ueber-mich">Über mich</a>
       <a href="#kontakt">Kontakt</a>
     </nav>
@@ -547,10 +547,10 @@
   </section>
 
   <section class="view" id="projekte" aria-labelledby="proj-titel"><div class="wrap">
-  <h2 id="proj-titel">Projekte</h2>
+  <h2 id="proj-titel">Serien</h2>
   <p class="hint" id="projHint"></p>
   <div class="sheet">
-    <div class="filters" id="projList" role="group" aria-label="Projekte"></div>
+    <div class="filters" id="projList" role="group" aria-label="Serien"></div>
     <div id="projDetail"></div>
   </div>
 </div></section>
@@ -866,7 +866,7 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
-  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Über mich": "About me", "Kontakt": "Contact",
+  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle eine Serie.": "Choose a series.", "Serien": "Series", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Stadt": "City", "Menschen": "People", "Landschaft": "Landscape", "Tiere": "Animals", "Öffnen": "Open",
   "Licht auf Film, von Hand entwickelt.": "Light on film, developed by hand.",
   "Kontaktbogen ansehen": "View contact sheet", "Anfrage schreiben (z.Zt. inaktiv)": "Get in touch (currently inactive)",
@@ -880,8 +880,8 @@ const EN = {
   "Weitere Projekte und Seiten von mir.": "More projects and sites of mine.",
   "Die Datenbank ist noch nicht verbunden.": "The database is not connected yet.",
   "Die Daten konnten nicht geladen werden.": "The data could not be loaded.",
-  "Keine Treffer.": "No results.", "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Info": "Info", "Bilder": "images", "Ansehen": "View", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
-  "Wähle eine Kategorie.": "Choose a category.", "Projektseite in neuem Tab öffnen": "Open project page in a new tab",
+  "Keine Treffer.": "No results.", "Noch keine Serien.": "No series yet.", "Serie": "Series", "Info": "Info", "Bilder": "images", "Ansehen": "View", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
+  "Wähle eine Kategorie.": "Choose a category.", "Projektseite in neuem Tab öffnen": "Open the series page in a new tab",
   "Die Projektseite ist noch nicht eingetragen.": "The project page has not been entered yet."
 };
 let lang = "de";
@@ -927,7 +927,7 @@ let projSel = null;
 function renderCards() {
   const list = $("projList"), det = $("projDetail"); list.innerHTML = ""; det.innerHTML = "";
   if (!projLoaded) return;
-  $("projHint").textContent = !projects.length ? tr("Noch keine Projekte.") : projSel === null ? tr("Wähle ein Projekt.") : "";
+  $("projHint").textContent = !projects.length ? tr("Noch keine Serien.") : projSel === null ? tr("Wähle eine Serie.") : "";
   const pub = (n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`;
   projects.forEach((p, i) => {
     const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = p.title;
@@ -948,7 +948,7 @@ function renderCards() {
       const b = document.createElement("button"), im = document.createElement("img");
       b.type = "button"; im.alt = ""; im.loading = "lazy"; im.src = src; b.appendChild(im);
       b.addEventListener("click", () => {
-        state.lb = imgs.map((s2) => ({ src: s2, title: p.title, rows: [["Projekt", p.title], ["Info", text]], link: p.url }));
+        state.lb = imgs.map((s2) => ({ src: s2, title: p.title, rows: [["Serie", p.title], ["Info", text]], link: p.url }));
         state.index = k; showLightbox(); lb.showModal();
       });
       g.appendChild(b);
