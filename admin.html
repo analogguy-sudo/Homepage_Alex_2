@@ -18,18 +18,31 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 .th{position:relative}.th img{width:64px;height:64px;object-fit:cover;border-radius:3px;display:block}
 .rules{margin:.6rem 0 1rem;padding:.7rem 1rem;border-left:3px solid #444;background:#111;color:#c9c9c5;font-size:.92rem}
 .rules summary{cursor:pointer;color:#ededeb;font-weight:600}.rules p,.rules ul{margin:.45rem 0}.rules ul{padding-left:1.2rem}
-.side{display:flex;flex-direction:column;gap:.4rem;align-items:center}.mv{display:flex;gap:.25rem;align-items:center}
-.mv button{padding:.1rem .45rem;line-height:1.2}.grip{cursor:grab;font-size:1.25rem;color:#a8a8a5;user-select:none;-webkit-user-select:none;padding:0 .15rem}
-#list.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem}
-#list.compact .item{display:block;margin:0;padding:.5rem}#list.compact .item>div:last-child{display:none}#list.compact .side img{width:100%;height:auto;aspect-ratio:1}
-.pos{font-size:.8rem;color:#a8a8a5}.item.drag{opacity:.35}.hint{color:#a8a8a5;font-size:.9rem}
-.order{position:sticky;top:0;z-index:5;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;background:#2a2410;border:1px solid #6b5a1e;border-radius:6px;padding:.6rem .9rem;margin:1rem 0}
+/* Bereich „Reihenfolge“ */
+.tabs{display:flex;gap:.4rem;margin:1rem 0}.tabs button{background:#1b1b1b;color:#ededeb;border:1px solid #444}.tabs button[aria-pressed="true"]{background:#ededeb;color:#0e0e0e}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}.chips button{background:#1b1b1b;color:#ededeb;border:1px solid #444;font-weight:500}.chips button[aria-pressed="true"]{background:#ededeb;color:#0e0e0e}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem;margin:.6rem 0}
+.tile{background:#1b1b1b;border:1px solid #333;border-radius:5px;padding:.4rem;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.tile img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:3px;display:block;pointer-events:none}
+.tile .t{font-size:.8rem;color:#c9c9c5;margin:.3rem 0 .2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .mv{display:flex;justify-content:space-between;align-items:center}.tile .mv button{padding:.1rem .55rem;background:#0e0e0e;color:#ededeb;border:1px solid #444}
+.tile .n{font-size:.8rem;color:#a8a8a5}.tile.drag{opacity:.3}.hint{color:#a8a8a5;font-size:.9rem}
+.order{position:sticky;bottom:0;z-index:5;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;background:#151515;border:1px solid #333;border-radius:6px;padding:.6rem .9rem;margin:.8rem 0}
+.order.dirty{background:#2a2410;border-color:#6b5a1e}button:disabled{opacity:.4;cursor:default}
 .th button{position:absolute;top:-7px;right:-7px;width:20px;height:20px;padding:0;border-radius:50%;line-height:1;font-size:.9rem}
 </style></head><body><main>
 <h1>Admin: Kontaktbogen</h1><p class="msg" id="msg" role="status"></p>
 <form id="login" class="box"><div class="row"><input id="em" type="email" placeholder="E-Mail" autocomplete="username" required><input id="pw" type="password" placeholder="Passwort" autocomplete="current-password" required><button>Anmelden</button></div></form>
 <div id="app" class="hide">
 <p><button class="s" id="out" type="button">Abmelden</button> &nbsp; <a href="index.html">zur Seite</a></p>
+<div class="tabs"><button type="button" id="t-edit" aria-pressed="true">Fotos bearbeiten</button><button type="button" id="t-sort" aria-pressed="false">Reihenfolge</button></div>
+<section id="sorter" class="box hide"><b>Reihenfolge im Kontaktbogen</b>
+<p class="hint">Zeige alle Bilder oder nur eine Rubrik. Ziehe ein Bild an die gewünschte Stelle oder verschiebe es mit ← →, dann „Reihenfolge speichern“. In einer Rubrik tauschen nur deren Bilder die Plätze, alle anderen bleiben, wo sie sind.</p>
+<div class="chips" id="sfilter"></div>
+<div class="sgrid" id="sgrid"></div>
+<div class="order" id="sbar"><span id="sstate">Keine Änderungen.</span><button type="button" id="osave" disabled>Reihenfolge speichern</button><button type="button" class="s" id="oreset" disabled>Verwerfen</button></div>
+</section>
+<div id="editor">
 <form id="up" class="box"><b>Neues Foto</b>
 <div class="row"><input id="f" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" required></div>
 <div class="row"><input name="title" placeholder="Titel" required><input name="film" placeholder="Film"><input name="camera" placeholder="Kamera"><input name="format" placeholder="Format (35 mm)"><input name="year" type="number" placeholder="Jahr"><input name="location" placeholder="Ort"><input name="focal" placeholder="Brennweite (50 mm)"><input name="shutter" placeholder="Zeit (1/125)"><input name="aperture" placeholder="Blende (f/8)"><select name="kfilm" id="up-kfilm" required><option value="">Film wählen</option></select><select name="kmotiv" id="up-kmotiv" required><option value="">Motiv wählen</option></select></div>
@@ -40,8 +53,6 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 <li><b>Landschaft:</b> Natur, Parks, Aussicht</li></ul>
 <p>Ein neues Motiv gibt es erst ab etwa 5 passenden Bildern. Ort, Kamera, Film und Format sind keine Kategorien, sie stehen in den Feldern oben. Serien wie eine Reise oder ein Thema gehören unter <b>Projekte</b>.</p></details>
 <button>Hochladen</button></form>
-<div id="order" class="order hide"><span>Reihenfolge geändert.</span><button type="button" id="osave">Reihenfolge speichern</button><button type="button" class="s" id="oreset">Verwerfen</button></div>
-<p class="hint">Reihenfolge im Kontaktbogen: Foto am Griff ⠿ an die gewünschte Stelle ziehen oder mit ↑ ↓ verschieben, dann „Reihenfolge speichern“. Neue Fotos kommen ans Ende. <label><input type="checkbox" id="compact"> Nur Bilder zeigen (zum Sortieren)</label></p>
 <div id="list"></div>
 <h1 style="margin-top:2.5rem">Projekte</h1>
 <form id="pf" class="box"><b>Neues Projekt</b>
@@ -49,7 +60,7 @@ button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}
 <div class="row"><input name="title" placeholder="Titel (z. B. Cyanotypie)" required><input name="url" placeholder="Link (https://… oder leer)"><input name="sort" type="number" placeholder="Reihenfolge"></div>
 <div class="row"><textarea name="text_de" rows="3" placeholder="Text deutsch"></textarea><textarea name="text_en" rows="3" placeholder="Text englisch"></textarea></div>
 <button>Projekt anlegen</button></form>
-<div id="plist"></div></div>
+<div id="plist"></div></div></div>
 <script>
 const U="https://owbbsnujnkhyyqvagtai.supabase.co",KEY="sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga";
 const $=i=>document.getElementById(i),F=["title","film","camera","format","year","location","focal","shutter","aperture"];
@@ -82,38 +93,50 @@ $("login").onsubmit=async e=>{e.preventDefault();say("Anmelden …");
   try{const r=await fetch(U+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify({email:$("em").value,password:$("pw").value})});
   const d=await r.json();if(!d.access_token)throw new Error(d.msg||d.error_description||"Login fehlgeschlagen");
   tok=d.access_token;try{sessionStorage.setItem("tok",tok)}catch(x){}say("");load()}catch(x){say(x.message)}};
-async function load(){try{rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();draw();show(true);loadP()}catch(x){say(x.message)}}
-/* Reihenfolge: am Griff ziehen (Maus) oder mit ↑ ↓ verschieben (Handy), gespeichert wird alles auf einmal */
-let dragEl=null;
-function moved(){[...$("list").children].forEach((x,i)=>x.querySelector(".pos").textContent=i+1);$("order").classList.remove("hide")}
-function draw(){const L=$("list");L.innerHTML="";$("order").classList.add("hide");rows.forEach((r,n)=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;
-  d.innerHTML='<div class="side"><img alt=""><div class="mv"><button type="button" class="s up" title="nach oben">↑</button><span class="grip" title="ziehen">⠿</span><button type="button" class="s down" title="nach unten">↓</button></div><span class="pos">'+(n+1)+'</span></div><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="kmotiv"><option value="">Motiv wählen</option></select></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
+async function load(){try{rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();draw();sortInit();show(true);loadP()}catch(x){say(x.message)}}
+function draw(){const L=$("list");L.innerHTML="";rows.forEach(r=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;
+  d.innerHTML='<img alt=""><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="kmotiv"><option value="">Motiv wählen</option></select></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   {const c=splitCat(r.cat);fillSel(d.querySelector('[data-k="kfilm"]'),KFILM,c.kfilm);fillSel(d.querySelector('[data-k="kmotiv"]'),KMOTIV,c.kmotiv)}
   d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);
   d.querySelectorAll("input").forEach(i=>i.value=r[i.dataset.k]??"");
   {const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"photos","details",null,"detail_")}
-  const grip=d.querySelector(".grip");grip.onmousedown=()=>{d.draggable=true};grip.onmouseup=()=>{d.draggable=false};
-  d.ondragstart=e=>{dragEl=d;d.classList.add("drag");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",r.id)};
-  d.ondragover=e=>{if(!dragEl||dragEl===d)return;e.preventDefault();const b=d.getBoundingClientRect();const before=L.classList.contains("compact")?e.clientX<b.left+b.width/2:e.clientY<b.top+b.height/2;L.insertBefore(dragEl,before?d:d.nextSibling)};
-  d.ondrop=e=>e.preventDefault();
-  d.ondragend=()=>{d.draggable=false;d.classList.remove("drag");dragEl=null;moved()};
-  d.querySelector(".up").onclick=()=>{const p=d.previousElementSibling;if(p){L.insertBefore(d,p);moved();d.scrollIntoView({block:"nearest"})}};
-  d.querySelector(".down").onclick=()=>{const q=d.nextElementSibling;if(q){L.insertBefore(q,d);moved();d.scrollIntoView({block:"nearest"})}};
   d.querySelector(".sv").onclick=async()=>{try{const o=body(k=>d.querySelector('[data-k="'+k+'"]').value.trim());
     await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});say("Gespeichert.")}catch(x){say(x.message)}};
   d.querySelector(".dl").onclick=async()=>{if(!confirm("Foto löschen?"))return;try{
     await api("/rest/v1/photos?id=eq."+r.id,{method:"DELETE"});for(const n of r.details||[])await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});await api("/storage/v1/object/photos/"+enc(r.storage_path),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");load()}catch(x){say(x.message)}};
   L.appendChild(d)})}
+/* Bereich „Reihenfolge“: Raster mit Ziehen (Maus) und ← → (Handy). Eine Rubrik zeigt nur ihre Bilder;
+   diese tauschen untereinander die Plätze, die übrigen Fotos behalten ihre Position. Gespeichert wird alles auf einmal. */
+let ord=[],sf="",dragId=null;
+const SF=[["","Alle"]].concat(KFILM.concat(KMOTIV).map(k=>[k,k]));
+const catsOf=r=>(r.cat||"").split(",").map(x=>x.trim());
+function sortInit(){ord=rows.map(r=>r.id);sortDraw();dirty(false)}
+function dirty(on){$("sbar").classList.toggle("dirty",on);$("osave").disabled=$("oreset").disabled=!on;$("sstate").textContent=on?"Reihenfolge geändert.":"Keine Änderungen."}
+function visible(){return ord.filter(id=>!sf||catsOf(rows.find(r=>r.id===id)).includes(sf))}
+function place(ids){const slots=ord.map((id,i)=>ids.includes(id)?i:-1).filter(i=>i>=0);slots.forEach((slot,k)=>ord[slot]=ids[k])}   // Teilfolge in ihre bisherigen Plätze zurückschreiben
+function move(id,to){const v=visible().filter(x=>x!==id);v.splice(Math.max(0,Math.min(to,v.length)),0,id);place(v);sortDraw();dirty(true)}
+function sortDraw(){const F2=$("sfilter");F2.innerHTML="";SF.forEach(([k,l])=>{const b=document.createElement("button");b.type="button";b.textContent=l;b.setAttribute("aria-pressed",String(k===sf));b.onclick=()=>{sf=k;sortDraw()};F2.appendChild(b)});
+  const G=$("sgrid"),v=visible();G.innerHTML="";
+  v.forEach((id,k)=>{const r=rows.find(x=>x.id===id),t=document.createElement("div");t.className="tile";t.draggable=true;t.dataset.id=id;
+    t.innerHTML='<img alt=""><div class="t"></div><div class="mv"><button type="button" title="nach vorne">←</button><span class="n">'+(ord.indexOf(id)+1)+'</span><button type="button" title="nach hinten">→</button></div>';
+    t.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);t.querySelector(".t").textContent=r.title||"Ohne Titel";
+    const [l,rt]=t.querySelectorAll("button");l.onclick=()=>move(id,k-1);rt.onclick=()=>move(id,k+1);
+    t.ondragstart=e=>{dragId=id;t.classList.add("drag");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};
+    t.ondragend=()=>{dragId=null;t.classList.remove("drag")};
+    t.ondragover=e=>{if(dragId&&dragId!==id)e.preventDefault()};
+    t.ondrop=e=>{e.preventDefault();if(!dragId||dragId===id)return;const b=t.getBoundingClientRect(),after=e.clientX>b.left+b.width/2,w=visible().filter(x=>x!==dragId);move(dragId,w.indexOf(id)+(after?1:0))};
+    G.appendChild(t)})}
 $("osave").onclick=async()=>{try{say("Speichere Reihenfolge …");
-  const ids=[...$("list").children].map(x=>x.dataset.id),todo=ids.map((id,i)=>[rows.find(x=>x.id===id),i+1]).filter(([r,n])=>r.sort!==n||r.position!==n);
+  const todo=ord.map((id,i)=>[rows.find(x=>x.id===id),i+1]).filter(([r,n])=>r.sort!==n||r.position!==n);
   // position ist in der Datenbank eindeutig: erst auf freie negative Zwischenwerte, dann auf die endgültigen Nummern
   const patch=async(r,o)=>{const res=await(await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:{"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(o)})).json();
     if(!res.length)throw new Error("Nicht gespeichert. Bitte ab- und wieder anmelden.")};   // ohne gültige Anmeldung ändert die Datenbank still keine Zeile
   for(const [r,n] of todo)await patch(r,{position:-n});
   for(const [r,n] of todo){await patch(r,{sort:n,position:n});r.sort=r.position=n}
-  rows.sort((a,b)=>a.sort-b.sort);$("order").classList.add("hide");say("Reihenfolge gespeichert.")}catch(x){say(x.message)}};
-$("oreset").onclick=()=>{draw();say("")};
-$("compact").onchange=e=>$("list").classList.toggle("compact",e.target.checked);
+  rows.sort((a,b)=>a.sort-b.sort);draw();sortInit();say("Reihenfolge gespeichert ("+todo.length+" Fotos verschoben).")}catch(x){say("Fehler: "+x.message)}};
+$("oreset").onclick=()=>{sortInit();say("")};
+function tab(sortOn){$("sorter").classList.toggle("hide",!sortOn);$("editor").classList.toggle("hide",sortOn);$("t-sort").setAttribute("aria-pressed",String(sortOn));$("t-edit").setAttribute("aria-pressed",String(!sortOn))}
+$("t-sort").onclick=()=>tab(true);$("t-edit").onclick=()=>tab(false);
 /* Urheber und Copyright als EXIF in das verkleinerte JPEG schreiben (Canvas entfernt alle Metadaten) */
 const META=[[0x013B,"Alexander Fichter"],[0x8298,"© Alexander Fichter"]];   // wie in Lightroom
 async function withMeta(blob){const b=new Uint8Array(await blob.arrayBuffer()),d=META.map(([,s])=>new TextEncoder().encode(s+"\0")),n=META.length,t=new Uint8Array(14+n*12+d.reduce((a,x)=>a+x.length,0)),v=new DataView(t.buffer);
