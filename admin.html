@@ -24,7 +24,8 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}.chips button{background:#1b1b1b;color:#ededeb;border:1px solid #444;font-weight:500}.chips button[aria-pressed="true"]{background:#ededeb;color:#0e0e0e}
 .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem;margin:.6rem 0}
 .tile{background:#1b1b1b;border:1px solid #333;border-radius:5px;padding:.4rem;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.tile img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:3px;display:block;pointer-events:none}
+.tile img{width:100%;aspect-ratio:1;object-fit:contain;background:#0b0b0b;border-radius:3px;display:block;pointer-events:none}
+.tile .fmt{font-size:.72rem;color:#a8a8a5;margin:-.15rem 0 .2rem}
 .tile .t{font-size:.8rem;color:#c9c9c5;margin:.3rem 0 .2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile .mv{display:flex;justify-content:space-between;align-items:center}.tile .mv button{padding:.1rem .55rem;background:#0e0e0e;color:#ededeb;border:1px solid #444}
 .tile .del{color:#f19999!important;border-color:#6b2a2a!important}.tile .dup{font-size:.72rem;color:#f0b35a;margin:-.1rem 0 .25rem}
@@ -144,6 +145,8 @@ function sortDraw(){const F2=$("sfilter");F2.innerHTML="";sfList().forEach(([k,l
     const dup=rows.some(x=>x.id!==id&&(srcName(x)===srcName(r)||(x.title||"").trim().toLowerCase()===(r.title||"").trim().toLowerCase()));
     t.innerHTML='<img alt=""><div class="t"></div>'+(dup?'<div class="dup">doppelt? gleiche Datei oder gleicher Titel</div>':'')+'<div class="mv"><button type="button" title="nach vorne">←</button><span class="n">'+(ord.indexOf(id)+1)+'</span><button type="button" title="nach hinten">→</button><button type="button" class="del" title="Foto löschen">✕</button></div>';
     t.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);t.querySelector(".t").textContent=r.title||"Ohne Titel";
+    {const im=t.querySelector("img"),f=document.createElement("div");f.className="fmt";t.querySelector(".t").after(f);   // Format zeigen: hoch, quer oder quadratisch
+     im.onload=()=>{const q=im.naturalWidth/im.naturalHeight;f.textContent=q>1.08?"▭ quer":q<.92?"▯ hoch":"□ quadratisch"}}
     const [l,rt,del]=t.querySelectorAll("button");l.onclick=()=>move(id,k-1);rt.onclick=()=>move(id,k+1);
     del.onclick=async()=>{if($("osave").disabled===false&&!confirm("Ungespeicherte Reihenfolge geht verloren. Trotzdem löschen?"))return;await delPhoto(r)};
     t.ondragstart=e=>{dragId=id;t.classList.add("drag");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};
