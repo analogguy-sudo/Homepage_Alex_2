@@ -176,6 +176,8 @@
   .pimgs button { padding: 0; border: 0; background: none; cursor: zoom-in; }
   .pimgs img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
   /* Bildstrecken */
+  .filters-sub { margin: 1rem 0 .2rem; font-family: var(--edge); font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+  .lb-strecke { background: none; border: 0; padding: 0; margin-top: .8rem; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .strecke h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: 1.8rem; margin: 0 0 .4rem; }
   .strecke > p { max-width: 62ch; margin: 0 0 .4rem; font-family: var(--serif); font-style: italic; color: var(--ink-soft); }
   /* Bilder im selben Rahmen wie im Kontaktbogen, mit leichtem 3D-Effekt: beim Überfahren heben sie sich an und kippen leicht */
@@ -727,6 +729,7 @@ async function loadPhotos() {
   if (!res.ok) throw new Error("Supabase antwortete mit Status " + res.status);
   const rows = await res.json();
   return rows.filter((r) => r.storage_path).map((r) => ({
+    strecke: r.strecke_id, kb: r.im_kontaktbogen !== false,
     title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, categories: (r.cat || "").split(",").map((c) => c.trim()).filter(Boolean), year: r.year, location: r.location, focal: r.focal, shutter: r.shutter, aperture: r.aperture,
     src: `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${r.storage_path.split("/").map(encodeURIComponent).join("/")}`,
     details: (r.details || []).map((n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`)
@@ -765,13 +768,14 @@ function renderHero(p) {
 }
 
 /* Kategorien: erst der Film, dann das Motiv (wie im Admin-Bereich); unbekannte ans Ende */
-const CATS = ["Schwarzweiß", "Farbe", "Stadt", "Menschen", "Landschaft", "Tiere"];
+/* Kontaktbogen = Auswahl der besten Bilder; die Motive stecken in den Bildstrecken, hier nur der Film */
+const CATS = ["Schwarzweiß", "Farbe"];
+const kbPhotos = () => state.all.filter((p) => p.kb);
 function renderFilters() {
-  const rank = (c) => (CATS.includes(c) ? CATS.indexOf(c) : CATS.length);
-  const cats = [...new Set(state.all.flatMap((p) => p.categories || []))].sort((a, b) => rank(a) - rank(b));
   const box = $("filters");
   box.innerHTML = "";
-  cats.forEach((f) => {
+  // erst nach Wahl einer Rubrik erscheinen Bilder; ein zweiter Klick hebt die Auswahl wieder auf
+  CATS.filter((c) => kbPhotos().some((p) => (p.categories || []).includes(c))).forEach((f) => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "chip"; b.textContent = tr(f);
     b.setAttribute("aria-pressed", String(f === state.filter));
@@ -781,7 +785,7 @@ function renderFilters() {
 }
 
 function renderGrid() {
-  state.shown = state.filter ? state.all.filter((p) => (p.categories || []).includes(state.filter)) : [];
+  state.shown = state.filter ? kbPhotos().filter((p) => (p.categories || []).includes(state.filter)) : [];
   $("hint").textContent = state.filter ? "" : tr("Wähle eine Kategorie.");
   const grid = $("grid");
   grid.innerHTML = "";
@@ -830,6 +834,15 @@ function showLightbox() {
     const dd = document.createElement("dd"), a = document.createElement("a");
     a.href = p.link; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸";
     dd.appendChild(a); dl.appendChild(dd);
+  }
+  if (p.strecke && document.body.dataset.view !== "bildstrecken") {
+    const k = streckenItems().findIndex((x) => x.id === p.strecke);
+    if (k >= 0) {
+      const dd = document.createElement("dd"), b = document.createElement("button");
+      b.type = "button"; b.className = "lb-strecke"; b.textContent = tr("Zur ganzen Bildstrecke") + " ▸";
+      b.addEventListener("click", () => { lb.close(); projSel.bildstrecke = k; location.hash = "#bildstrecken"; renderCards(); });
+      dd.appendChild(b); dl.appendChild(dd);
+    }
   }
   const th = $("lbThumbs"); th.innerHTML = "";   // Detailbilder: kleine Vorschau, Klick tauscht das große Bild
   if (p.details && p.details.length) {
@@ -880,6 +893,7 @@ loadPhotos().then((photos) => {
   renderHero(photos[0]);
   renderFilters();
   renderGrid();
+  renderCards();   // Bildstrecken brauchen die Fotos
 }).catch((err) => {
   console.error(err);
   $("status").textContent = "Die Fotos konnten nicht geladen werden. Prüfe URL und Key in index.html sowie die Lese-Richtlinie in Supabase.";
@@ -888,7 +902,8 @@ loadPhotos().then((photos) => {
 /* ---------- Sprache ---------- */
 const EN = {
   "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
-  "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Stadt": "City", "Menschen": "People", "Landschaft": "Landscape", "Tiere": "Animals", "Öffnen": "Open",
+  "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Stadt": "City", "Menschen": "People", "Landschaft": "Landscape", "Tiere": "Animals", "Alle": "All", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series",
+  "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen der Pfalz": "Castle ruins of the Palatinate", "Öffnen": "Open",
   "Licht auf Film, von Hand entwickelt.": "Light on film, developed by hand.",
   "Kontaktbogen ansehen": "View contact sheet", "Anfrage schreiben (z.Zt. inaktiv)": "Get in touch (currently inactive)",
   "Fotos werden geladen …": "Loading photos …",
@@ -947,26 +962,35 @@ async function loadProjects() {
 /* Projekte und Bildstrecken liegen in derselben Tabelle, unterschieden durch "kind" */
 const projSel = { projekt: null, bildstrecke: null };
 function renderCards() { renderKind("projekt", "proj"); renderKind("bildstrecke", "strk"); }
+// allgemeine Themen zuerst, dann „Reisen & Touren“
+const streckenItems = () => projects.filter((p) => p.kind === "bildstrecke").sort((a, b) => (a.bereich === b.bereich ? 0 : a.bereich === "allgemein" ? -1 : 1) || (a.sort || 0) - (b.sort || 0));
 function renderKind(kind, pre) {
   const list = $(pre + "List"), det = $(pre + "Detail"); list.innerHTML = ""; det.innerHTML = "";
   if (!projLoaded) return;
-  const items = projects.filter((p) => (p.kind || "projekt") === kind), sel = projSel[kind];
+  const items = kind === "bildstrecke" ? streckenItems() : projects.filter((p) => (p.kind || "projekt") === kind), sel = projSel[kind];
   const strecke = kind === "bildstrecke";
   $(pre + "Hint").textContent = !items.length ? tr(strecke ? "Noch keine Bildstrecken." : "Noch keine Projekte.")
     : sel === null ? tr(strecke ? "Wähle eine Bildstrecke." : "Wähle ein Projekt.") : "";
   const pub = (n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`;
   items.forEach((p, i) => {
-    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = p.title;
+    if (strecke && p.bereich !== "allgemein" && (i === 0 || items[i - 1].bereich === "allgemein")) {
+      const sub = document.createElement("p"); sub.className = "filters-sub"; sub.textContent = tr("Reisen & Touren"); list.appendChild(sub);
+    }
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = tr(p.title);
     b.setAttribute("aria-pressed", String(i === sel));
     b.addEventListener("click", () => { projSel[kind] = sel === i ? null : i; renderKind(kind, pre); });
     list.appendChild(b);
   });
   const p = items[sel]; if (!p) return;
-  const imgs = [p.image, ...(p.images || [])].filter(Boolean).map(pub);
   const text = (lang === "en" && p.text_en) || p.text_de || "";
-  const open = (k) => { state.lb = imgs.map((s2) => ({ src: s2, title: p.title, rows: [[strecke ? "Bildstrecke" : "Projekt", p.title], ["Info", text]], link: p.url })); state.index = k; showLightbox(); lb.showModal(); };
+  const fotos = strecke ? state.all.filter((f) => f.strecke === p.id) : [];
+  const imgs = strecke ? fotos.map((f) => f.src) : [p.image, ...(p.images || [])].filter(Boolean).map(pub);
+  const open = (k) => {
+    state.lb = strecke ? fotos : imgs.map((s2) => ({ src: s2, title: p.title, rows: [["Projekt", p.title], ["Info", text]], link: p.url }));
+    state.index = k; showLightbox(); lb.showModal();
+  };
   const box = document.createElement("article"); box.className = strecke ? "strecke" : "pbox";
-  const h = document.createElement("h3"); h.textContent = p.title; box.appendChild(h);
+  const h = document.createElement("h3"); h.textContent = tr(p.title); box.appendChild(h);
   if (text) { const t = document.createElement("p"); t.textContent = text; box.appendChild(t); }
   if (p.url) { const a = document.createElement("a"); a.className = "plink"; a.href = p.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸"; box.appendChild(a); }
   if (imgs.length) {
