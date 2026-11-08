@@ -157,7 +157,6 @@
   }
   .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-left-color: var(--ink); }
   .status { color: var(--ink-soft); margin: 0 0 1.5rem; }
-  .status.demo { border-left: 4px solid var(--amber); padding-left: .9rem; }
   /* Fotos im Bilderrahmen */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 28px; align-items: start; }
   .print { margin: 0; }
@@ -672,7 +671,6 @@ const CONFIG = {
   heroPosition: "70% 50%"  // Bildausschnitt, z. B. "50% 25%" rückt den Ausschnitt nach oben
 };
 
-/* Datenbank aus dem anderen Projekt (Entwicklungszeiten), nur lesend */
 /* Deine Daten: hier einmal eintragen, die Seite übernimmt sie überall */
 const PROFILE = {
   name: "Analoge Welt",                     // Logo oben links
@@ -686,51 +684,11 @@ const PROFILE = {
   schutz: "bilder"                          // Rechtsklick sperren: "bilder" (nur auf Fotos), "alles" (ganze Seite) oder "aus"
 };
 
-/* ---------- Demo-Motive (erscheinen, solange Supabase nicht verbunden ist) ---------- */
-function scene(w, h, c, sun) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient>
-      <filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".35"/></feComponentTransfer></filter>
-    </defs>
-    <rect width="${w}" height="${h}" fill="url(#g)"/>
-    <circle cx="${w * sun[0]}" cy="${h * sun[1]}" r="${Math.min(w, h) * sun[2]}" fill="${c[2]}" opacity=".92"/>
-    <path d="M0 ${h * .72} Q ${w * .25} ${h * .55} ${w * .5} ${h * .68} T ${w} ${h * .62} L ${w} ${h} L 0 ${h} Z" fill="${c[3]}"/>
-    <path d="M0 ${h * .86} Q ${w * .3} ${h * .74} ${w * .62} ${h * .84} T ${w} ${h * .8} L ${w} ${h} L 0 ${h} Z" fill="${c[4]}"/>
-    <rect width="${w}" height="${h}" filter="url(#n)"/>
-  </svg>`;
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-}
-const DEMO = [
-  { title: "Abendlicht",   film: "Kodak Portra 400", camera: "Leica M6",    format: "35 mm",  year: 2024, location: "Ostsee",
-    src: scene(1200, 800,  ["#E8B87A","#F3DDB0","#FFF1CF","#8A5A3B","#4A2F20"], [.68,.52,.11]) },
-  { title: "Nebelfeld",    film: "Ilford HP5 Plus",  camera: "Pentax 67",   format: "120",    year: 2023, location: "Eifel",
-    src: scene(1000, 1000, ["#CFC6B4","#E9E2D2","#F6F1E4","#7A7367","#3E3A33"], [.3,.38,.09]) },
-  { title: "Dünen",        film: "Kodak Portra 400", camera: "Leica M6",    format: "35 mm",  year: 2024, location: "Sylt",
-    src: scene(800, 1000,  ["#D99A5B","#EFC98F","#FBE8BE","#A8683A","#5B3520"], [.55,.3,.13]) },
-  { title: "Hafen",        film: "Fuji Pro 400H",    camera: "Olympus XA",  format: "35 mm",  year: 2022, location: "Hamburg",
-    src: scene(1200, 800,  ["#9DB0A6","#D7DFCF","#F2EBD2","#4F6B63","#26382F"], [.22,.4,.08]) },
-  { title: "Morgen",       film: "Ilford HP5 Plus",  camera: "Pentax 67",   format: "120",    year: 2023, location: "Harz",
-    src: scene(900, 1100,  ["#B9B3A8","#DDD8CB","#F5F1E6","#6A655C","#2F2C27"], [.7,.25,.1]) },
-  { title: "Brache",       film: "Kodak Portra 400", camera: "Leica M6",    format: "35 mm",  year: 2024, location: "Brandenburg",
-    src: scene(1200, 800,  ["#C98B4E","#E9C48A","#F8E3B2","#8C5A30","#4A2C17"], [.4,.46,.12]) },
-  { title: "Sommerende",   film: "Fuji Pro 400H",    camera: "Pentax 67",   format: "120",    year: 2022, location: "Bodensee",
-    src: scene(1000, 1000, ["#A9B7B0","#E2E6D4","#F7F0D6","#587369","#2B3F37"], [.6,.35,.1]) },
-  { title: "Kanal",        film: "Ilford HP5 Plus",  camera: "Olympus XA",  format: "35 mm",  year: 2023, location: "Berlin",
-    src: scene(800, 1000,  ["#B3AB9C","#D9D3C3","#F1ECDD","#6B655A","#302D27"], [.35,.3,.09]) },
-  { title: "Dämmerung",    film: "Kodak Portra 400", camera: "Leica M6",    format: "35 mm",  year: 2024, location: "Rhön",
-    src: scene(1200, 800,  ["#D7956A","#EDBD8A","#FFE8C0","#9A5B3E","#4B2A1D"], [.5,.58,.14]) }
-];
-
 /* ---------- Daten laden ---------- */
-const state = { all: [], shown: [], filter: null, index: 0, demo: false };
+const state = { all: [], shown: [], filter: null, index: 0 };
 const $ = (id) => document.getElementById(id);
 
 async function loadPhotos() {
-  if (!CONFIG.supabaseUrl || !CONFIG.supabaseKey) {
-    state.demo = true;
-    return DEMO;
-  }
   const url = `${CONFIG.supabaseUrl}/rest/v1/${CONFIG.table}?select=*&order=sort.asc,created_at.desc`;
   const headers = { apikey: CONFIG.supabaseKey };
   // Alte anon-Keys sind JWTs (beginnen mit "eyJ"); neue Publishable Keys (sb_publishable_…) brauchen den Header nicht.
@@ -747,15 +705,6 @@ async function loadPhotos() {
 }
 
 /* ---------- Anzeige ---------- */
-function metaLine(p) {
-  return [p.film, p.camera].filter(Boolean).join(", ") || "";
-}
-function metaFull(p) {
-  const a = metaLine(p);
-  const b = [p.location, p.year].filter(Boolean).join(", ");
-  return [a, b].filter(Boolean).join(" – ");
-}
-
 function renderHero(p) {
   const img = $("heroImg");
   if (CONFIG.heroImage) {
@@ -777,8 +726,7 @@ function renderHero(p) {
   img.classList.add("develop");
 }
 
-/* Kategorien: erst der Film, dann das Motiv (wie im Admin-Bereich); unbekannte ans Ende */
-/* Kontaktbogen = Auswahl der besten Bilder; die Motive stecken in den Bildstrecken, hier nur der Film */
+/* Kontaktbogen = Auswahl der besten Bilder (Haken im Admin); Rubriken nur nach Film, die Motive stecken in den Bildstrecken */
 const CATS = ["Schwarzweiß", "Farbe"];
 const kbPhotos = () => state.all.filter((p) => p.kb);
 function renderFilters() {
@@ -850,7 +798,9 @@ function showLightbox() {
     if (k >= 0) {
       const dd = document.createElement("dd"), b = document.createElement("button");
       b.type = "button"; b.className = "lb-strecke"; b.textContent = tr("Zur ganzen Bildstrecke") + " ▸";
-      b.addEventListener("click", () => { lb.close(); projSel.bildstrecke = k; location.hash = "#bildstrecken"; renderCards(); });
+      const go = () => { projSel.bildstrecke = k; location.hash = "#bildstrecken"; renderCards(); };
+      // das Schließen geht im Verlauf einen Schritt zurück; erst danach wechseln, sonst überschreibt der Rückschritt die neue Seite
+      b.addEventListener("click", () => { if (history.state && history.state.lb) addEventListener("popstate", go, { once: true }); else setTimeout(go); lb.close(); });
       dd.appendChild(b); dl.appendChild(dd);
     }
   }
@@ -894,12 +844,7 @@ loadPhotos().then((photos) => {
     if (CONFIG.heroImage) renderHero(null);   // Porträt auch ohne Galeriefotos zeigen
     return;
   }
-  if (state.demo) {
-    status.textContent = "Demo-Modus: Trage deine Supabase-Daten oben in index.html ein, dann erscheinen hier deine eigenen Fotos.";
-    status.classList.add("demo");
-  } else {
-    status.remove();
-  }
+  status.remove();
   renderHero(photos[0]);
   renderFilters();
   renderGrid();
@@ -912,23 +857,15 @@ loadPhotos().then((photos) => {
 /* ---------- Sprache ---------- */
 const EN = {
   "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
-  "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Stadt": "City", "Menschen": "People", "Landschaft": "Landscape", "Tiere": "Animals", "Alle": "All", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series",
+  "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series",
   "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen der Pfalz": "Castle ruins of the Palatinate", "Öffnen": "Open",
-  "Licht auf Film, von Hand entwickelt.": "Light on film, developed by hand.",
-  "Kontaktbogen ansehen": "View contact sheet", "Anfrage schreiben (z.Zt. inaktiv)": "Get in touch (currently inactive)",
   "Fotos werden geladen …": "Loading photos …",
   "Ich fotografiere seit über zehn Jahren auf Film. Mich reizt, dass jede Aufnahme Zeit kostet: Man schaut länger hin, wartet aufs richtige Licht und sieht das Ergebnis erst Tage später.": "I have been shooting film for over ten years. I love that every frame takes time: you look longer, wait for the right light and only see the result days later.",
   "Meine Schwarzweißfilme entwickle ich selbst.": "I develop my black-and-white films myself.",
-  "Kameras": "Cameras", "Filme": "Films", "Entwicklung": "Development",
-  "Für Aufträge, Prints oder Fragen zu meinen Arbeiten schreib mir eine E-Mail. Ich antworte in der Regel innerhalb von zwei Tagen.": "For commissions, prints or questions about my work, send me an email. I usually reply within two days.",
-  "Impressum": "Legal notice", "Datenschutz": "Privacy",
-  "Meine ausgetesteten Entwicklungszeiten für Filme und Entwickler.": "My tested development times for films and developers.",
-  "Weitere Projekte und Seiten von mir.": "More projects and sites of mine.",
-  "Die Datenbank ist noch nicht verbunden.": "The database is not connected yet.",
-  "Die Daten konnten nicht geladen werden.": "The data could not be loaded.",
-  "Keine Treffer.": "No results.", "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Ansehen": "View", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
-  "Wähle eine Kategorie.": "Choose a category.", "Projektseite in neuem Tab öffnen": "Open project page in a new tab",
-  "Die Projektseite ist noch nicht eingetragen.": "The project page has not been entered yet."
+  "Kameras": "Cameras", "Entwicklung": "Development",
+  "Datenschutz": "Privacy",
+  "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
+  "Wähle eine Kategorie.": "Choose a category."
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
