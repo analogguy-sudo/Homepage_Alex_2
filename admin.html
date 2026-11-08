@@ -27,6 +27,7 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 .tile img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:3px;display:block;pointer-events:none}
 .tile .t{font-size:.8rem;color:#c9c9c5;margin:.3rem 0 .2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile .mv{display:flex;justify-content:space-between;align-items:center}.tile .mv button{padding:.1rem .55rem;background:#0e0e0e;color:#ededeb;border:1px solid #444}
+.tile .del{color:#f19999!important;border-color:#6b2a2a!important}.tile .dup{font-size:.72rem;color:#f0b35a;margin:-.1rem 0 .25rem}
 .tile .n{font-size:.8rem;color:#a8a8a5}.tile.drag{opacity:.3}.hint{color:#a8a8a5;font-size:.9rem}
 .order{position:sticky;bottom:0;z-index:5;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;background:#151515;border:1px solid #333;border-radius:6px;padding:.6rem .9rem;margin:.8rem 0}
 .order.dirty{background:#2a2410;border-color:#6b5a1e}button:disabled{opacity:.4;cursor:default}
@@ -59,6 +60,7 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 <div class="row"><select name="strecke" id="bulk-strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" name="kb"> Im Kontaktbogen</label></div>
 <div class="row"><input id="bf" type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" required></div>
 <button>Alle hochladen</button></form>
+<div class="row" style="align-items:center"><label class="kb" for="lfilter">Anzeigen:</label><select id="lfilter"></select></div>
 <div id="list"></div>
 <h1 style="margin-top:2.5rem">Bildstrecken und Projekte</h1>
 <p class="hint"><b>Bildstrecke:</b> ein allgemeines Thema (Menschen &amp; Porträts, Stadtbild, Landschaft &amp; Natur) oder eine Strecke unter „Reisen &amp; Touren“. Welche Fotos dazugehören, stellst du oben beim jeweiligen Foto ein. <b>Projekt:</b> eine Arbeit, die über das Fotografieren hinausgeht, etwa Cyanotypie. Nur bei Projekten werden die Bilder hier hochgeladen.</p>
@@ -104,7 +106,7 @@ $("login").onsubmit=async e=>{e.preventDefault();say("Anmelden …");
   const d=await r.json();if(!d.access_token)throw new Error(d.msg||d.error_description||"Login fehlgeschlagen");
   tok=d.access_token;try{sessionStorage.setItem("tok",tok)}catch(x){}say("");load()}catch(x){say(x.message)}};
 async function load(){try{rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();await loadP();draw();sortInit();show(true)}catch(x){say(x.message)}}
-function draw(){const L=$("list");L.innerHTML="";rows.forEach(r=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;
+function draw(){const L=$("list");L.innerHTML="";fillListFilter();rows.forEach(r=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;d.dataset.id=r.id;
   d.innerHTML='<img alt=""><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" data-k="kb"> Im Kontaktbogen</label></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   {const c=splitCat(r.cat);fillSel(d.querySelector('[data-k="kfilm"]'),KFILM,c.kfilm);fillStrecke(d.querySelector('[data-k="strecke"]'),r.strecke_id);d.querySelector('[data-k="kb"]').checked=r.im_kontaktbogen!==false}
   d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);
@@ -112,9 +114,19 @@ function draw(){const L=$("list");L.innerHTML="";rows.forEach(r=>{const d=docume
   {const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"photos","details",null,"detail_")}
   d.querySelector(".sv").onclick=async()=>{try{const o=body(k=>d.querySelector('[data-k="'+k+'"]').value.trim());o.im_kontaktbogen=d.querySelector('[data-k="kb"]').checked;
     await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});say("Gespeichert.")}catch(x){say(x.message)}};
-  d.querySelector(".dl").onclick=async()=>{if(!confirm("Foto löschen?"))return;try{
-    await api("/rest/v1/photos?id=eq."+r.id,{method:"DELETE"});for(const n of r.details||[])await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});await api("/storage/v1/object/photos/"+enc(r.storage_path),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");load()}catch(x){say(x.message)}};
-  L.appendChild(d)})}
+  d.querySelector(".dl").onclick=()=>delPhoto(r);
+  L.appendChild(d)});filterList()}
+// ursprünglicher Dateiname ohne den Zeitstempel vom Hochladen, um doppelt hochgeladene Bilder zu erkennen
+const srcName=r=>(r.storage_path||"").replace(/^\d+_/,"").toLowerCase();
+/* Foto löschen; die Bilddatei nur, wenn kein anderer Eintrag sie noch verwendet */
+async function delPhoto(r){if(!confirm("„"+(r.title||"Ohne Titel")+"“ löschen?"))return;try{
+  await api("/rest/v1/photos?id=eq."+r.id,{method:"DELETE"});
+  for(const n of [...(r.details||[]),r.storage_path])if(!rows.some(x=>x.id!==r.id&&(x.storage_path===n||(x.details||[]).includes(n))))await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});
+  say("Gelöscht.");await load()}catch(x){say(x.message)}}
+/* Fotoliste nach Bildstrecke filtern (gleiche Auswahl wie im Bereich „Reihenfolge“) */
+function filterList(){const v=$("lfilter").value;[...$("list").children].forEach(d=>{const r=rows.find(x=>x.id===d.dataset.id);
+  d.classList.toggle("hide",!!v&&!(v==="kb"?r.im_kontaktbogen!==false:v==="none"?!r.strecke_id:v.startsWith("f:")?catsOf(r).includes(v.slice(2)):r.strecke_id===v.slice(2)))})}
+function fillListFilter(){const sel=$("lfilter"),cur=sel.value;sel.innerHTML="";sfList().concat([["none","Ohne Bildstrecke"]]).forEach(([k,l])=>sel.add(new Option(k?l:"Alle Fotos",k)));sel.value=cur;if(sel.selectedIndex<0)sel.value=""}
 /* Bereich „Reihenfolge“: Raster mit Ziehen (Maus) und ← → (Handy). Eine Rubrik zeigt nur ihre Bilder;
    diese tauschen untereinander die Plätze, die übrigen Fotos behalten ihre Position. Gespeichert wird alles auf einmal. */
 let ord=[],sf="",dragId=null;
@@ -129,9 +141,11 @@ function move(id,to){const v=visible().filter(x=>x!==id);v.splice(Math.max(0,Mat
 function sortDraw(){const F2=$("sfilter");F2.innerHTML="";sfList().forEach(([k,l])=>{const b=document.createElement("button");b.type="button";b.textContent=l;b.setAttribute("aria-pressed",String(k===sf));b.onclick=()=>{sf=k;sortDraw()};F2.appendChild(b)});
   const G=$("sgrid"),v=visible();G.innerHTML="";
   v.forEach((id,k)=>{const r=rows.find(x=>x.id===id),t=document.createElement("div");t.className="tile";t.draggable=true;t.dataset.id=id;
-    t.innerHTML='<img alt=""><div class="t"></div><div class="mv"><button type="button" title="nach vorne">←</button><span class="n">'+(ord.indexOf(id)+1)+'</span><button type="button" title="nach hinten">→</button></div>';
+    const dup=rows.some(x=>x.id!==id&&(srcName(x)===srcName(r)||(x.title||"").trim().toLowerCase()===(r.title||"").trim().toLowerCase()));
+    t.innerHTML='<img alt=""><div class="t"></div>'+(dup?'<div class="dup">doppelt? gleiche Datei oder gleicher Titel</div>':'')+'<div class="mv"><button type="button" title="nach vorne">←</button><span class="n">'+(ord.indexOf(id)+1)+'</span><button type="button" title="nach hinten">→</button><button type="button" class="del" title="Foto löschen">✕</button></div>';
     t.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);t.querySelector(".t").textContent=r.title||"Ohne Titel";
-    const [l,rt]=t.querySelectorAll("button");l.onclick=()=>move(id,k-1);rt.onclick=()=>move(id,k+1);
+    const [l,rt,del]=t.querySelectorAll("button");l.onclick=()=>move(id,k-1);rt.onclick=()=>move(id,k+1);
+    del.onclick=async()=>{if($("osave").disabled===false&&!confirm("Ungespeicherte Reihenfolge geht verloren. Trotzdem löschen?"))return;await delPhoto(r)};
     t.ondragstart=e=>{dragId=id;t.classList.add("drag");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};
     t.ondragend=()=>{dragId=null;t.classList.remove("drag")};
     t.ondragover=e=>{if(dragId&&dragId!==id)e.preventDefault()};
@@ -148,6 +162,7 @@ $("osave").onclick=async()=>{try{say("Speichere Reihenfolge …");
   rows.sort((a,b)=>a.sort-b.sort);draw();sortInit();say("Reihenfolge gespeichert ("+todo.length+" Fotos verschoben).")}catch(x){say("Fehler: "+x.message)}};
 $("oreset").onclick=()=>{sortInit();say("")};
 function tab(sortOn){$("sorter").classList.toggle("hide",!sortOn);$("editor").classList.toggle("hide",sortOn);$("t-sort").setAttribute("aria-pressed",String(sortOn));$("t-edit").setAttribute("aria-pressed",String(!sortOn))}
+$("lfilter").onchange=filterList;
 $("t-sort").onclick=()=>tab(true);$("t-edit").onclick=()=>tab(false);
 /* Urheber und Copyright als EXIF in das verkleinerte JPEG schreiben (Canvas entfernt alle Metadaten) */
 const META=[[0x013B,"Alexander Fichter"],[0x8298,"© Alexander Fichter"]];   // wie in Lightroom
