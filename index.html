@@ -454,13 +454,19 @@
   /* Breite Bildschirme mit Maus oder Trackpad: Logo und Datumszeile links, Überschrift bündig darunter,
      rechts neben dem Seagull das Menü als Inhaltsverzeichnis „In dieser Ausgabe“ */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
-    :root { --free: calc((100vw - 98.9vh) / 2 - max(2rem, 50vw - 880px) - 3rem); }   /* linke Textspalte endet vor der Linie */
+    /* Foto mit minimalem Abstand oben und unten (--imgpad) */
+    :root {
+      --imgpad: .5rem;
+      --imgw: min(100vw, (100vh - 2 * var(--imgpad)) * .989);
+      --imgl: calc((100vw - var(--imgw)) / 2);
+      --free: calc(var(--imgl) - max(2rem, 50vw - 880px) - 3rem);   /* linke Textspalte endet vor der Linie */
+    }
     .dateline { display: block; }
-    .brand { font-size: clamp(2.2rem, (50vw - 49.45vh - max(2rem, 50vw - 880px) - 1.5rem) / 4.7, 3.2rem); }   /* Schriftzug ≈ 4,7 × Schriftgröße */
+    .brand { font-size: clamp(2.2rem, (var(--imgl) - max(2rem, 50vw - 880px) - 1.5rem) / 4.7, 3.2rem); }   /* Schriftzug ≈ 4,7 × Schriftgröße */
     body:not([data-view]) .hero > div:first-child > p { font-size: 1.18rem; }
     body:not([data-view]) .site-head nav {
       position: fixed; z-index: 5;
-      left: calc(50vw + 49.45vh + 2.5rem); right: 2rem;
+      left: calc(var(--imgl) + var(--imgw) + 2.5rem); right: 2rem;
       top: calc(7rem + clamp(1.5rem, 5vw, 4rem));
       flex-direction: column; flex-wrap: nowrap; align-items: flex-end; gap: 0;
     }
