@@ -228,6 +228,7 @@
   footer { padding-block: 1.75rem; font-size: .92rem; color: var(--ink-soft); }
   footer .wrap { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; justify-content: space-between; }
   footer a { text-underline-offset: 3px; }
+  #copy { -webkit-user-select: none; user-select: none; touch-action: manipulation; }   /* Doppeltippen zoomt nicht und markiert nichts */
 
   /* ===== 7. Detailansicht (Lightbox): Foto links, Angaben rechts, Bedienknöpfe unten rechts ===== */
   dialog.lb {
@@ -635,7 +636,7 @@
 
 <footer>
   <div class="wrap">
-    <span>© <span id="year"></span> <span id="copyName"></span></span>
+    <span><span id="copy">©</span> <span id="year"></span> <span id="copyName"></span></span>
     <a href="datenschutz.html">Datenschutz</a>
   </div>
 </footer>
@@ -1012,6 +1013,13 @@ $("theme").addEventListener("click", () => {
   try { localStorage.setItem("theme", next); } catch (e) {}
 });
 applyProfile(); loadProjects(); setLang(lang); route();
+
+/* ---------- Geheimer Zugang: zweimal schnell auf das © tippen öffnet den Admin-Bereich ---------- */
+let copyTap = 0;
+$("copy").addEventListener("click", () => {   // zwei Klicks statt dblclick, damit es auch mit dem Finger klappt
+  const now = Date.now();
+  if (now - copyTap < 450) location.href = "admin.html"; else copyTap = now;
+});
 
 /* ---------- Bilderschutz: Rechtsklick und Ziehen sperren ---------- */
 document.addEventListener("contextmenu", (e) => {
