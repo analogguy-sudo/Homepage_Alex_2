@@ -5,8 +5,8 @@
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<link rel="icon" href="favicon.ico?v=20261101" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261101">
+<link rel="icon" href="favicon.ico?v=20261101" sizes="32x32">
+<link rel="icon" href="logo/favicon.svg?v=20261109" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261101">
 <link rel="manifest" href="manifest.webmanifest?v=20261101">
 <meta name="theme-color" content="#0E0E0E">
@@ -43,6 +43,10 @@
     padding-block: 1.75rem;
   }
   .brand { font-family: var(--display); font-size: 2.2rem; letter-spacing: .05em; text-transform: uppercase; text-decoration: none; }
+  .home-link { display: inline-flex; align-items: center; gap: .8rem; color: inherit; text-decoration: none; }
+  .logo { display: block; width: 48px; height: auto; flex: none; color: var(--ink); }
+  .logo circle { stroke-width: 14; } .logo line { stroke-width: 10; }
+  .site-head { align-items: center; }
   .tools { display: flex; gap: .5rem; align-items: center; }
   .tools button {
     font: inherit; font-weight: 600; font-size: .95rem;
@@ -72,7 +76,7 @@
 <body>
 
 <header class="wrap site-head">
-  <a class="brand" href="./">Analoge Welt</a>
+  <a class="home-link" href="./" aria-label="Analoge Welt – Startseite"><svg class="logo" aria-hidden="true" viewBox="90 90 460 460"><g transform="translate(320 320) scale(0.82) translate(-320 -320)"><circle cx="320" cy="320" r="270" fill="none" stroke="currentColor" stroke-width="9"></circle><line x1="470.0" y1="320.0" x2="314.2" y2="589.9" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line><line x1="395.0" y1="449.9" x2="83.3" y2="449.9" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line><line x1="245.0" y1="449.9" x2="89.2" y2="180.0" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line><line x1="170.0" y1="320.0" x2="325.8" y2="50.1" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line><line x1="245.0" y1="190.1" x2="556.7" y2="190.1" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line><line x1="395.0" y1="190.1" x2="550.8" y2="460.0" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line><text x="320" y="324" text-anchor="middle" dominant-baseline="central" font-family="'Cormorant Garamond', Garamond, Georgia, serif" font-weight="700" font-size="150" textLength="210" lengthAdjust="spacingAndGlyphs" fill="currentColor">ATF</text></g></svg><span class="brand">Analoge Welt</span></a>
   <div class="tools">
     <button type="button" data-lang="de">DE</button>
     <button type="button" data-lang="en">EN</button>
