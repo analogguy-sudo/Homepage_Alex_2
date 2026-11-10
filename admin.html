@@ -31,7 +31,7 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 .tile .del{color:#f19999!important;border-color:#6b2a2a!important}.tile .dup{font-size:.72rem;color:#f0b35a;margin:-.1rem 0 .25rem}
 .tile .n{font-size:.8rem;color:#a8a8a5}.tile.drag{opacity:.3}.hint{color:#a8a8a5;font-size:.9rem}
 .order{position:sticky;bottom:0;z-index:5;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;background:#151515;border:1px solid #333;border-radius:6px;padding:.6rem .9rem;margin:.8rem 0}
-.order.dirty{background:#2a2410;border-color:#6b5a1e}button:disabled{opacity:.4;cursor:default}
+.item.changed{border-color:#6b5a1e;background:#1d1a10}.order.dirty{background:#2a2410;border-color:#6b5a1e}button:disabled{opacity:.4;cursor:default}
 .th button{position:absolute;top:-7px;right:-7px;width:20px;height:20px;padding:0;border-radius:50%;line-height:1;font-size:.9rem}
 </style></head><body><main>
 <h1>Admin: Kontaktbogen</h1><p class="msg" id="msg" role="status"></p>
@@ -70,7 +70,8 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 <div class="row"><select name="kind"><option value="bildstrecke">Bildstrecke</option><option value="projekt">Projekt</option></select><select name="bereich"><option value="besonders">Reisen &amp; Touren</option><option value="allgemein">Allgemeines Thema</option></select><input name="title" placeholder="Titel (z. B. Andalusien)" required><input name="url" placeholder="Link (https://… oder leer)"><input name="sort" type="number" placeholder="Reihenfolge"></div>
 <div class="row"><textarea name="text_de" rows="3" placeholder="Text deutsch"></textarea><textarea name="text_en" rows="3" placeholder="Text englisch"></textarea></div>
 <button>Anlegen</button></form>
-<div id="plist"></div></div></div>
+<div id="plist"></div>
+<div class="order" id="ebar"><span id="estate">Keine ungespeicherten Änderungen.</span><button type="button" id="esave" disabled>Alle Änderungen speichern</button></div></div></div>
 <script>
 const U="https://owbbsnujnkhyyqvagtai.supabase.co",KEY="sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga";
 const $=i=>document.getElementById(i),F=["title","film","camera","format","year","location","focal","shutter","aperture"];
@@ -105,17 +106,31 @@ $("login").onsubmit=async e=>{e.preventDefault();say("Anmelden …");
   try{const r=await fetch(U+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify({email:$("em").value,password:$("pw").value})});
   const d=await r.json();if(!d.access_token)throw new Error(d.msg||d.error_description||"Login fehlgeschlagen");
   tok=d.access_token;try{sessionStorage.setItem("tok",tok)}catch(x){}say("");load()}catch(x){say(x.message)}};
-async function load(){try{rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();await loadP();draw();sortInit();show(true)}catch(x){say(x.message)}}
+/* Ungespeicherte Änderungen: jede geänderte Karte wird markiert. „Speichern“ an der Karte speichert nur sie,
+   „Alle Änderungen speichern“ unten in der Leiste speichert alle markierten Fotos, Bildstrecken und Projekte auf einmal. */
+const pending=()=>[...document.querySelectorAll("#list .item.changed, #plist .item.changed")];
+function upd(){const n=pending().length;$("ebar").classList.toggle("dirty",n>0);$("esave").disabled=!n;
+  $("estate").textContent=n?(n===1?"1 Eintrag geändert, noch nicht gespeichert.":n+" Einträge geändert, noch nicht gespeichert."):"Keine ungespeicherten Änderungen."}
+function track(d){const mark=e=>{if(e.target.closest(".strip"))return;d.classList.add("changed");upd()};d.addEventListener("input",mark);d.addEventListener("change",mark);
+  d.querySelector(".sv").onclick=async()=>{try{await d._save();d.classList.remove("changed");upd();say("Gespeichert.")}catch(x){say(x.message)}}}
+async function saveAll(){const list=pending();if(!list.length)return;$("esave").disabled=true;let ok=0,err="";say("Speichere "+list.length+" …");
+  for(const d of list){try{await d._save();d.classList.remove("changed");ok++}catch(x){err=x.message}}
+  upd();say(err?ok+" gespeichert, "+(list.length-ok)+" nicht: "+err:(ok===1?"1 Eintrag gespeichert.":ok+" Einträge gespeichert."))}
+// vor dem Neuladen der Listen nachfragen, damit keine Änderung still verloren geht
+async function keep(){if(pending().length&&confirm("Es gibt ungespeicherte Änderungen. Vorher speichern?"))await saveAll()}
+addEventListener("beforeunload",e=>{if(pending().length){e.preventDefault();e.returnValue=""}});
+async function load(){try{await keep();rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();await loadP();draw();sortInit();show(true)}catch(x){say(x.message)}}
 function draw(){const L=$("list");L.innerHTML="";fillListFilter();rows.forEach(r=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;
   d.innerHTML='<img alt=""><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" data-k="kb"> Im Kontaktbogen</label></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   {fillSel(d.querySelector('[data-k="kfilm"]'),KFILM,filmOf(r.cat));fillStrecke(d.querySelector('[data-k="strecke"]'),r.strecke_id);d.querySelector('[data-k="kb"]').checked=r.im_kontaktbogen!==false}
   d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);
   d.querySelectorAll("input").forEach(i=>i.value=r[i.dataset.k]??"");
   {const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"photos","details",null,"detail_")}
-  d.querySelector(".sv").onclick=async()=>{try{const o=body(k=>d.querySelector('[data-k="'+k+'"]').value.trim());o.im_kontaktbogen=d.querySelector('[data-k="kb"]').checked;
-    await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});say("Gespeichert.")}catch(x){say(x.message)}};
+  d._save=async()=>{const o=body(k=>d.querySelector('[data-k="'+k+'"]').value.trim());o.im_kontaktbogen=d.querySelector('[data-k="kb"]').checked;
+    await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});Object.assign(r,o)};
+  track(d);
   d.querySelector(".dl").onclick=()=>delPhoto(r);
-  L.appendChild(d)});filterList()}
+  L.appendChild(d)});filterList();upd()}
 // ursprünglicher Dateiname ohne den Zeitstempel vom Hochladen, um doppelt hochgeladene Bilder zu erkennen
 const srcName=r=>(r.storage_path||"").replace(/^\d+_/,"").toLowerCase();
 /* Foto löschen; die Bilddatei nur, wenn kein anderer Eintrag sie noch verwendet */
@@ -153,6 +168,7 @@ function sortDraw(){const F2=$("sfilter");F2.innerHTML="";sfList().forEach(([k,l
     t.ondragover=e=>{if(dragId&&dragId!==id)e.preventDefault()};
     t.ondrop=e=>{e.preventDefault();if(!dragId||dragId===id)return;const b=t.getBoundingClientRect(),after=e.clientX>b.left+b.width/2,w=visible().filter(x=>x!==dragId);move(dragId,w.indexOf(id)+(after?1:0))};
     G.appendChild(t)})}
+$("esave").onclick=saveAll;
 $("osave").onclick=async()=>{try{say("Speichere Reihenfolge …");
   const todo=ord.map((id,i)=>[rows.find(x=>x.id===id),i+1]).filter(([r,n])=>r.sort!==n||r.position!==n);
   // position ist in der Datenbank eindeutig und nicht negativ: erst auf freie hohe Zwischenwerte, dann auf die endgültigen Nummern
@@ -195,16 +211,17 @@ async function putImage(file,prefix="projekt_"){const bmp=await decode(file),sc=
   c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
   const blob=await withMeta(await new Promise(r=>c.toBlob(r,"image/jpeg",.88))),slug=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\.[^.]+$/,"").replace(/[^\w-]+/g,"_"),name=prefix+Date.now()+"_"+slug+".jpg";
   await api("/storage/v1/object/photos/"+name,{method:"POST",headers:{"Content-Type":"image/jpeg"},body:blob});return name}
-async function loadP(){try{prows=await(await api("/rest/v1/projects?select=*&order=sort.asc")).json();drawP();fillStrecke($("up-strecke"),$("up-strecke").value);fillStrecke($("bulk-strecke"),$("bulk-strecke").value)}catch(x){say(x.message)}}
+async function loadP(){try{await keep();prows=await(await api("/rest/v1/projects?select=*&order=sort.asc")).json();drawP();fillStrecke($("up-strecke"),$("up-strecke").value);fillStrecke($("bulk-strecke"),$("bulk-strecke").value)}catch(x){say(x.message)}}
 function drawP(){const L=$("plist");L.innerHTML="";prows.forEach(r=>{const d=document.createElement("div");d.className="box item";
   d.innerHTML='<img alt=""><div><div class="row">'+PF.map(k=>k.startsWith("text")?'<textarea data-k="'+k+'" rows="3" placeholder="'+k+'"></textarea>':'<input data-k="'+k+'" type="'+(k==="sort"?"number":"text")+'" placeholder="'+k+'">').join("")+'<select data-k="kind"><option value="projekt">Projekt</option><option value="bildstrecke">Bildstrecke</option></select><select data-k="bereich"><option value="besonders">Reisen &amp; Touren</option><option value="allgemein">Allgemeines Thema</option></select></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   if(r.image)d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.image);else d.querySelector("img").style.visibility="hidden";
   d.querySelectorAll("[data-k]").forEach(i=>i.value=r[i.dataset.k]??"");
   if(r.kind!=="bildstrecke"){const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"projects","images","image","bild_")}
-  d.querySelector(".sv").onclick=async()=>{try{const o={};d.querySelectorAll("[data-k]").forEach(i=>{const v=i.value.trim();o[i.dataset.k]=i.dataset.k==="sort"?(v===""?0:Number(v)):(v||null)});
-    await api("/rest/v1/projects?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});say("Gespeichert.")}catch(x){say(x.message)}};
+  d._save=async()=>{const o={};d.querySelectorAll("[data-k]").forEach(i=>{const v=i.value.trim();o[i.dataset.k]=i.dataset.k==="sort"?(v===""?0:Number(v)):(v||null)});
+    await api("/rest/v1/projects?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});Object.assign(r,o)};
+  track(d);
   d.querySelector(".dl").onclick=async()=>{if(!confirm("Wirklich löschen?"))return;try{await api("/rest/v1/projects?id=eq."+r.id,{method:"DELETE"});for(const n of [r.image,...(r.images||[])].filter(Boolean))if(!rows.some(x=>x.storage_path===n))await api("/storage/v1/object/photos/"+enc(n),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");await load()}catch(x){say(x.message)}};
-  L.appendChild(d)})}
+  L.appendChild(d)});upd()}
 $("pf").onsubmit=async e=>{e.preventDefault();say("Speichere …");try{const f=e.target.elements,file=$("pimg").files[0];
   const o={kind:f.kind.value,bereich:f.bereich.value,title:f.title.value.trim(),url:f.url.value.trim()||null,text_de:f.text_de.value.trim()||null,text_en:f.text_en.value.trim()||null,sort:f.sort.value===""?Math.max(0,...prows.map(r=>r.sort||0))+1:Number(f.sort.value)};
   const names=[];for(const x of $("pimg").files)names.push(await putImage(x));if(names.length){o.image=names[0];o.images=names.slice(1)}
