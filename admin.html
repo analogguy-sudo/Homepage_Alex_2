@@ -97,8 +97,9 @@ async function api(p,o={}){
   const r=await fetch(U+p,{...o,headers:h});
   if(r.status===401){out();throw new Error("Bitte neu anmelden.")}
   if(!r.ok)throw new Error((await r.text()).slice(0,200));return r}
-function body(get){const o={};F.forEach(k=>{const v=get(k);o[k]=k==="year"?(v===""?null:Number(v)):(v||null)});
-  o.cat=get("kfilm")||null;o.strecke_id=get("strecke")||null;return o}
+// leere Textfelder als "" speichern, nicht als null: Spalten wie film, camera und cat dürfen in der Datenbank nicht leer (null) sein
+function body(get){const o={};F.forEach(k=>{const v=get(k);o[k]=k==="year"?(v===""?null:Number(v)):v});
+  o.cat=get("kfilm")||"";o.strecke_id=get("strecke")||null;return o}
 const J={"Content-Type":"application/json",Prefer:"return=minimal"};
 fillSel($("up-kfilm"),KFILM,"");fillSel($("bulk-kfilm"),KFILM,"");
 $("out").onclick=out;
