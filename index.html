@@ -773,9 +773,14 @@
     body:not([data-view]) .site-head nav { display: grid; grid-template-columns: 1fr auto minmax(0, max-content); }
     /* auf Höhe der Linie unter dem Titel links beginnen (--toct, vom Skript gemessen), mit eigener feiner Linie darüber.
        Steht die Beschreibung woanders (Tablet), direkt unter der Linie der Kopfzeile – dann ohne eigene Linie (sonst doppelt). */
-    body:not([data-view]) .site-head nav { top: var(--toct, var(--headb, 7rem)); }
-    body:not([data-view]) .site-head nav::before { grid-column: 1 / -1; }
-    html.toc-at-head body:not([data-view]) .site-head nav::before { display: none; }
+    /* Überschrift „Inhalt“ wie im Magazin: klein über der Nummernspalte, die Linie darunter bleibt an ihrer Stelle (--toct) */
+    body:not([data-view]) .site-head nav { top: calc(var(--toct, calc(var(--headb, 7rem) + 1.6rem)) - 1.6rem); }
+    body:not([data-view]) .site-head nav::before {
+      content: attr(data-toc); grid-column: 2 / -1; align-self: end; border: 0;
+      font-family: var(--edge); font-weight: 600; font-size: .72rem; line-height: 1rem; padding-bottom: .6rem;
+      letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft);
+    }
+    body:not([data-view]) .site-head nav .nav-home + a { border-top: 1px solid var(--rule); }
     body:not([data-view]) .site-head nav a {
       grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; column-gap: .9rem; align-items: baseline; text-align: left;
     }
@@ -1425,7 +1430,7 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
-  "Startseite": "Home", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
+  "Startseite": "Home", "Inhalt": "Contents", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series",
   "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen zwischen Pfalz und Elsass": "Castle ruins between the Palatinate and Alsace", "Öffnen": "Open",
   "Fotos werden geladen …": "Loading photos …",
@@ -1466,6 +1471,7 @@ const pageList = () => ["top", "leuchttisch", "bildstrecken", ...(hasProjects ? 
 const PAGE_NAMES = { top: "Startseite", leuchttisch: "Leuchttisch", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
 function renderPagers() {
   const PAGES = pageList();
+  $("mainNav").dataset.toc = tr("Inhalt");   // Überschrift des Inhaltsverzeichnisses auf der Startseite
   // Seitennummern an den Überschriften: die Rubriken zählen ab 01, die Startseite hat keine Nummer
   PAGES.forEach((id, i) => {
     if (!i) return;
@@ -1708,9 +1714,9 @@ const setHeadH = () => {
 function setTocTop() {
   const p = document.querySelector(".hero > div:first-child > p"), root = document.documentElement;
   const ok = p && p.offsetParent && getComputedStyle(p).position === "static" && !document.body.dataset.view;
-  // ein Viertel des Weges von der Kopfzeilen-Linie zur Linie unter dem Titel
+  // Linie über den Rubriken: 40 % des Weges von der Kopfzeilen-Linie zur Linie unter dem Titel (darüber steht „Inhalt“)
   const headB = parseFloat(getComputedStyle(root).getPropertyValue("--headb")) || 0;
-  if (ok) root.style.setProperty("--toct", Math.round(headB + (p.getBoundingClientRect().top + scrollY - headB) * .25) + "px"); else root.style.removeProperty("--toct");
+  if (ok) root.style.setProperty("--toct", Math.round(headB + (p.getBoundingClientRect().top + scrollY - headB) * .4) + "px"); else root.style.removeProperty("--toct");
   root.classList.toggle("toc-at-head", !ok);
 }
 if (document.fonts) document.fonts.ready.then(setTocTop);
