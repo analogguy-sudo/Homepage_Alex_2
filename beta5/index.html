@@ -799,6 +799,11 @@
   @keyframes lay { from { opacity: 0; transform: translateX(var(--shift, 0px)) translateY(-8px) rotate(var(--tilt, 0deg)); } }
   /* bis zum Auflegen bleiben die Streifen unsichtbar (kein kurzes Aufblitzen beim Seitenwechsel) */
   .leuchttisch.prep .strip35 { opacity: 0; animation: none; }
+  /* Seite nie seitlich verschiebbar (iOS: Wert am <html> gilt fürs ganze Fenster, Sticky-Kopfzeile bleibt intakt) */
+  html { overflow-x: hidden; overscroll-behavior-x: none; }
+  /* Umschalten Alle/Schwarzweiß/Farbe: kurz überblenden statt den Tisch neu aufzulegen */
+  .leuchttisch.swap .strip35.laid { animation: swapIn .22s ease both; }
+  @keyframes swapIn { from { opacity: 0; } }
 </style>
 </head>
 
@@ -1059,7 +1064,7 @@ function renderFilters() {
     const b = document.createElement("button");
     b.type = "button"; b.className = "seg"; b.textContent = f ? tr(f) : tr("Alle");
     b.setAttribute("aria-pressed", String(f === state.filter));
-    b.addEventListener("click", () => { state.filter = f; renderFilters(); renderGrid(); });
+    b.addEventListener("click", () => { if (state.filter === f) return; state.filter = f; renderFilters(); renderGrid("swap"); });
     box.appendChild(b);
   });
 }
@@ -1070,12 +1075,14 @@ function renderFilters() {
 const perStrip = () => innerWidth < 600 ? 3 : innerWidth < 1000 ? 4 : 6;
 const hasMouse = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
 let stripN = 0;
-function renderGrid() {
+function renderGrid(mode) {
   state.shown = state.filter ? kbPhotos().filter((p) => (p.categories || []).includes(state.filter)) : kbPhotos();
   $("hint").textContent = tr(hasMouse() ? "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern."
                                        : "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.");
   const grid = $("grid"), els = [], per = perStrip();
-  stripN = per; grid.innerHTML = ""; grid.className = "leuchttisch play"; grid.style.setProperty("--per", per);
+  stripN = per; grid.innerHTML = "";
+  // „play“ = Streifen nacheinander auflegen (beim Öffnen der Seite); „swap“ = kurz überblenden (Filter, Sprache, Drehen)
+  grid.className = "leuchttisch " + (mode || "play"); grid.style.setProperty("--per", per);
   for (let s = 0, n = 0; s < state.shown.length; s += per, n++) {
     const chunk = state.shown.slice(s, s + per);
     const strip = document.createElement("div"); strip.className = "strip35";
@@ -1107,8 +1114,8 @@ function renderGrid() {
 }
 /* Beim Öffnen der Seite die Streifen nacheinander auflegen */
 function prepTable() { const g = $("grid"); if (g.classList.contains("leuchttisch")) { g.classList.remove("play"); g.classList.add("prep"); } }
-function replayTable() { const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("prep", "play"); void g.offsetWidth; g.classList.add("play"); }
-addEventListener("resize", () => { if (state.all.length && perStrip() !== stripN) renderGrid(); });
+function replayTable() { const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("prep", "play", "swap"); void g.offsetWidth; g.classList.add("play"); }
+addEventListener("resize", () => { if (state.all.length && perStrip() !== stripN) renderGrid("swap"); });
 
 /* Lupe: folgt der Maus über den Bildern und zeigt den Ausschnitt 2,6-fach vergrößert */
 let loupe = null;
@@ -1347,7 +1354,7 @@ function setLang(l) {
     n.nodeValue = l === "en" ? raw.replace(key, EN[key]) : raw;
   });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
-  renderCards(); renderPagers(); if (state.all.length) { renderFilters(); renderGrid(); renderTeaser(); }
+  renderCards(); renderPagers(); if (state.all.length) { renderFilters(); renderGrid("swap"); renderTeaser(); }
 }
 
 /* ---------- BETA: Vorschau auf dem Titelblatt (Handy) ---------- */
