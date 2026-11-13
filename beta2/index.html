@@ -1212,8 +1212,11 @@ const ALIAS = { equipment: "ueber-mich", kontakt: "ueber-mich" };   // Teile der
 let routedOnce = false;
 function route() {
   setMenu(false);
-  if (routedOnce && document.startViewTransition && !reduceMotion()) document.startViewTransition(applyRoute);
-  else applyRoute();
+  const toTop = !location.hash || location.hash === "#top";
+  if (routedOnce && document.startViewTransition && !reduceMotion()) {
+    const vt = document.startViewTransition(applyRoute);
+    if (toTop) vt.finished.then(() => window.scrollTo({ top: 0, behavior: "instant" })).catch(() => {});   // Safari: sicher ganz oben
+  } else applyRoute();
   routedOnce = true;
 }
 function applyRoute() {
@@ -1230,6 +1233,16 @@ function applyRoute() {
   if (t) t.scrollIntoView({ behavior: "instant" }); else window.scrollTo({ top: 0, behavior: "instant" });
 }
 addEventListener("hashchange", route);
+/* Zurück zum Titelblatt (Logo, „Titelblatt“, „← 01“): ohne Sprungmarke, damit Safari nicht selbst
+   unter die Kopfzeile scrollt – Adresse ohne #, Ansicht wechseln, ganz nach oben */
+document.addEventListener("click", (e) => {
+  const a = e.target.closest && e.target.closest('a[href="#top"]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  e.preventDefault();
+  if (location.hash) { try { history.pushState(null, "", location.pathname + location.search); } catch (err) {} route(); }
+  else window.scrollTo({ top: 0, behavior: reduceMotion() ? "instant" : "smooth" });
+});
+
 if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://… oder ./datei.jpg)
   const b = CONFIG.bgImage;
   const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
