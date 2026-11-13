@@ -767,19 +767,16 @@
     .cams { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.6rem 2.5rem; }
     .cam-text { max-width: none; }
   }
-  /* Titelblatt am Computer: Einstieg wie am Handy – Knopf „Bildstrecken ansehen“ und Vorschau vom Leuchttisch, links unter dem Titel */
+  /* Titelblatt am Computer: Vorschau vom Leuchttisch links unter dem Titel (die Rubriken stehen rechts im Inhaltsverzeichnis) */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
-    body:not([data-view]) .hero > div:first-child > .cta-desk { display: flex; margin-top: .4rem; }
-    .cta-desk a { font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: .85rem; text-decoration: none; }
-    .cta-desk .cta-main { padding: .8rem 1.1rem; background: var(--ink); color: var(--paper); }
     body:not([data-view]) .hero > div:first-child > .teaser-desk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2rem; max-width: min(260px, 26vh); }   /* bleibt auch auf niedrigen Bildschirmen über der Beschreibung */
     .teaser-desk:empty { display: none !important; }
     .teaser-desk button { padding: 0; border: 0; background: var(--paper-deep); aspect-ratio: 1; overflow: hidden; cursor: zoom-in; }
     .teaser-desk img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
     .teaser-desk button:hover img { transform: scale(1.04); }
     /* niedrigere Bildschirme: vier kleine Bilder in einer Reihe, ganz niedrige ohne Vorschau – nie über der Beschreibung */
-    @media (max-height: 880px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 100%; margin-top: 1.6rem; } }
-    @media (max-height: 700px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { display: none; } }
+    @media (max-height: 740px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 100%; margin-top: 1.6rem; } }
+    @media (max-height: 620px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { display: none; } }
     .hero .teaser-desk .teaser-label { grid-column: 1 / -1; margin: 0 0 .1rem; max-width: none; text-shadow: none; position: static; width: auto; padding: 0; border: 0;
       font-family: var(--edge); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
   }
@@ -828,9 +825,6 @@
     <div>
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
       <p data-en="Analogue photography<br>on 35 mm and medium format.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.</p>
-      <nav class="cta cta-desk" aria-label="Einstieg">
-        <a href="#bildstrecken" class="cta-main" data-en="View photo series&nbsp;→">Bildstrecken ansehen&nbsp;→</a>
-      </nav>
       <div class="teaser teaser-desk"></div>
     </div>
     <div class="mobile-hero-copy">
