@@ -671,6 +671,9 @@
   .leuchttisch.play .strip35.laid { animation: lay .35s ease-out both; animation-delay: calc(.1s + var(--i) * 40ms); }
   /* Auflegen: nur Deckkraft und kleine Verschiebung (keine Drehung während der Animation – schont das iPhone) */
   @keyframes lay { from { opacity: 0; } }   /* Streifen nur einblenden, ohne Bewegung */
+  @media (hover: none) { .leuchttisch.play .strip35.laid { animation: none; } }   /* Touch: Streifen liegen sofort da, die Seite blendet als Ganzes ein */
+  @media (hover: none) and (prefers-reduced-motion: no-preference) { dialog.lb[open] { animation: lbIn .18s ease-out; } }
+  @keyframes lbIn { from { opacity: 0; } }
   /* Perforation: hier scheint das Licht des Tisches durch */
   .strip35::before, .strip35::after {
     content: ""; position: absolute; left: 4px; right: 4px; height: clamp(4px, .7vw, 7px); border-radius: 1.5px;
@@ -1318,7 +1321,9 @@ function showLightbox() {
 }
 function openLightbox(i) { openViewer(state.shown, i, []); }
 /* Das angetippte Bild wächst fließend zur Vollansicht auf (und schrumpft beim Schließen zurück) */
-const canMorph = () => !!document.startViewTransition && !reduceMotion();
+// Touch-Geräte (iPhone, Tablet): keine Seiten-Schnappschüsse (View Transitions) – die ruckeln dort. Stattdessen schlichtes Einblenden.
+const isTouch = () => matchMedia("(hover: none)").matches;
+const canMorph = () => !!document.startViewTransition && !reduceMotion() && !isTouch();
 function openViewer(list, k, els) {
   state.lb = list; state.index = k; state.lbEls = els || [];
   const src = state.lbEls[k], big = $("lbImg");
@@ -1694,7 +1699,10 @@ let routedOnce = false;
 function route() {
   if (location.hash === "#kontaktbogen") { location.replace("#leuchttisch"); return; }   // alter Link
   const toTop = !location.hash || location.hash === "#top";
-  if (routedOnce && document.startViewTransition && !reduceMotion()) {
+  if (routedOnce && isTouch() && !reduceMotion()) {
+    applyRoute();
+    document.querySelector("main").animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+  } else if (routedOnce && document.startViewTransition && !reduceMotion()) {
     const vt = startVT(applyRoute);
     if (toTop) vt.finished.then(() => window.scrollTo({ top: 0, behavior: "instant" })).catch(() => {});   // Safari: sicher ganz oben
   } else applyRoute();
