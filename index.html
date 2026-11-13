@@ -784,6 +784,9 @@
       font-family: var(--edge); font-size: .78em; letter-spacing: .14em; color: var(--amber);
     }
     body:not([data-view]) .site-head nav .nav-t { grid-column: 3; grid-row: 1; white-space: nowrap; }
+    /* Pfeil hinter der Rubrik: zeigt, dass man hier weiterkommt; rückt beim Überfahren ein Stück nach rechts */
+    body:not([data-view]) .site-head nav .nav-t::after { content: "→"; display: inline-block; margin-left: .55em; color: var(--ink-soft); transition: transform .2s ease, color .2s; }
+    body:not([data-view]) .site-head nav a:hover .nav-t::after, body:not([data-view]) .site-head nav a:focus-visible .nav-t::after { transform: translateX(.3em); color: var(--ink); }
     body:not([data-view]) .site-head nav .nav-sub { grid-column: 3; grid-row: 2; white-space: normal; }   /* bei wenig Platz umbrechen statt abschneiden */
     body:not([data-view]) .site-head nav .nav-sub {
       display: block; margin-top: .2rem; font-family: var(--serif); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0;
@@ -1705,7 +1708,9 @@ const setHeadH = () => {
 function setTocTop() {
   const p = document.querySelector(".hero > div:first-child > p"), root = document.documentElement;
   const ok = p && p.offsetParent && getComputedStyle(p).position === "static" && !document.body.dataset.view;
-  if (ok) root.style.setProperty("--toct", Math.round(p.getBoundingClientRect().top + scrollY) + "px"); else root.style.removeProperty("--toct");
+  // halbe Höhe zwischen Kopfzeilen-Linie und der Linie unter dem Titel
+  const headB = parseFloat(getComputedStyle(root).getPropertyValue("--headb")) || 0;
+  if (ok) root.style.setProperty("--toct", Math.round((headB + p.getBoundingClientRect().top + scrollY) / 2) + "px"); else root.style.removeProperty("--toct");
   root.classList.toggle("toc-at-head", !ok);
 }
 if (document.fonts) document.fonts.ready.then(setTocTop);
