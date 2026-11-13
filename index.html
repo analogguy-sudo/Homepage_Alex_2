@@ -188,7 +188,7 @@
   .filters-sub { margin: 1rem 0 .2rem; font-family: var(--edge); font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
   .lb-strecke { background: none; border: 0; padding: 0; margin-top: .8rem; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .strecke h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1; margin: 0 0 .6rem; }
-  .strecke > p { max-width: 52ch; margin: 0 0 .4rem; font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--ink-soft); }
+  .strecke-head > p { max-width: 52ch; margin: 0 0 .4rem; font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--ink-soft); }
 
   /* Über mich: Text als lesbare Spalte, Porträt darunter (Handy) bzw. rechts daneben (Tablet quer, Computer) */
   #ueber-mich .about { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 clamp(3rem, 7vw, 7rem); align-items: start; }
@@ -429,7 +429,8 @@
     /* Foto mit minimalem Abstand oben und unten (--imgpad) */
     :root {
       --imgpad: .5rem;
-      --imgw: min(100vw, (100vh - 2 * var(--imgpad)) * .989);
+      --ar: .76;   /* Seitenverhältnis des Titelbild-Ausschnitts (Breite/Höhe): schmaler als das Original, die Kamera bleibt mittig */
+      --imgw: min(100vw, (100vh - 2 * var(--imgpad)) * var(--ar));
       --imgl: calc((100vw - var(--imgw)) / 2);
       --free: calc(var(--imgl) - max(2rem, 50vw - 880px) - 3rem);   /* linke Textspalte endet vor der Linie */
       --logo: clamp(68px, (var(--imgl) - max(2rem, 50vw - 880px) - 1.5rem) * .3, 96px);   /* Logo oben links, wächst mit dem Platz links vom Foto */
@@ -619,6 +620,10 @@
   }
 
   /* Vollansicht: fließender Übergang und Zoom */
+  html.vt-photo::view-transition-old(root) { animation: none; opacity: 0; }
+  html.vt-photo::view-transition-new(root) { animation: none; }
+  dialog.lb[open] .lb-info, dialog.lb[open] .lb-ctrl { animation: lbUi .35s .12s ease both; }   /* Text und Knöpfe kommen kurz nach dem Foto */
+  @keyframes lbUi { from { opacity: 0; } }
   ::view-transition-group(photo) { animation-duration: .42s; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
   ::view-transition-old(photo), ::view-transition-new(photo) { height: 100%; object-fit: contain; }
   .lb-stage.zoomed { display: block; overflow: auto; height: calc(100dvh - 3rem); -webkit-overflow-scrolling: touch; cursor: zoom-out; }
@@ -653,11 +658,6 @@
                 0 0 90px 10px rgba(255, 247, 222, .16),                         /* Licht strahlt in den dunklen Raum */
                 0 34px 60px -30px rgba(0, 0, 0, .85);
   }
-  .leuchttisch::before {   /* feines Raster auf der Scheibe, wie auf echten Leuchttischen */
-    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-    background-image: linear-gradient(rgba(60, 55, 40, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(60, 55, 40, .05) 1px, transparent 1px);
-    background-size: 22px 22px; background-position: -1px -1px;
-  }
   :root[data-theme="light"] .leuchttisch { box-shadow: 0 0 0 5px #c4c3bd, 0 0 0 6px #8e8d88, 0 0 0 7px #e4e3de, 0 26px 50px -28px rgba(0,0,0,.45); }
   .strip35 {
     position: relative; display: grid; grid-template-columns: repeat(var(--per), minmax(0, 1fr)); gap: clamp(4px, .8vw, 8px);
@@ -666,7 +666,7 @@
     transform: translateX(var(--shift, 0px)) rotate(var(--tilt, 0deg)); opacity: 0;
   }
   .strip35.laid { opacity: 1; }
-  .leuchttisch.play .strip35.laid { animation: lay .55s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
+  .leuchttisch.play .strip35.laid { animation: lay .45s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 45ms); }
   /* Auflegen: nur Deckkraft und kleine Verschiebung (keine Drehung während der Animation – schont das iPhone) */
   @keyframes lay { from { opacity: 0; transform: translateX(var(--shift, 0px)) translateY(-8px) rotate(var(--tilt, 0deg)); } }
   /* Perforation: hier scheint das Licht des Tisches durch */
@@ -676,11 +676,6 @@
   }
   .strip35::before { top: clamp(4px, .7vw, 6px); }
   .strip35::after { bottom: clamp(4px, .7vw, 6px); }
-  .edge-film {
-    position: absolute; top: clamp(3px, .6vw, 5px); right: 10px; z-index: 1; padding: 0 5px;
-    font-family: var(--edge); font-weight: 600; letter-spacing: .14em; font-size: clamp(6px, 1.05vw, 9px); line-height: 1.2;
-    color: #f0b94e; background: rgb(17, 15, 13);
-  }
   .frame35 { position: relative; display: grid; place-items: center; aspect-ratio: 3 / 2; padding: 0; border: 0; background: #060605; cursor: zoom-in; overflow: hidden; }
   /* Bild nur so groß wie sein Inhalt (statt mit schwarzen Rändern), damit der Übergang zur Großansicht sauber wächst */
   .frame35 img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; min-width: 0; min-height: 0; }
@@ -714,8 +709,6 @@
     body::after { display: none; }
     .leuchttisch { box-shadow: 0 0 0 5px #c4c3bd, 0 0 0 6px #8e8d88, 0 0 0 7px #d9d8d3, 0 22px 40px -24px rgba(0,0,0,.8); }
   }
-  /* bis zum Auflegen bleiben die Streifen unsichtbar (kein kurzes Aufblitzen beim Seitenwechsel) */
-  .leuchttisch.prep .strip35 { opacity: 0; animation: none; }
   /* Seite nie seitlich verschiebbar (iOS: Wert am <html> gilt fürs ganze Fenster, Sticky-Kopfzeile bleibt intakt) */
   html { overflow-x: hidden; overscroll-behavior-x: none; }
   /* Umschalten Alle/Schwarzweiß/Farbe: sofort wechseln, ohne Überblenden (das Abdunkeln wirkte auf dem iPhone wie Flackern) */
@@ -742,6 +735,122 @@
   .back-to-photo[hidden] { display: none; }
   @keyframes backIn { from { opacity: 0; transform: translate(-50%, 12px); } }
   @media (prefers-reduced-motion: reduce) { .cam.flash, .back-to-photo { animation: none; } }
+
+  /* ==========================================================================
+     13. Feinschliff am Computer: Bildstrecken, Equipment, Titelblatt
+     ========================================================================== */
+  /* Unterzeile im Menü nur im Inhaltsverzeichnis des Titelblatts (Computer/Tablet quer) */
+  .nav-sub { display: none; }
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    /* Hochformat-Aufmacher links, Titel und Text rechts daneben – wie eine Magazinseite.
+       Die Strecke löst sich dafür in das Raster des Artikels auf (display: contents), am Handy bleibt alles untereinander. */
+    .strecke.lead-split {
+      display: grid; grid-template-columns: 1fr 1fr; align-items: start; max-width: 1100px;
+      gap: clamp(1.75rem, 5vw, 3.5rem) clamp(.6rem, 2.4vw, 1.75rem);
+    }
+    .strecke.lead-split > .story { display: contents; }
+    .strecke.lead-split > .strecke-head { grid-column: 2; grid-row: 1; align-self: center; padding: 0 0 0 .5rem; }
+    .strecke.lead-split > .story > .shot.lead { grid-column: 1; grid-row: 1; justify-self: end; }
+    /* Aufmacher so hoch, dass er samt Bildunterschrift unter der Kopfzeile auf den Bildschirm passt */
+    .strecke.lead-split .shot.lead button, .strecke.lead-split .shot.lead figcaption { width: min(100%, calc(72vh * var(--r, .75))); }
+    .strecke.lead-split .strecke-head h3 { font-size: clamp(2.4rem, 4vw, 3.8rem); }
+    /* einzelne Hoch- und Quadratformate mittig statt links mit Leerraum daneben */
+    .shot.solo button, .shot.solo figcaption { margin-inline: auto; }
+    /* Equipment: drei Kameras pro Reihe – lesbare Texte, größere Kamerafotos */
+    .cams { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.6rem 2.5rem; }
+    .cam-text { max-width: none; }
+  }
+  /* Titelblatt am Computer: Vorschau vom Leuchttisch links unter dem Titel (die Rubriken stehen rechts im Inhaltsverzeichnis) */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    body:not([data-view]) .hero > div:first-child > .teaser-desk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2rem; max-width: min(260px, 26vh); }   /* bleibt auch auf niedrigen Bildschirmen über der Beschreibung */
+    .teaser-desk:empty { display: none !important; }
+    .teaser-desk button { padding: 0; border: 0; background: var(--paper-deep); aspect-ratio: 1; overflow: hidden; cursor: zoom-in; }
+    .teaser-desk img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+    .teaser-desk button:hover img { transform: scale(1.04); }
+    /* niedrigere Bildschirme: vier kleine Bilder in einer Reihe, ganz niedrige ohne Vorschau – nie über der Beschreibung */
+    @media (max-height: 740px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 100%; margin-top: 1.6rem; } }
+    @media (max-height: 620px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { display: none; } }
+    .hero .teaser-desk .teaser-label { grid-column: 1 / -1; margin: 0 0 .1rem; max-width: none; text-shadow: none; position: static; width: auto; padding: 0; border: 0;
+      font-family: var(--edge); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+  }
+  /* Titelblatt-Inhaltsverzeichnis: Nummer direkt vor der Rubrik, darunter eine kurze Unterzeile */
+  @media (min-width: 1024px) and (min-height: 501px) and (orientation: landscape) and (hover: none),
+         (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+    body:not([data-view]) .site-head nav a { padding-top: .6rem; padding-bottom: .6rem; }
+    /* Inhaltsverzeichnis: Nummern in einer eigenen Spalte direkt vor den Rubriken – alle Nummern senkrecht
+       untereinander, Rubriken linksbündig daneben, der ganze Block rechts. Die Zeilen teilen sich die Spalten (subgrid). */
+    body:not([data-view]) .site-head nav { display: grid; grid-template-columns: 1fr auto minmax(0, max-content); }
+    /* direkt unter der Linie der Kopfzeile beginnen – die ist schon die obere Linie, sonst entsteht eine leere Zeile */
+    body:not([data-view]) .site-head nav { top: var(--headb, 7rem); }
+    body:not([data-view]) .site-head nav::before { display: none; }
+    body:not([data-view]) .site-head nav a {
+      grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; column-gap: .9rem; align-items: baseline; text-align: left;
+    }
+    body:not([data-view]) .site-head nav a::before {
+      content: attr(data-no); grid-column: 2; grid-row: 1;
+      font-family: var(--edge); font-size: .78em; letter-spacing: .14em; color: var(--amber);
+    }
+    body:not([data-view]) .site-head nav .nav-t { grid-column: 3; grid-row: 1; white-space: nowrap; }
+    body:not([data-view]) .site-head nav .nav-sub { grid-column: 3; grid-row: 2; white-space: normal; }   /* bei wenig Platz umbrechen statt abschneiden */
+    body:not([data-view]) .site-head nav .nav-sub {
+      display: block; margin-top: .2rem; font-family: var(--serif); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0;
+      font-size: .82em; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: .15em;   /* Kursiv-Überhang nicht abschneiden */
+    }
+  }
+
+  /* ==========================================================================
+     14. Titelblatt am Computer: wechselnde Fotos vom Leuchttisch links unter dem Titel.
+     Das Seagull bleibt groß in der Mitte. Wechsel mit einer sich schließenden und öffnenden Blende („Auslöser“).
+     ========================================================================== */
+  .slides, .slide-cap { display: none; }
+  .slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; cursor: zoom-in; }
+  /* Blende: neun Lamellen über dem Bild, nur sichtbar während des Wechsels */
+  .iris { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; visibility: hidden; }
+  .iris-rot { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; will-change: transform; }
+  .blade { position: absolute; display: block; transform-origin: 50% 100%; will-change: transform; background: #0d0d0c; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+  .slide.on { opacity: 1; z-index: 1; }
+  .slide-cap { font-family: var(--edge); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); line-height: 1.5; }
+  .slide-cap .no { color: var(--amber); }
+  .slide-cap > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* Filmrand-Zeile immer einzeilig */
+  .slide-cap .to { display: inline-block; margin-top: .45rem; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--ink-soft); cursor: pointer; background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; }
+  /* Computer/Tablet quer: links unter dem Titel, so breit wie die Spalte – aber nie bis in die Beschreibung */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    body:not([data-view]) .hero > div:first-child > .slides.ready {
+      display: block; position: relative; overflow: hidden; margin-top: 2rem; background: #0b0b0b;
+      width: min(100%, 30vh); aspect-ratio: 1;   /* Startwert; das Skript passt die Größe an den freien Platz an */
+    }
+    body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { display: block; margin-top: .7rem; max-width: min(100%, 36vh); }
+  }
+  @media (min-width: 821px) and (orientation: landscape) and (max-height: 800px) {
+    body:not([data-view]) .hero > div:first-child > .slides.ready { width: min(100%, 27vh); margin-top: 1.4rem; }
+    body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { max-width: min(100%, 27vh); }
+  }
+  @media (min-width: 821px) and (orientation: landscape) and (max-height: 620px) {
+    body:not([data-view]) .hero > div:first-child > .slides.ready, body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { display: none; }
+  }
+  /* Computer: Beschreibung direkt unter dem Titel statt unten verankert – darunter hat die Bilderfolge Platz */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    body:not([data-view]) .hero.has-slides > div:first-child > p {
+      position: static; width: auto; max-width: 34ch; margin: 0; padding: 1rem 0 0; border-top: 1px solid var(--rule); font-size: 1.05rem;
+    }
+    body:not([data-view]) .hero.has-slides > div:first-child > h1 { margin-bottom: 1.2rem; }
+    body:not([data-view]) .hero.has-slides { padding-bottom: .5rem; padding-top: clamp(1rem, 3vh, 3rem); }
+    body:not([data-view]) .hero.has-slides > div:first-child > .slides.ready { margin-top: 1.6rem; }
+  }
+  /* Breite Bildschirme mit Maus: das Seagull sitzt in einem schmaleren Rahmen (Ausschnitt statt ganzes Bild) */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+    body:not([data-view]) .bgfix {
+      inset: auto; left: var(--imgl); width: var(--imgw); top: var(--imgpad); height: calc(100vh - 2 * var(--imgpad));
+      background-size: cover; background-position: 50% 50%;
+    }
+  }
+  /* Handy und Tablet hoch: das Titelbild selbst wechselt (an der Stelle des Seagull), Filmrand-Zeile darunter */
+  @media (max-width: 1100px) and (orientation: portrait) {
+    body:not([data-view]) .hero.has-slides::before { display: none; }
+    body:not([data-view]) .hero.has-slides > .slides.ready { display: block; order: -1; position: relative; overflow: hidden; width: 100%; aspect-ratio: 1978 / 1315; background: #0b0b0b; }
+    body:not([data-view]) .hero.has-slides .mobile-hero-copy > .slide-cap { display: block; margin: 0 0 .9rem; }
+    body:not([data-view]) .hero.has-slides #teaser { display: none !important; }
+  }
 </style>
 </head>
 
@@ -756,11 +865,11 @@
   <a class="home-link" href="#top" aria-label="Analoge Welt – Startseite"><span class="logo logo-head" aria-hidden="true"></span><span class="brand">Analoge Welt</span></a>
   <div class="head-right">
     <nav id="mainNav" aria-label="Hauptnavigation">
-      <a href="#top" class="nav-home">Titelblatt</a>
-      <a href="#leuchttisch">Leuchttisch</a>
-      <a href="#bildstrecken">Bildstrecken</a>
-      <a href="#projekte" class="nav-proj" hidden>Projekte</a>
-      <a href="#ueber-mich">Über mich</a>
+      <a href="#top" class="nav-home">Startseite</a>
+      <a href="#leuchttisch"><span class="nav-t">Leuchttisch</span><span class="nav-sub">Meine liebsten Bilder</span></a>
+      <a href="#bildstrecken"><span class="nav-t">Bildstrecken</span><span class="nav-sub">Fotos, die zusammengehören</span></a>
+      <a href="#projekte" class="nav-proj" hidden><span class="nav-t">Projekte</span><span class="nav-sub">Arbeiten rund um den Film</span></a>
+      <a href="#ueber-mich"><span class="nav-t">Über mich</span><span class="nav-sub">Kameras und Kontakt</span></a>
     </nav>
     <span class="tools">
       <button class="icon" id="theme" type="button" aria-label="Hell / Dunkel" title="Hell / Dunkel"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg></button>
@@ -775,6 +884,8 @@
     <div>
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
       <p data-en="Analogue photography<br>on 35 mm and medium format.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.</p>
+      <div class="slides" id="slides" aria-roledescription="Bilderfolge" aria-label="Vom Leuchttisch"></div>
+      <div class="slide-cap slide-cap-d" aria-live="polite"></div>
     </div>
     <div class="mobile-hero-copy">
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
@@ -952,7 +1063,7 @@ function warmStrecken() {   // beim Öffnen der Seite „Bildstrecken“: Aufmac
 }
 /* Hoch- und quadratische Formate paarweise nebeneinander; wer keinen Partner hat, steht allein und größer */
 function pairUp(story) {
-  const shots = [...story.children];
+  const shots = [...story.querySelectorAll(":scope > .shot")];
   const half = (n) => n && !n.classList.contains("lead") && !n.classList.contains("wide");
   for (let i = 1; i < shots.length; i++) {
     if (!half(shots[i])) continue;
@@ -1059,8 +1170,6 @@ function renderGrid(mode) {
     strip.style.setProperty("--i", n);
     strip.style.setProperty("--tilt", ((((n * 37) % 9) - 4) * 0.09) + "deg");      // leicht schief …
     strip.style.setProperty("--shift", ((((n * 53) % 7) - 3) * (per <= 3 ? 1.5 : 4)) + "px");   // … und nicht ganz bündig, wie von Hand ausgelegt
-    const film = ((chunk.find((p) => p.film) || {}).film || "").toUpperCase();
-    const ed = document.createElement("span"); ed.className = "edge-film"; ed.textContent = film ? film + "  ◂" : ""; strip.appendChild(ed);
     let left = chunk.length;
     const lay = () => strip.classList.add("laid");
     const one = () => { if (--left === 0) lay(); };
@@ -1083,8 +1192,7 @@ function renderGrid(mode) {
   if (hasMouse()) setupLoupe(grid);
 }
 /* Beim Öffnen der Seite die Streifen nacheinander auflegen */
-function prepTable() { const g = $("grid"); if (g.classList.contains("leuchttisch")) { g.classList.remove("play"); g.classList.add("prep"); } }
-function replayTable() { const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("prep", "play", "swap"); void g.offsetWidth; g.classList.add("play"); }
+function replayTable() { const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("play", "swap"); void g.offsetWidth; g.classList.add("play"); }
 addEventListener("resize", () => { if (state.all.length && perStrip() !== stripN) renderGrid("swap"); });
 
 /* Lupe: folgt der Maus über den Bildern und zeigt den Ausschnitt 2,6-fach vergrößert */
@@ -1206,22 +1314,24 @@ function openViewer(list, k, els) {
     if (src) src.style.viewTransitionName = "";
     showLightbox(); lb.showModal();
     big.style.viewTransitionName = "photo";
-    try { await Promise.race([big.decode(), new Promise((r) => setTimeout(r, 300))]); } catch (e) {}
+    try { await Promise.race([big.decode(), new Promise((r) => setTimeout(r, 120))]); } catch (e) {}   // Vorschaubild liegt schon im Speicher
   };
   if (!src || !canMorph()) { showLightbox(); lb.showModal(); return; }
   src.style.viewTransitionName = "photo";
-  startVT(go).finished.finally(() => { big.style.viewTransitionName = ""; });
+  document.documentElement.classList.add("vt-photo");
+  startVT(go).finished.finally(() => { big.style.viewTransitionName = ""; document.documentElement.classList.remove("vt-photo"); });
 }
 function closeViewer() {
   const el = state.lbEls && state.lbEls[state.index], big = $("lbImg");
   if (!lb.open) return;
   if (!el || !el.isConnected || !canMorph() || big.closest(".zoomed")) { lb.close(); return; }
   big.style.viewTransitionName = "photo";
+  document.documentElement.classList.add("vt-photo");
   startVT(() => {
     big.style.viewTransitionName = ""; lb.close();
     el.scrollIntoView({ block: "nearest", behavior: "instant" });   // man landet bei dem Bild, das man zuletzt angesehen hat
     el.style.viewTransitionName = "photo";
-  }).finished.finally(() => { el.style.viewTransitionName = ""; });
+  }).finished.finally(() => { el.style.viewTransitionName = ""; document.documentElement.classList.remove("vt-photo"); });
 }
 function step(d) {
   const n = state.lb.length;
@@ -1290,6 +1400,7 @@ loadPhotos().then((photos) => {
   if (document.body.dataset.view === "bildstrecken") warmStrecken();
   renderCards();   // Bildstrecken brauchen die Fotos
   loadCameras();
+  setupSlides();
 }).catch((err) => {
   console.error(err);
   $("status").textContent = "Die Fotos konnten nicht geladen werden. Prüfe URL und Key in index.html sowie die Lese-Richtlinie in Supabase.";
@@ -1297,7 +1408,7 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
-  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
+  "Kontaktbogen": "Contact sheet", "Startseite": "Home", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series",
   "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen der Pfalz": "Castle ruins of the Palatinate", "Burgruinen zwischen Pfalz und Elsass": "Castle ruins between the Palatinate and Alsace", "Öffnen": "Open",
   "Fotos werden geladen …": "Loading photos …",
@@ -1307,7 +1418,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Zur Bildstrecke": "To the photo series", "Titelbild": "Cover", "Meine liebsten Bilder": "My favourite frames", "Fotos, die zusammengehören": "Photos that belong together", "Arbeiten rund um den Film": "Work around film", "Kameras und Kontakt": "Cameras and contact", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1333,28 +1444,35 @@ function setLang(l) {
 }
 
 /* ---------- Vorschau auf dem Titelblatt (Handy) ---------- */
-function renderTeaser() {
-  const box = $("teaser"); box.innerHTML = "";
+function renderTeaser() {   // Vorschau vom Leuchttisch: am Handy unter dem Titelbild, am Computer links unter dem Titel
   const pics = kbPhotos().slice(0, 4);
-  if (pics.length < 4) return;
-  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Vom Leuchttisch"); box.appendChild(lab);
-  pics.forEach((p, i) => {
-    const b = document.createElement("button"), im = document.createElement("img");
-    b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
-    im.alt = ""; im.decoding = "async"; im.src = thumb(p.src, 300); fadeIn(im, p.src); b.appendChild(im);
-    b.addEventListener("click", () => openViewer(pics, i, [...box.querySelectorAll("img")]));
-    box.appendChild(b);
+  document.querySelectorAll(".teaser").forEach((box) => {
+    box.innerHTML = "";
+    if (pics.length < 4) return;
+    const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Vom Leuchttisch"); box.appendChild(lab);
+    pics.forEach((p, i) => {
+      const b = document.createElement("button"), im = document.createElement("img");
+      b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
+      im.alt = ""; im.decoding = "async"; im.src = thumb(p.src, 300); fadeIn(im, p.src); b.appendChild(im);
+      b.addEventListener("click", () => openViewer(pics, i, [...box.querySelectorAll("img")]));
+      box.appendChild(b);
+    });
   });
 }
 
 /* ---------- Weiterblättern am Ende jeder Unterseite ---------- */
 let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
 const pageList = () => ["top", "leuchttisch", "bildstrecken", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
-const PAGE_NAMES = { top: "Titelblatt", leuchttisch: "Leuchttisch", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
+const PAGE_NAMES = { top: "Startseite", leuchttisch: "Leuchttisch", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
 function renderPagers() {
   const PAGES = pageList();
-  // Seitennummern an den Überschriften (01 = Titelblatt)
-  PAGES.forEach((id, i) => { const h = document.querySelector("#" + id + " h2"); if (h) h.dataset.num = String(i + 1).padStart(2, "0"); });
+  // Seitennummern an den Überschriften: die Rubriken zählen ab 01, die Startseite hat keine Nummer
+  PAGES.forEach((id, i) => {
+    if (!i) return;
+    const no = String(i).padStart(2, "0");
+    const h = document.querySelector("#" + id + " h2"); if (h) h.dataset.num = no;
+    const a = document.querySelector('#mainNav a[href="#' + id + '"]'); if (a) a.dataset.no = no;
+  });
   document.querySelectorAll(".pager").forEach((n) => n.remove());
   PAGES.slice(1).forEach((id) => {
     // „Über mich“ endet mit dem Kontakt, dort steht das Weiterblättern
@@ -1367,7 +1485,7 @@ function renderPagers() {
     [[k - 1, "prev", "← "], [k + 1, "next", ""]].forEach(([j, cls, pre]) => {
       if (j < 0 || j >= PAGES.length) return;
       const a = document.createElement("a"); a.className = cls; a.href = "#" + PAGES[j];
-      const s = document.createElement("small"); s.textContent = pre + String(j + 1).padStart(2, "0") + (cls === "next" ? " →" : "");
+      const s = document.createElement("small"); s.textContent = j === 0 ? "←" : pre + String(j).padStart(2, "0") + (cls === "next" ? " →" : "");
       const t = document.createElement("span"); t.textContent = tr(PAGE_NAMES[PAGES[j]]);
       a.append(s, t); nav.appendChild(a);
     });
@@ -1402,6 +1520,42 @@ const projSel = { projekt: null, bildstrecke: null };
 function renderCards() { renderKind("projekt", "proj"); renderKind("bildstrecke", "strk"); }
 // allgemeine Themen zuerst, dann „Reisen & Touren“
 const streckenItems = () => projects.filter((p) => p.kind === "bildstrecke").sort((a, b) => (a.bereich === b.bereich ? 0 : a.bereich === "allgemein" ? -1 : 1) || (a.sort || 0) - (b.sort || 0));
+/* Wechsel der Bildstrecke: alte Strecke ausblenden, das erste Bild der neuen schon laden, dann am Anfang der
+   neuen Strecke einblenden – nicht mitten drin an der alten Scrollstelle, und ohne unscharfe Platzhalter. */
+let switching = false;
+async function switchItem(kind, pre, items, next) {
+  if (switching) return; switching = true;
+  const det = $(pre + "Detail"), wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const anim = !reduceMotion() && det.childElementCount > 0;
+  let ready = Promise.resolve();
+  const lead = next !== null && kind === "bildstrecke" && items[next] ? state.all.find((f) => f.strecke === items[next].id) : null;
+  if (lead) {
+    const im = new Image();
+    im.sizes = "(min-width: 1200px) 1100px, 100vw"; im.srcset = storySrcset(lead.src); im.src = sized(lead.src, innerWidth < 700 ? 640 : 1080);
+    ready = im.decode().catch(() => {});
+  }
+  try {
+    if (anim) {
+      det.style.transition = "opacity .2s ease"; det.style.opacity = "0";
+      await Promise.all([wait(200), Promise.race([ready, wait(450)])]);
+    }
+    projSel[kind] = next; renderKind(kind, pre);
+    if (next !== null) {
+      const top = det.getBoundingClientRect().top, head = parseFloat(getComputedStyle(det).scrollMarginTop) || 0;
+      if (top < head || top > innerHeight * .55) {
+        if (anim) det.scrollIntoView({ behavior: "instant", block: "start" });   // unsichtbar springen, dann einblenden
+        else det.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+      }
+    }
+    if (anim) {
+      det.style.transition = "none"; det.style.transform = "translateY(10px)"; det.getBoundingClientRect();
+      det.style.transition = "opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1)"; det.style.opacity = "1"; det.style.transform = "none";
+      await wait(450);
+    }
+  } finally {
+    det.style.transition = det.style.opacity = det.style.transform = ""; switching = false;
+  }
+}
 function renderKind(kind, pre) {
   const list = $(pre + "List"), det = $(pre + "Detail"); list.innerHTML = ""; det.innerHTML = "";
   if (!projLoaded) return;
@@ -1416,14 +1570,7 @@ function renderKind(kind, pre) {
     }
     const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = tr(p.title);
     b.setAttribute("aria-pressed", String(i === sel));
-    b.addEventListener("click", () => {
-      projSel[kind] = sel === i ? null : i; renderKind(kind, pre);
-      // Handy: Inhalt steht unter der Liste – sanft dorthin scrollen, damit man sieht, dass etwas passiert ist
-      if (projSel[kind] !== null) requestAnimationFrame(() => {
-        const d = $(pre + "Detail");
-        if (d.getBoundingClientRect().top > innerHeight * .55) d.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
-      });
-    });
+    b.addEventListener("click", () => switchItem(kind, pre, items, sel === i ? null : i));
     list.appendChild(b);
   });
   const p = items[sel]; if (!p) return;
@@ -1435,9 +1582,10 @@ function renderKind(kind, pre) {
     state.index = k; showLightbox(); lb.showModal();
   };
   const box = document.createElement("article"); box.className = strecke ? "strecke" : "pbox";
-  const h = document.createElement("h3"); h.textContent = tr(p.title); box.appendChild(h);
-  if (text) { const t = document.createElement("p"); t.textContent = text; box.appendChild(t); }
-  if (p.url) { const a = document.createElement("a"); a.className = "plink"; a.href = p.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸"; box.appendChild(a); }
+  const head = document.createElement("div"); head.className = "strecke-head"; box.appendChild(head);   // Titel und Text
+  const h = document.createElement("h3"); h.textContent = tr(p.title); head.appendChild(h);
+  if (text) { const t = document.createElement("p"); t.textContent = text; head.appendChild(t); }
+  if (p.url) { const a = document.createElement("a"); a.className = "plink"; a.href = p.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸"; head.appendChild(a); }
   if (strecke && fotos.length) {
     // Bildstrecke wie eine Magazinstrecke – erstes Bild groß, Querformate über die volle Breite,
     // Hochformate paarweise nebeneinander, darunter eine Zeile wie der Rand eines Negativs
@@ -1453,6 +1601,7 @@ function renderKind(kind, pre) {
       im.alt = f.title + (f.location ? ", " + f.location : ""); im.decoding = "async"; if (k > 3) im.loading = "lazy";
       // Form (Hoch/Quer) aus dem vorab gemessenen Seitenverhältnis; das große Bild lädt sofort, ohne auf etwas zu warten
       const shape = (r) => {
+        if (k === 0 && r <= .87) box.classList.add("lead-split");   // Hochformat-Aufmacher: am Computer Titel und Text daneben
         b.style.aspectRatio = String(r);
         fig.style.setProperty("--r", r.toFixed(4));   // für die Höhenbegrenzung
         fig.classList.add(r >= 1.15 ? "wide" : r <= .87 ? "tall" : "even");
@@ -1519,8 +1668,7 @@ function route() {
   if (routedOnce && document.startViewTransition && !reduceMotion()) {
     const vt = startVT(applyRoute);
     if (toTop) vt.finished.then(() => window.scrollTo({ top: 0, behavior: "instant" })).catch(() => {});   // Safari: sicher ganz oben
-    vt.finished.then(() => { if (document.body.dataset.view === "leuchttisch") replayTable(); }).catch(() => {});
-  } else { applyRoute(); if (document.body.dataset.view === "leuchttisch") replayTable(); }
+  } else applyRoute();
   routedOnce = true;
 }
 function applyRoute() {
@@ -1529,7 +1677,7 @@ function applyRoute() {
   document.querySelectorAll("#mainNav a").forEach((a) => {   // aktuelle Seite im Menü markieren
     if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });
-  if (v === "leuchttisch") prepTable();
+  if (v === "leuchttisch") replayTable();   // auflegen beginnt sofort, während die Seite einblendet
   if (v === "bildstrecken") warmStrecken();   // aufgelegt wird nach dem Seitenwechsel (siehe route)
   if (v === "ueber-mich") { const im = $("heroImg"); im.classList.remove("develop"); void im.offsetWidth; im.classList.add("develop"); }
   let t = null;
@@ -1543,6 +1691,7 @@ const setHeadH = () => {
   const head = document.querySelector(".site-head");
   const pinned = getComputedStyle(head).position === "sticky";
   document.documentElement.style.setProperty("--headh", (pinned ? head.offsetHeight + 16 : 16) + "px");
+  document.documentElement.style.setProperty("--headb", Math.round(head.getBoundingClientRect().bottom + scrollY) + "px");   // Unterkante der Kopfzeile (Inhaltsverzeichnis darunter)
 };
 setHeadH();
 if (window.ResizeObserver) new ResizeObserver(setHeadH).observe(document.querySelector(".site-head"));
@@ -1562,6 +1711,128 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
   const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
   document.documentElement.style.setProperty("--bg", `url("${u}")`);
 }
+/* ---------- Wechselnde Titelfotos ---------- */
+const slideState = { list: [], i: 0, timer: null, busy: false, hover: false };
+function setupSlides() {
+  const box = $("slides"); if (!box) return;
+  const pics = kbPhotos().slice(0, 12);
+  if (pics.length < 2) return;
+  slideState.pics = pics;
+  box.closest(".hero").classList.add("has-slides");
+  box.addEventListener("pointerenter", () => { slideState.hover = true; });
+  box.addEventListener("pointerleave", () => { slideState.hover = false; });
+  buildSlides(); mqPortrait.addEventListener("change", buildSlides);
+}
+/* Handy/Tablet hoch: das Titelbild selbst wechselt (Seagull zuerst), Filmrand-Zeile darunter.
+   Computer: Seagull bleibt groß, die Bilderfolge läuft links unter dem Titel. */
+const mqPortrait = matchMedia("(max-width: 1100px) and (orientation: portrait)");
+function buildSlides() {
+  const box = $("slides"), cap = document.querySelector(".slide-cap-d"), hero = box.closest(".hero"), pics = slideState.pics;
+  const mobile = mqPortrait.matches;
+  const seagullSrc = getComputedStyle(document.documentElement).getPropertyValue("--bg").replace(/^\s*url\(["']?|["']?\)\s*$/g, "");
+  slideState.list = (mobile && seagullSrc ? [{ seagull: true, src: seagullSrc, title: "Seagull 4A" }] : []).concat(pics.map((p, n) => ({ ...p, no: n + 1 })));
+  clearTimeout(slideState.timer); slideState.busy = false; slideState.i = 0;
+  box.innerHTML = "";
+  slideState.list.forEach((p, k) => {
+    const im = document.createElement("img"); im.className = "slide" + (k === 0 ? " on" : "") + (p.seagull ? " seagull" : ""); im.alt = p.title; im.decoding = "async";
+    im.dataset.src = p.seagull ? p.src : sized(p.src, mobile ? 1080 : 640);
+    if (p.seagull) im.style.objectPosition = "center 19%";
+    else im.addEventListener("click", () => openViewer(pics, p.no - 1, []));
+    if (k === 0) im.src = im.dataset.src;
+    box.appendChild(im);
+  });
+  if (mobile) { hero.appendChild(box); document.querySelector(".mobile-hero-copy").prepend(cap); }
+  else { const col = hero.querySelector(":scope > div:first-child"); col.appendChild(box); col.appendChild(cap); }
+  box.classList.add("ready");
+  slideCaption(0); requestAnimationFrame(sizeSlides);
+  if (!reduceMotion()) queueSlide();
+}
+/* Computer: so groß wie möglich – bis knapp über die Fußzeile, höchstens so breit wie die Spalte */
+function sizeSlides() {
+  const box = $("slides"), cap = document.querySelector(".slide-cap-d");
+  if (mqPortrait.matches || !box.classList.contains("ready")) { box.style.width = ""; box.style.display = ""; cap.style.display = ""; return; }
+  const col = box.parentElement, foot = document.querySelector("footer .wrap");
+  box.style.display = ""; cap.style.display = "";
+  if (!box.offsetParent || !foot) return;
+  // Grenze: unterer Bildschirmrand minus Fußzeile – so passt alles ohne Scrollen auf den Bildschirm
+  const hero = box.closest(".hero"), padB = parseFloat(getComputedStyle(hero).paddingBottom) || 0;
+  const footH = foot.parentElement.offsetHeight;   // ganze Fußzeile inklusive Innenabstand
+  const top = box.getBoundingClientRect().top + scrollY;
+  const avail = Math.floor(innerHeight - footH - padB - top - cap.offsetHeight - 12);
+  const w = Math.min(col.clientWidth, avail);
+  if (w < 120) { box.style.display = "none"; cap.style.display = "none"; return; }   // zu wenig Platz: lieber gar nicht
+  box.style.width = w + "px"; cap.style.maxWidth = w + "px";
+}
+addEventListener("resize", () => requestAnimationFrame(sizeSlides));
+if (document.fonts) document.fonts.ready.then(() => requestAnimationFrame(sizeSlides));
+function queueSlide() { clearTimeout(slideState.timer); slideState.timer = setTimeout(nextSlide, 3500); }
+async function nextSlide() {
+  const box = $("slides");
+  // nur auf dem Titelblatt, im sichtbaren Tab und nicht unter der Maus weiterschalten
+  if (document.hidden || document.body.dataset.view || slideState.hover || slideState.busy || lb.open || !box.offsetParent) { queueSlide(); return; }
+  slideState.busy = true;
+  const imgs = [...box.querySelectorAll(".slide")], cur = imgs[slideState.i], k = (slideState.i + 1) % imgs.length, nxt = imgs[k];
+  if (!nxt.getAttribute("src")) nxt.src = nxt.dataset.src;
+  try { await Promise.race([nxt.decode(), new Promise((r, j) => setTimeout(j, 4000))]); } catch (e) { slideState.i = k; slideState.busy = false; queueSlide(); return; }
+  try { await iris(cur, nxt); }
+  catch (e) { cur.classList.remove("on"); nxt.classList.add("on"); const ir = box.querySelector(".iris"); if (ir) ir.style.visibility = "hidden"; }
+  slideState.i = k; slideCaption(k); slideState.busy = false; sizeSlides();
+  // das übernächste Bild schon vorladen
+  const after = imgs[(k + 1) % imgs.length]; if (!after.getAttribute("src")) after.src = after.dataset.src;
+  queueSlide();
+}
+/* Auslöser: sechs Lamellen schließen sich über dem Bild und öffnen sich mit dem nächsten.
+   Die Lamellen werden nur verschoben und gedreht (transform) – das kann der Browser ohne Neuzeichnen,
+   deshalb läuft es auch auf dem iPhone flüssig. */
+const BLADES = 9;   // neun Lamellen wie in vielen Objektiven: die Öffnung wirkt fast rund
+const settle = (anim, ms) => Promise.race([anim.finished.catch(() => {}), new Promise((r) => setTimeout(r, ms))]);   // falls der Browser anhält: trotzdem weiter
+function irisEl(box) {
+  let ir = box.querySelector(".iris");
+  if (!ir) {
+    ir = document.createElement("div"); ir.className = "iris"; ir.setAttribute("aria-hidden", "true");
+    const rot = document.createElement("div"); rot.className = "iris-rot";
+    for (let n = 0; n < BLADES; n++) { const b = document.createElement("i"); b.className = "blade"; rot.appendChild(b); }
+    ir.appendChild(rot); box.appendChild(ir);
+  }
+  return ir;
+}
+async function iris(cur, nxt) {
+  const box = cur.parentElement, ir = irisEl(box), rot = ir.firstChild, blades = [...rot.children];
+  const w = box.clientWidth, h = box.clientHeight, D = Math.hypot(w, h), S = Math.ceil(3 * D), open = Math.ceil(D / 2) + 4;
+  // jede Lamelle: großes Feld, dessen Unterkante um die Bildmitte kreist – neun davon lassen eine fast runde Öffnung frei
+  rot.style.width = w + "px"; rot.style.height = h + "px";
+  blades.forEach((b) => { b.style.width = b.style.height = S + "px"; b.style.left = (w / 2 - S / 2) + "px"; b.style.top = (h / 2 - S) + "px"; });
+  ir.style.visibility = "visible";
+  const run = (a0, a1, r0, r1, duration, easing) => Promise.all([
+    settle(rot.animate([{ transform: `rotate(${r0}deg)` }, { transform: `rotate(${r1}deg)` }], { duration, easing, fill: "forwards" }), duration + 900),
+    ...blades.map((b, n) => settle(b.animate([
+      { transform: `rotate(${n * 360 / BLADES}deg) translateY(${-a0}px)` },
+      { transform: `rotate(${n * 360 / BLADES}deg) translateY(${-a1}px)` }], { duration, easing, fill: "forwards" }), duration + 900))]);
+  await run(open, 0, 0, 20, 300, "cubic-bezier(.5,0,.8,.45)");         // schließen
+  cur.classList.remove("on"); nxt.classList.add("on");                 // hinter der geschlossenen Blende tauschen
+  await new Promise((r) => setTimeout(r, 70));                         // kurzer dunkler Moment, wie beim Auslösen
+  await run(0, open, 20, 40, 500, "cubic-bezier(.15,.65,.3,1)");       // öffnen
+  ir.style.visibility = "hidden";
+  [rot, ...blades].forEach((e) => e.getAnimations().forEach((an) => an.cancel()));
+}
+function slideCaption(k) {
+  const p = slideState.list[k]; if (!p) return;
+  document.querySelectorAll(".slide-cap").forEach((cap) => {
+    cap.innerHTML = "";
+    const line = document.createElement("div");
+    const no = document.createElement("span"); no.className = "no"; no.textContent = p.seagull ? "▸ " : "▸ " + p.no + "A  ";
+    line.append(no, document.createTextNode(p.seagull ? tr("Titelbild") + " · Seagull 4A" : [p.title, p.location, p.film].filter(Boolean).join(" · ")));
+    cap.appendChild(line);
+    const sIdx = p.strecke ? streckenItems().findIndex((x) => x.id === p.strecke) : -1;
+    if (sIdx >= 0) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "to"; b.textContent = tr("Zur Bildstrecke") + " →";
+      b.addEventListener("click", () => { projSel.bildstrecke = sIdx; renderCards(); location.hash = "#bildstrecken"; });
+      cap.appendChild(b);
+    }
+  });
+}
+addEventListener("visibilitychange", () => { if (!document.hidden && slideState.list.length && !reduceMotion()) queueSlide(); });
+
 /* ---------- Kameras (Equipment) aus der Datenbank ---------- */
 let cameras = [];
 const camKey = (n) => (n || "").trim().toLowerCase();
