@@ -430,7 +430,8 @@
     /* Foto mit minimalem Abstand oben und unten (--imgpad) */
     :root {
       --imgpad: .5rem;
-      --imgw: min(100vw, (100vh - 2 * var(--imgpad)) * .989);
+      --ar: .76;   /* Seitenverhältnis des Titelbild-Ausschnitts (Breite/Höhe): schmaler als das Original, die Kamera bleibt mittig */
+      --imgw: min(100vw, (100vh - 2 * var(--imgpad)) * var(--ar));
       --imgl: calc((100vw - var(--imgw)) / 2);
       --free: calc(var(--imgl) - max(2rem, 50vw - 880px) - 3rem);   /* linke Textspalte endet vor der Linie */
       --logo: clamp(68px, (var(--imgl) - max(2rem, 50vw - 880px) - 1.5rem) * .3, 96px);   /* Logo oben links, wächst mit dem Platz links vom Foto */
@@ -805,19 +806,42 @@
   .slide-cap .no { color: var(--amber); }
   .slide-cap > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* Filmrand-Zeile immer einzeilig */
   .slide-cap .to { display: inline-block; margin-top: .45rem; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--ink-soft); cursor: pointer; background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; }
+  /* Computer/Tablet quer: links unter dem Titel, so breit wie die Spalte – aber nie bis in die Beschreibung */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
     body:not([data-view]) .hero > div:first-child > .slides.ready {
       display: block; position: relative; overflow: hidden; margin-top: 2rem; background: #0b0b0b;
-      width: min(260px, 28vh, 100%); aspect-ratio: 1;
+      width: min(100%, 30vh); aspect-ratio: 1;   /* Startwert; das Skript passt die Größe an den freien Platz an */
     }
-    body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { display: block; margin-top: .7rem; max-width: min(260px, 100%); }
+    body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { display: block; margin-top: .7rem; max-width: min(100%, 36vh); }
   }
-  /* niedrige Bildschirme: kleiner, ganz niedrige ohne Bilderfolge – nie über der Beschreibung */
   @media (min-width: 821px) and (orientation: landscape) and (max-height: 800px) {
-    body:not([data-view]) .hero > div:first-child > .slides.ready { width: min(150px, 19vh, 100%); margin-top: 1.2rem; }
+    body:not([data-view]) .hero > div:first-child > .slides.ready { width: min(100%, 27vh); margin-top: 1.4rem; }
+    body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { max-width: min(100%, 27vh); }
   }
   @media (min-width: 821px) and (orientation: landscape) and (max-height: 620px) {
     body:not([data-view]) .hero > div:first-child > .slides.ready, body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { display: none; }
+  }
+  /* Computer: Beschreibung direkt unter dem Titel statt unten verankert – darunter hat die Bilderfolge Platz */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    body:not([data-view]) .hero.has-slides > div:first-child > p {
+      position: static; width: auto; max-width: 34ch; margin: 0; padding: 1rem 0 0; border-top: 1px solid var(--rule); font-size: 1.05rem;
+    }
+    body:not([data-view]) .hero.has-slides > div:first-child > h1 { margin-bottom: 1.2rem; }
+    body:not([data-view]) .hero.has-slides { padding-bottom: .5rem; padding-top: clamp(1rem, 3vh, 3rem); }
+    body:not([data-view]) .hero.has-slides > div:first-child > .slides.ready { margin-top: 1.6rem; }
+  }
+  /* Breite Bildschirme mit Maus: das Seagull sitzt in einem schmaleren Rahmen (Ausschnitt statt ganzes Bild) */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+    body:not([data-view]) .bgfix {
+      inset: auto; left: var(--imgl); width: var(--imgw); top: var(--imgpad); height: calc(100vh - 2 * var(--imgpad));
+      background-size: cover; background-position: 50% 50%;
+    }
+  }
+  /* Handy und Tablet hoch: dieselbe Bilderfolge unter dem Knopf, statt der vier kleinen Vorschaubilder */
+  @media (max-width: 1100px) and (orientation: portrait) {
+    body:not([data-view]) .mobile-hero-copy > .slides.ready { display: block; position: relative; overflow: hidden; width: 100%; aspect-ratio: 1; margin-top: 1.75rem; background: #0b0b0b; }
+    body:not([data-view]) .mobile-hero-copy > .slides.ready + .slide-cap { display: block; margin-top: .7rem; }
+    body:not([data-view]) .hero.has-slides #teaser { display: none !important; }
   }
 </style>
 </head>
@@ -1665,12 +1689,39 @@ function setupSlides() {
     im.addEventListener("click", () => openViewer(pics, k, []));
     box.appendChild(im);
   });
-  box.classList.add("ready");
+  box.classList.add("ready"); box.closest(".hero").classList.add("has-slides");
+  placeSlides(); mqPortrait.addEventListener("change", placeSlides);
   box.addEventListener("pointerenter", () => { slideState.hover = true; });
   box.addEventListener("pointerleave", () => { slideState.hover = false; });
   slideCaption(0);
   if (!reduceMotion()) queueSlide();
 }
+/* Handy/Tablet hoch: unter den Knopf in der Handy-Spalte; sonst links unter den Titel */
+const mqPortrait = matchMedia("(max-width: 1100px) and (orientation: portrait)");
+function placeSlides() {
+  const box = $("slides"), cap = document.querySelector(".slide-cap-d");
+  const target = mqPortrait.matches ? document.querySelector(".mobile-hero-copy") : document.querySelector(".hero > div:first-child");
+  if (box.parentElement !== target) { target.appendChild(box); target.appendChild(cap); }
+  requestAnimationFrame(sizeSlides);
+}
+/* Computer: so groß wie möglich – bis knapp über die Fußzeile, höchstens so breit wie die Spalte */
+function sizeSlides() {
+  const box = $("slides"), cap = document.querySelector(".slide-cap-d");
+  if (mqPortrait.matches || !box.classList.contains("ready")) { box.style.width = ""; box.style.display = ""; cap.style.display = ""; return; }
+  const col = box.parentElement, foot = document.querySelector("footer .wrap");
+  box.style.display = ""; cap.style.display = "";
+  if (!box.offsetParent || !foot) return;
+  // Grenze: unterer Bildschirmrand minus Fußzeile – so passt alles ohne Scrollen auf den Bildschirm
+  const hero = box.closest(".hero"), padB = parseFloat(getComputedStyle(hero).paddingBottom) || 0;
+  const footH = foot.parentElement.offsetHeight;   // ganze Fußzeile inklusive Innenabstand
+  const top = box.getBoundingClientRect().top + scrollY;
+  const avail = Math.floor(innerHeight - footH - padB - top - cap.offsetHeight - 12);
+  const w = Math.min(col.clientWidth, avail);
+  if (w < 120) { box.style.display = "none"; cap.style.display = "none"; return; }   // zu wenig Platz: lieber gar nicht
+  box.style.width = w + "px"; cap.style.maxWidth = w + "px";
+}
+addEventListener("resize", () => requestAnimationFrame(sizeSlides));
+if (document.fonts) document.fonts.ready.then(() => requestAnimationFrame(sizeSlides));
 function queueSlide() { clearTimeout(slideState.timer); slideState.timer = setTimeout(nextSlide, 3500); }
 async function nextSlide() {
   const box = $("slides");
@@ -1682,7 +1733,7 @@ async function nextSlide() {
   try { await Promise.race([nxt.decode(), new Promise((r, j) => setTimeout(j, 4000))]); } catch (e) { slideState.i = k; slideState.busy = false; queueSlide(); return; }
   try { await iris(cur, nxt); }
   catch (e) { cur.classList.remove("on"); nxt.classList.add("on"); nxt.style.clipPath = ""; }
-  slideState.i = k; slideCaption(k); slideState.busy = false;
+  slideState.i = k; slideCaption(k); slideState.busy = false; sizeSlides();
   // das übernächste Bild schon vorladen
   const after = imgs[(k + 1) % imgs.length]; if (!after.getAttribute("src")) after.src = after.dataset.src;
   queueSlide();
