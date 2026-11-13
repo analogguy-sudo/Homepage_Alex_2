@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Passwort festlegen</title>
+<style>
+/* Gemeinsame Passwort-Seite für alle Logins im Supabase-Projekt der Webseiten (analogewelt.com, narvaez-arts.com, Ferienwohnung).
+   Supabase schickt Links aus „Passwort vergessen“ und Einladungen an die Site URL (analogewelt.com); index.html leitet sie hierher weiter. */
+:root{color-scheme:dark}
+body{font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;max-width:440px;margin:40px auto;padding:0 20px;color:#ededeb;background:#0e0e0e}
+h1{font-weight:600;font-size:1.4rem;margin-bottom:.4rem}
+label{display:block;margin-top:14px;font-size:.9rem;color:#a8a8a5}
+input,button{width:100%;box-sizing:border-box;padding:.6rem .7rem;margin-top:5px;font:inherit;font-size:16px;border:1px solid #444;border-radius:4px;background:#1b1b1b;color:inherit}
+button{margin-top:18px;background:#ededeb;color:#0e0e0e;border:0;font-weight:600;cursor:pointer}
+button:disabled{opacity:.5}
+.note{color:#a8a8a5;font-size:.9rem}
+.msg{margin-top:16px;padding:10px 12px;border-radius:4px;background:#1b1b1b;border:1px solid #444}
+.msg.err{border-color:#a5483a;color:#f0b4a8}
+.links a{display:block;margin-top:10px;color:#a8a8a5}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<h1 id="title">Passwort festlegen</h1>
+<p class="note" id="who"></p>
+
+<form id="set" hidden>
+  <input type="email" id="user" autocomplete="username" hidden>
+  <label for="pw1" id="l1">Neues Passwort</label>
+  <input id="pw1" type="password" autocomplete="new-password" minlength="8" required>
+  <label for="pw2" id="l2">Neues Passwort wiederholen</label>
+  <input id="pw2" type="password" autocomplete="new-password" minlength="8" required>
+  <button type="submit" id="save">Passwort speichern</button>
+</form>
+
+<form id="ask" hidden>
+  <p class="note" id="askText">Der Link ist abgelaufen oder wurde schon benutzt. Hier bekommst du einen neuen.</p>
+  <label for="email">E-Mail</label>
+  <input id="email" type="email" autocomplete="username" required>
+  <button type="submit" id="send">Neuen Link senden</button>
+</form>
+
+<div id="msg" class="msg" hidden></div>
+<div id="done" class="links" hidden>
+  <a href="https://analogewelt.com/admin.html">Admin analogewelt.com</a>
+  <a href="https://narvaez-arts.com/admin.html">Admin narvaez-arts.com</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL="https://owbbsnujnkhyyqvagtai.supabase.co";
+const SB_KEY="sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga";
+const $=id=>document.getElementById(id);
+const es=(navigator.language||"").startsWith("es");
+const T=es?{title:"Elegir contraseña",l1:"Nueva contraseña",l2:"Repite la contraseña",save:"Guardar contraseña",
+  askText:"El enlace ha caducado o ya se usó. Aquí recibes uno nuevo.",send:"Enviar enlace nuevo",
+  mismatch:"Las contraseñas no coinciden.",saved:"Contraseña guardada. Ya puedes entrar con ella.",sent:"Enlace enviado. Revisa tu correo.",expired:"Este enlace ya no es válido.",who:e=>"Cuenta: "+e}
+ :{title:"Passwort festlegen",l1:"Neues Passwort",l2:"Neues Passwort wiederholen",save:"Passwort speichern",
+  askText:"Der Link ist abgelaufen oder wurde schon benutzt. Hier bekommst du einen neuen.",send:"Neuen Link senden",
+  mismatch:"Die Passwörter stimmen nicht überein.",saved:"Passwort gespeichert. Du kannst dich jetzt damit anmelden.",sent:"Link verschickt. Schau in dein Postfach.",expired:"Dieser Link gilt nicht mehr.",who:e=>"Konto: "+e};
+for(const k of ["title","l1","l2","save","askText","send"])$(k).textContent=T[k];
+if(es)document.documentElement.lang="es";
+
+const msg=(text,err)=>{$("msg").textContent=text;$("msg").className="msg"+(err?" err":"");$("msg").hidden=false};
+const hashError=new URLSearchParams(location.hash.slice(1)).has("error_code");
+const db=window.supabase.createClient(SB_URL,SB_KEY);
+
+async function start(){
+  const {data:{session}}=await db.auth.getSession();
+  if(session){
+    $("who").textContent=T.who(session.user.email);
+    $("user").value=session.user.email;
+    $("set").hidden=false;
+  }else{
+    $("ask").hidden=false;
+    if(hashError)msg(T.expired,true);
+  }
+  history.replaceState(null,"",location.pathname);
+}
+setTimeout(start,0);
+
+$("set").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if($("pw1").value!==$("pw2").value)return msg(T.mismatch,true);
+  $("save").disabled=true;
+  const {error}=await db.auth.updateUser({password:$("pw1").value});
+  $("save").disabled=false;
+  if(error)return msg(error.message,true);
+  $("set").hidden=true;
+  msg(T.saved);
+  $("done").hidden=false;
+  await db.auth.signOut();
+});
+
+$("ask").addEventListener("submit",async e=>{
+  e.preventDefault();
+  $("send").disabled=true;
+  const {error}=await db.auth.resetPasswordForEmail($("email").value.trim(),{redirectTo:location.origin+"/passwort.html"});
+  $("send").disabled=false;
+  if(error)return msg(error.message,true);
+  msg(T.sent);
+});
+</script>
+</body>
+</html>
