@@ -748,7 +748,6 @@
      ========================================================================== */
   /* Unterzeile im Menü nur im Inhaltsverzeichnis des Titelblatts (Computer/Tablet quer) */
   .nav-sub { display: none; }
-  .latest { display: none; }
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
     /* Hochformat-Aufmacher links, Titel und Text rechts daneben – wie eine Magazinseite.
        Die Strecke löst sich dafür in das Raster des Artikels auf (display: contents), am Handy bleibt alles untereinander. */
@@ -768,6 +767,22 @@
     .cams { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.6rem 2.5rem; }
     .cam-text { max-width: none; }
   }
+  /* Titelblatt am Computer: Einstieg wie am Handy – Knopf „Bildstrecken ansehen“ und Vorschau vom Leuchttisch, links unter dem Titel */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    body:not([data-view]) .hero > div:first-child > .cta-desk { display: flex; margin-top: .4rem; }
+    .cta-desk a { font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: .85rem; text-decoration: none; }
+    .cta-desk .cta-main { padding: .8rem 1.1rem; background: var(--ink); color: var(--paper); }
+    body:not([data-view]) .hero > div:first-child > .teaser-desk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2rem; max-width: min(260px, 26vh); }   /* bleibt auch auf niedrigen Bildschirmen über der Beschreibung */
+    .teaser-desk:empty { display: none !important; }
+    .teaser-desk button { padding: 0; border: 0; background: var(--paper-deep); aspect-ratio: 1; overflow: hidden; cursor: zoom-in; }
+    .teaser-desk img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+    .teaser-desk button:hover img { transform: scale(1.04); }
+    /* niedrigere Bildschirme: vier kleine Bilder in einer Reihe, ganz niedrige ohne Vorschau – nie über der Beschreibung */
+    @media (max-height: 880px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 100%; margin-top: 1.6rem; } }
+    @media (max-height: 700px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { display: none; } }
+    .hero .teaser-desk .teaser-label { grid-column: 1 / -1; margin: 0 0 .1rem; max-width: none; text-shadow: none; position: static; width: auto; padding: 0; border: 0;
+      font-family: var(--edge); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+  }
   /* Titelblatt-Inhaltsverzeichnis: Nummer links, Rubrik rechts, darunter eine kurze Unterzeile */
   @media (min-width: 1024px) and (min-height: 501px) and (orientation: landscape) and (hover: none),
          (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
@@ -779,15 +794,6 @@
       display: block; margin-top: .2rem; font-family: var(--serif); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0;
       font-size: .82em; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: .15em;   /* Kursiv-Überhang nicht abschneiden */
     }
-    /* Zuletzt hinzugefügt: unter der Überschrift links */
-    body:not([data-view]) .latest {
-      display: flex; flex-direction: column; gap: .3rem; margin-top: 2.2rem; padding-top: .9rem; border-top: 1px solid var(--rule);
-      text-decoration: none; color: inherit;
-    }
-    body:not([data-view]) .latest[hidden] { display: none; }
-    .latest small { font-family: var(--edge); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
-    .latest span { font-family: var(--display); font-size: 1.35rem; line-height: 1.05; text-transform: uppercase; letter-spacing: .03em; }
-    .latest:hover span { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
   }
 </style>
 </head>
@@ -822,7 +828,10 @@
     <div>
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
       <p data-en="Analogue photography<br>on 35 mm and medium format.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.</p>
-      <a class="latest" id="latest" href="#bildstrecken" hidden><small>Zuletzt hinzugefügt</small><span id="latestTitle"></span></a>
+      <nav class="cta cta-desk" aria-label="Einstieg">
+        <a href="#bildstrecken" class="cta-main" data-en="View photo series&nbsp;→">Bildstrecken ansehen&nbsp;→</a>
+      </nav>
+      <div class="teaser teaser-desk"></div>
     </div>
     <div class="mobile-hero-copy">
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
@@ -1030,7 +1039,7 @@ async function loadPhotos() {
   if (!res.ok) throw new Error("Supabase antwortete mit Status " + res.status);
   const rows = await res.json();
   return rows.filter((r) => r.storage_path).map((r) => ({
-    strecke: r.strecke_id, kb: r.im_kontaktbogen !== false, added: r.created_at || "",
+    strecke: r.strecke_id, kb: r.im_kontaktbogen !== false,
     title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, categories: (r.cat || "").split(",").map((c) => c.trim()).filter(Boolean), year: r.year, location: r.location, focal: r.focal, shutter: r.shutter, aperture: r.aperture,
     src: `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${r.storage_path.split("/").map(encodeURIComponent).join("/")}`,
     details: (r.details || []).map((n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`)
@@ -1355,7 +1364,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Meine liebsten Bilder": "My favourite frames", "Fotos, die zusammengehören": "Photos that belong together", "Arbeiten rund um den Film": "Work around film", "Kameras und Kontakt": "Cameras and contact", "Zuletzt hinzugefügt": "Recently added", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Meine liebsten Bilder": "My favourite frames", "Fotos, die zusammengehören": "Photos that belong together", "Arbeiten rund um den Film": "Work around film", "Kameras und Kontakt": "Cameras and contact", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1377,21 +1386,23 @@ function setLang(l) {
     n.nodeValue = l === "en" ? raw.replace(key, EN[key]) : raw;
   });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
-  renderCards(); renderPagers(); renderCameras(); renderLatest(); if (state.all.length) { renderFilters(); renderGrid("swap"); renderTeaser(); }
+  renderCards(); renderPagers(); renderCameras(); if (state.all.length) { renderFilters(); renderGrid("swap"); renderTeaser(); }
 }
 
 /* ---------- Vorschau auf dem Titelblatt (Handy) ---------- */
-function renderTeaser() {
-  const box = $("teaser"); box.innerHTML = "";
+function renderTeaser() {   // Vorschau vom Leuchttisch: am Handy unter dem Titelbild, am Computer links unter dem Titel
   const pics = kbPhotos().slice(0, 4);
-  if (pics.length < 4) return;
-  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Vom Leuchttisch"); box.appendChild(lab);
-  pics.forEach((p, i) => {
-    const b = document.createElement("button"), im = document.createElement("img");
-    b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
-    im.alt = ""; im.decoding = "async"; im.src = thumb(p.src, 300); fadeIn(im, p.src); b.appendChild(im);
-    b.addEventListener("click", () => openViewer(pics, i, [...box.querySelectorAll("img")]));
-    box.appendChild(b);
+  document.querySelectorAll(".teaser").forEach((box) => {
+    box.innerHTML = "";
+    if (pics.length < 4) return;
+    const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Vom Leuchttisch"); box.appendChild(lab);
+    pics.forEach((p, i) => {
+      const b = document.createElement("button"), im = document.createElement("img");
+      b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
+      im.alt = ""; im.decoding = "async"; im.src = thumb(p.src, 300); fadeIn(im, p.src); b.appendChild(im);
+      b.addEventListener("click", () => openViewer(pics, i, [...box.querySelectorAll("img")]));
+      box.appendChild(b);
+    });
   });
 }
 
@@ -1399,15 +1410,6 @@ function renderTeaser() {
 let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
 const pageList = () => ["top", "leuchttisch", "bildstrecken", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
 const PAGE_NAMES = { top: "Titelblatt", leuchttisch: "Leuchttisch", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
-/* Titelblatt (Computer): Hinweis auf die Bildstrecke mit dem zuletzt hochgeladenen Foto */
-function renderLatest() {
-  const items = streckenItems(); if (!items.length || !state.all.length) return;
-  const newest = state.all.filter((f) => f.strecke).sort((a, b) => (b.added > a.added ? 1 : b.added < a.added ? -1 : 0))[0];
-  const k = newest ? items.findIndex((x) => x.id === newest.strecke) : -1; if (k < 0) return;
-  $("latestTitle").textContent = tr(items[k].title) + " →";
-  const a = $("latest"); a.hidden = false;
-  a.onclick = () => { projSel.bildstrecke = k; renderCards(); };   // die Adresse #bildstrecken öffnet danach die Seite
-}
 function renderPagers() {
   const PAGES = pageList();
   // Seitennummern an den Überschriften (01 = Titelblatt)
@@ -1455,7 +1457,6 @@ async function loadProjects() {
   } catch (e) {}
   projLoaded = true;
   hasProjects = projects.some((p) => (p.kind || "projekt") === "projekt");
-  renderLatest();
   document.querySelector(".nav-proj").hidden = !hasProjects;
   renderCards(); renderPagers();
 }
