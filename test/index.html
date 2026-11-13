@@ -621,6 +621,10 @@
   }
 
   /* Vollansicht: fließender Übergang und Zoom */
+  html.vt-photo::view-transition-old(root) { animation: none; opacity: 0; }
+  html.vt-photo::view-transition-new(root) { animation: none; }
+  dialog.lb[open] .lb-info, dialog.lb[open] .lb-ctrl { animation: lbUi .35s .12s ease both; }   /* Text und Knöpfe kommen kurz nach dem Foto */
+  @keyframes lbUi { from { opacity: 0; } }
   ::view-transition-group(photo) { animation-duration: .42s; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
   ::view-transition-old(photo), ::view-transition-new(photo) { height: 100%; object-fit: contain; }
   .lb-stage.zoomed { display: block; overflow: auto; height: calc(100dvh - 3rem); -webkit-overflow-scrolling: touch; cursor: zoom-out; }
@@ -786,14 +790,19 @@
   @media (min-width: 1024px) and (min-height: 501px) and (orientation: landscape) and (hover: none),
          (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
     body:not([data-view]) .site-head nav a { padding-top: .6rem; padding-bottom: .6rem; }
-    /* Nummer links am Zeilenanfang, Rubrik rechtsbündig – bricht nie zwischen Nummer und Rubrik um */
-    body:not([data-view]) .site-head nav a { display: grid; grid-template-columns: auto 1fr; column-gap: 1rem; align-items: baseline; }
+    /* Inhaltsverzeichnis: Nummern in einer eigenen Spalte direkt vor den Rubriken – alle Nummern senkrecht
+       untereinander, Rubriken linksbündig daneben, der ganze Block rechts. Die Zeilen teilen sich die Spalten (subgrid). */
+    body:not([data-view]) .site-head nav { display: grid; grid-template-columns: 1fr auto minmax(0, max-content); }
+    body:not([data-view]) .site-head nav::before { grid-column: 1 / -1; }
+    body:not([data-view]) .site-head nav a {
+      grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; column-gap: .9rem; align-items: baseline; text-align: left;
+    }
     body:not([data-view]) .site-head nav a::before {
-      content: attr(data-no); grid-column: 1; grid-row: 1;
+      content: attr(data-no); grid-column: 2; grid-row: 1;
       font-family: var(--edge); font-size: .78em; letter-spacing: .14em; color: var(--amber);
     }
-    body:not([data-view]) .site-head nav .nav-t { grid-column: 2; grid-row: 1; white-space: nowrap; }
-    body:not([data-view]) .site-head nav .nav-sub { grid-column: 1 / -1; }
+    body:not([data-view]) .site-head nav .nav-t { grid-column: 3; grid-row: 1; white-space: nowrap; }
+    body:not([data-view]) .site-head nav .nav-sub { grid-column: 3; grid-row: 2; white-space: normal; }   /* bei wenig Platz umbrechen statt abschneiden */
     body:not([data-view]) .site-head nav .nav-sub {
       display: block; margin-top: .2rem; font-family: var(--serif); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0;
       font-size: .82em; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: .15em;   /* Kursiv-Überhang nicht abschneiden */
@@ -1319,22 +1328,24 @@ function openViewer(list, k, els) {
     if (src) src.style.viewTransitionName = "";
     showLightbox(); lb.showModal();
     big.style.viewTransitionName = "photo";
-    try { await Promise.race([big.decode(), new Promise((r) => setTimeout(r, 300))]); } catch (e) {}
+    try { await Promise.race([big.decode(), new Promise((r) => setTimeout(r, 120))]); } catch (e) {}   // Vorschaubild liegt schon im Speicher
   };
   if (!src || !canMorph()) { showLightbox(); lb.showModal(); return; }
   src.style.viewTransitionName = "photo";
-  startVT(go).finished.finally(() => { big.style.viewTransitionName = ""; });
+  document.documentElement.classList.add("vt-photo");
+  startVT(go).finished.finally(() => { big.style.viewTransitionName = ""; document.documentElement.classList.remove("vt-photo"); });
 }
 function closeViewer() {
   const el = state.lbEls && state.lbEls[state.index], big = $("lbImg");
   if (!lb.open) return;
   if (!el || !el.isConnected || !canMorph() || big.closest(".zoomed")) { lb.close(); return; }
   big.style.viewTransitionName = "photo";
+  document.documentElement.classList.add("vt-photo");
   startVT(() => {
     big.style.viewTransitionName = ""; lb.close();
     el.scrollIntoView({ block: "nearest", behavior: "instant" });   // man landet bei dem Bild, das man zuletzt angesehen hat
     el.style.viewTransitionName = "photo";
-  }).finished.finally(() => { el.style.viewTransitionName = ""; });
+  }).finished.finally(() => { el.style.viewTransitionName = ""; document.documentElement.classList.remove("vt-photo"); });
 }
 function step(d) {
   const n = state.lb.length;
@@ -1522,6 +1533,42 @@ const projSel = { projekt: null, bildstrecke: null };
 function renderCards() { renderKind("projekt", "proj"); renderKind("bildstrecke", "strk"); }
 // allgemeine Themen zuerst, dann „Reisen & Touren“
 const streckenItems = () => projects.filter((p) => p.kind === "bildstrecke").sort((a, b) => (a.bereich === b.bereich ? 0 : a.bereich === "allgemein" ? -1 : 1) || (a.sort || 0) - (b.sort || 0));
+/* Wechsel der Bildstrecke: alte Strecke ausblenden, das erste Bild der neuen schon laden, dann am Anfang der
+   neuen Strecke einblenden – nicht mitten drin an der alten Scrollstelle, und ohne unscharfe Platzhalter. */
+let switching = false;
+async function switchItem(kind, pre, items, next) {
+  if (switching) return; switching = true;
+  const det = $(pre + "Detail"), wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const anim = !reduceMotion() && det.childElementCount > 0;
+  let ready = Promise.resolve();
+  const lead = next !== null && kind === "bildstrecke" && items[next] ? state.all.find((f) => f.strecke === items[next].id) : null;
+  if (lead) {
+    const im = new Image();
+    im.sizes = "(min-width: 1200px) 1100px, 100vw"; im.srcset = storySrcset(lead.src); im.src = sized(lead.src, innerWidth < 700 ? 640 : 1080);
+    ready = im.decode().catch(() => {});
+  }
+  try {
+    if (anim) {
+      det.style.transition = "opacity .2s ease"; det.style.opacity = "0";
+      await Promise.all([wait(200), Promise.race([ready, wait(450)])]);
+    }
+    projSel[kind] = next; renderKind(kind, pre);
+    if (next !== null) {
+      const top = det.getBoundingClientRect().top, head = parseFloat(getComputedStyle(det).scrollMarginTop) || 0;
+      if (top < head || top > innerHeight * .55) {
+        if (anim) det.scrollIntoView({ behavior: "instant", block: "start" });   // unsichtbar springen, dann einblenden
+        else det.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+      }
+    }
+    if (anim) {
+      det.style.transition = "none"; det.style.transform = "translateY(10px)"; det.getBoundingClientRect();
+      det.style.transition = "opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1)"; det.style.opacity = "1"; det.style.transform = "none";
+      await wait(450);
+    }
+  } finally {
+    det.style.transition = det.style.opacity = det.style.transform = ""; switching = false;
+  }
+}
 function renderKind(kind, pre) {
   const list = $(pre + "List"), det = $(pre + "Detail"); list.innerHTML = ""; det.innerHTML = "";
   if (!projLoaded) return;
@@ -1536,14 +1583,7 @@ function renderKind(kind, pre) {
     }
     const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = tr(p.title);
     b.setAttribute("aria-pressed", String(i === sel));
-    b.addEventListener("click", () => {
-      projSel[kind] = sel === i ? null : i; renderKind(kind, pre);
-      // Handy: Inhalt steht unter der Liste – sanft dorthin scrollen, damit man sieht, dass etwas passiert ist
-      if (projSel[kind] !== null) requestAnimationFrame(() => {
-        const d = $(pre + "Detail");
-        if (d.getBoundingClientRect().top > innerHeight * .55) d.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
-      });
-    });
+    b.addEventListener("click", () => switchItem(kind, pre, items, sel === i ? null : i));
     list.appendChild(b);
   });
   const p = items[sel]; if (!p) return;
