@@ -1168,7 +1168,8 @@ function applyRoute() {
   });
   if (v === "ueber-mich") { const im = $("heroImg"); im.classList.remove("develop"); void im.offsetWidth; im.classList.add("develop"); }
   let t = null;
-  try { if (h && !v) t = document.querySelector("#" + h); } catch (e) {}
+  // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
+  try { if (h && h !== "top" && !v) t = document.querySelector("#" + h); } catch (e) {}
   if (t) t.scrollIntoView({ behavior: "instant" }); else window.scrollTo({ top: 0, behavior: "instant" });
 }
 addEventListener("hashchange", route);
