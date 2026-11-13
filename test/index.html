@@ -782,12 +782,13 @@
     .hero .teaser-desk .teaser-label { grid-column: 1 / -1; margin: 0 0 .1rem; max-width: none; text-shadow: none; position: static; width: auto; padding: 0; border: 0;
       font-family: var(--edge); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
   }
-  /* Titelblatt-Inhaltsverzeichnis: Nummer links, Rubrik rechts, darunter eine kurze Unterzeile */
+  /* Titelblatt-Inhaltsverzeichnis: Nummer direkt vor der Rubrik, darunter eine kurze Unterzeile */
   @media (min-width: 1024px) and (min-height: 501px) and (orientation: landscape) and (hover: none),
          (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
     body:not([data-view]) .site-head nav a { padding-top: .6rem; padding-bottom: .6rem; }
     body:not([data-view]) .site-head nav a::before {
-      content: attr(data-no); float: left; margin-top: .1rem; font-family: var(--edge); font-size: .78em; letter-spacing: .14em; color: var(--amber);
+      content: attr(data-no); display: inline-block; margin-right: .7em; vertical-align: .08em;   /* Nummer direkt vor der Rubrik */
+      font-family: var(--edge); font-size: .78em; letter-spacing: .14em; color: var(--amber);
     }
     body:not([data-view]) .site-head nav .nav-sub {
       display: block; margin-top: .2rem; font-family: var(--serif); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0;
