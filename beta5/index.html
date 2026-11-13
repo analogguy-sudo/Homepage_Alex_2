@@ -722,34 +722,47 @@
   .seg:active { transform: scale(.96); }
   #kontaktbogen .hint { margin-bottom: 1rem; }
 
-  /* BETA 5: echter Kontaktbogen – Fotopapier mit Negativstreifen */
-  .contact-sheet {
-    --paperc: #ebe9e1; display: flex; flex-direction: column; gap: clamp(12px, 2.4vw, 26px); max-width: 1180px;
-    padding: clamp(16px, 3.5vw, 44px) clamp(10px, 3vw, 40px) clamp(22px, 4vw, 52px);
-    background: var(--paperc); box-shadow: 0 34px 60px -34px rgba(0,0,0,.85), 0 0 0 1px rgba(0,0,0,.1);
+  /* BETA 5: Leuchttisch – Diafilm-Streifen auf einer leuchtenden Milchglasplatte im Aluminiumrahmen */
+  .leuchttisch {
+    position: relative; display: flex; flex-direction: column; gap: clamp(14px, 2.6vw, 28px); max-width: 1180px;
+    padding: clamp(22px, 4vw, 52px) clamp(12px, 3vw, 44px) clamp(28px, 4.5vw, 60px); border-radius: 5px;
+    background: radial-gradient(120% 95% at 50% 42%, #fffef8 0%, #f8f6ed 52%, #e8e5d8 100%);
+    box-shadow: 0 0 0 5px #c4c3bd, 0 0 0 6px #8e8d88, 0 0 0 7px #d9d8d3,      /* Aluminiumrahmen */
+                0 0 90px 10px rgba(255, 247, 222, .16),                         /* Licht strahlt in den dunklen Raum */
+                0 34px 60px -30px rgba(0, 0, 0, .85);
   }
+  .leuchttisch::before {   /* feines Raster auf der Scheibe, wie auf echten Leuchttischen */
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background-image: linear-gradient(rgba(60, 55, 40, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(60, 55, 40, .05) 1px, transparent 1px);
+    background-size: 22px 22px; background-position: -1px -1px;
+  }
+  :root[data-theme="light"] .leuchttisch { box-shadow: 0 0 0 5px #c4c3bd, 0 0 0 6px #8e8d88, 0 0 0 7px #e4e3de, 0 26px 50px -28px rgba(0,0,0,.45); }
   .strip35 {
     position: relative; display: grid; grid-template-columns: repeat(var(--per), minmax(0, 1fr)); gap: clamp(4px, .8vw, 8px);
     padding: clamp(14px, 2.4vw, 20px) clamp(4px, .8vw, 8px) clamp(18px, 2.8vw, 24px);
-    background: #151413; transform: rotate(var(--tilt, 0deg)); box-shadow: 0 1px 2px rgba(0,0,0,.35);
+    background: rgba(17, 15, 13, .95); box-shadow: 0 0 0 1px rgba(0, 0, 0, .25), 0 2px 6px rgba(0, 0, 0, .12);
+    transform: translateX(var(--shift, 0px)) rotate(var(--tilt, 0deg)); opacity: 0;
   }
-  /* Perforation oben und unten */
+  .strip35.laid { opacity: 1; }
+  .leuchttisch.play .strip35.laid { animation: lay .55s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
+  @keyframes lay { from { opacity: 0; transform: translateX(var(--shift, 0px)) translateY(-10px) rotate(calc(var(--tilt, 0deg) * 3)); } }
+  /* Perforation: hier scheint das Licht des Tisches durch */
   .strip35::before, .strip35::after {
-    content: ""; position: absolute; left: 4px; right: 4px; height: clamp(4px, .7vw, 7px);
-    background: repeating-linear-gradient(90deg, #040404 0 clamp(5px, .9vw, 9px), transparent clamp(5px, .9vw, 9px) clamp(10px, 1.7vw, 17px));
-    border-radius: 1px;
+    content: ""; position: absolute; left: 4px; right: 4px; height: clamp(4px, .7vw, 7px); border-radius: 1.5px;
+    background: repeating-linear-gradient(90deg, #fffcef 0 clamp(5px, .9vw, 9px), transparent clamp(5px, .9vw, 9px) clamp(10px, 1.7vw, 17px));
   }
   .strip35::before { top: clamp(4px, .7vw, 6px); }
   .strip35::after { bottom: clamp(4px, .7vw, 6px); }
   .edge-film {
-    position: absolute; top: clamp(4px, .7vw, 6px); right: 10px; font-family: var(--edge); font-weight: 600; letter-spacing: .14em;
-    font-size: clamp(6px, 1.05vw, 9px); line-height: 1; color: #d9c98c; background: #151413; padding: 0 4px; z-index: 1;
+    position: absolute; top: clamp(3px, .6vw, 5px); right: 10px; z-index: 1; padding: 0 5px;
+    font-family: var(--edge); font-weight: 600; letter-spacing: .14em; font-size: clamp(6px, 1.05vw, 9px); line-height: 1.2;
+    color: #f0b94e; background: rgb(17, 15, 13);
   }
-  .frame35 { position: relative; aspect-ratio: 3 / 2; padding: 0; border: 0; background: #000; cursor: zoom-in; }
-  .frame35 img { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 0; }
+  .frame35 { position: relative; aspect-ratio: 3 / 2; padding: 0; border: 0; background: #060605; cursor: zoom-in; }
+  .frame35 img { display: block; width: 100%; height: 100%; object-fit: contain; filter: brightness(1.04) saturate(1.05); }   /* von unten durchleuchtet */
   .frame35 .no {
     position: absolute; left: 2px; bottom: calc(-1 * clamp(13px, 2vw, 17px)); white-space: pre;
-    font-family: var(--edge); font-weight: 600; letter-spacing: .1em; font-size: clamp(6px, 1.05vw, 9px); color: #d9c98c;
+    font-family: var(--edge); font-weight: 600; letter-spacing: .1em; font-size: clamp(6px, 1.05vw, 9px); color: #f0b94e;
   }
   /* roter Fettstift: beim Überfahren bzw. Antippen wird das Bild markiert */
   .frame35::after {
@@ -757,7 +770,15 @@
     opacity: 0; transform: scale(1.08) rotate(-1.2deg); transition: opacity .18s ease, transform .25s cubic-bezier(.2,.8,.2,1); pointer-events: none;
   }
   .frame35:hover::after, .frame35:focus-visible::after, .frame35:active::after { opacity: .92; transform: rotate(-.6deg); }
-  :root[data-theme="light"] .contact-sheet { box-shadow: 0 30px 50px -30px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.12); }
+  /* Lupe (nur mit Maus): vergrößert, was unter ihr liegt */
+  .loupe {
+    position: absolute; z-index: 5; width: 190px; height: 190px; margin: -95px 0 0 -95px; border-radius: 50%; pointer-events: none;
+    background-color: #060605; background-repeat: no-repeat; opacity: 0; transform: scale(.85); transition: opacity .15s, transform .2s;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), inset 0 0 18px rgba(0,0,0,.35), 0 0 0 6px #1c1c1c, 0 0 0 8px #6f6f6c, 0 0 0 9px #1c1c1c, 0 18px 36px rgba(0,0,0,.45);
+  }
+  .loupe.on { opacity: 1; transform: none; }
+  @media (hover: hover) and (pointer: fine) { .leuchttisch.has-loupe .frame35 { cursor: none; } }
+  @media (prefers-reduced-motion: reduce) { .leuchttisch.play .strip35.laid { animation: none; } }
 </style>
 </head>
 
@@ -773,7 +794,7 @@
   <div class="head-right">
     <nav id="mainNav" aria-label="Hauptnavigation">
       <a href="#top" class="nav-home">Titelblatt</a>
-      <a href="#kontaktbogen">Lichtbilder</a>
+      <a href="#kontaktbogen">Leuchttisch</a>
       <a href="#bildstrecken">Bildstrecken</a>
       <a href="#projekte" class="nav-proj" hidden>Projekte</a>
       <a href="#ueber-mich">Über mich</a>
@@ -808,7 +829,7 @@
 
   <section class="works view" id="kontaktbogen" aria-labelledby="arbeiten-titel">
     <div class="wrap">
-      <h2 id="arbeiten-titel">Lichtbilder</h2>
+      <h2 id="arbeiten-titel">Leuchttisch</h2>
       <p class="hint" id="hint"></p>
       <div class="sheet">
         <div class="filters" id="filters" role="group" aria-label="Kategorien"></div>
@@ -1023,34 +1044,81 @@ function renderFilters() {
   });
 }
 
-/* BETA 5: echter Kontaktbogen – Negativstreifen auf Fotopapier, Bildnummern am Rand, Fettstift beim Antippen */
+/* BETA 5: Leuchttisch – Diafilm-Streifen auf leuchtender Scheibe, Bildnummern am Rand, Fettstift beim Antippen, Lupe mit der Maus.
+   Die Bilder laden schon im Hintergrund (geringe Priorität), während man noch auf der Startseite ist. Jeder Streifen wird erst
+   „aufgelegt“, wenn seine Bilder da sind – so ploppt nichts einzeln auf. */
 const perStrip = () => innerWidth < 600 ? 3 : innerWidth < 1000 ? 4 : 6;
+const hasMouse = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
 let stripN = 0;
 function renderGrid() {
   state.shown = state.filter ? kbPhotos().filter((p) => (p.categories || []).includes(state.filter)) : kbPhotos();
-  $("hint").textContent = tr("Kontaktabzüge meiner liebsten Bilder. Antippen zum Vergrößern – wie mit der Lupe.");
+  $("hint").textContent = tr(hasMouse() ? "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern."
+                                       : "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.");
   const grid = $("grid"), els = [], per = perStrip();
-  stripN = per; grid.innerHTML = ""; grid.className = "contact-sheet"; grid.style.setProperty("--per", per);
-  for (let s = 0; s < state.shown.length; s += per) {
+  stripN = per; grid.innerHTML = ""; grid.className = "leuchttisch play"; grid.style.setProperty("--per", per);
+  for (let s = 0, n = 0; s < state.shown.length; s += per, n++) {
     const chunk = state.shown.slice(s, s + per);
     const strip = document.createElement("div"); strip.className = "strip35";
-    strip.style.setProperty("--tilt", ((((s / per) * 37) % 9) - 4) * 0.09 + "deg");   // leicht schief, wie von Hand aufgelegt
+    strip.style.setProperty("--i", n);
+    strip.style.setProperty("--tilt", ((((n * 37) % 9) - 4) * 0.09) + "deg");      // leicht schief …
+    strip.style.setProperty("--shift", ((((n * 53) % 7) - 3) * (per <= 3 ? 1.5 : 4)) + "px");   // … und nicht ganz bündig, wie von Hand ausgelegt
     const film = ((chunk.find((p) => p.film) || {}).film || "").toUpperCase();
     const ed = document.createElement("span"); ed.className = "edge-film"; ed.textContent = film ? film + "  ◂" : ""; strip.appendChild(ed);
+    let left = chunk.length;
+    const lay = () => strip.classList.add("laid");
+    const one = () => { if (--left === 0) lay(); };
+    setTimeout(lay, 2500);   // spätestens dann, falls ein Bild hängt
     chunk.forEach((p, j) => {
       const i = s + j;
       const fr = document.createElement("button"), img = document.createElement("img"), no = document.createElement("span");
       fr.type = "button"; fr.className = "frame35"; fr.setAttribute("aria-label", p.title + " " + tr("vergrößern"));
-      img.alt = p.title + (p.film ? ", " + p.film : ""); img.decoding = "async"; if (i > 8) img.loading = "lazy";
-      img.src = sized(p.src, per <= 3 ? 400 : 500); fadeIn(img, p.src);
+      img.alt = p.title + (p.film ? ", " + p.film : ""); img.decoding = "async"; img.fetchPriority = "low";
+      img.addEventListener("load", one, { once: true }); img.addEventListener("error", one, { once: true });
+      img.src = sized(p.src, 400);
+      if (img.complete) one();
       no.className = "no"; no.textContent = (i + 1) + "   ▸ " + (i + 1) + "A";
       fr.append(img, no); strip.appendChild(fr); els.push(img);
-      fr.addEventListener("click", () => openViewer(state.shown, i, els));
+      fr.dataset.i = i;
+      fr.addEventListener("click", () => { hideLoupe(); openViewer(state.shown, i, els); });
     });
     grid.appendChild(strip);
   }
+  if (hasMouse()) setupLoupe(grid);
 }
+/* Beim Öffnen der Seite die Streifen nacheinander auflegen */
+function replayTable() { const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("play"); void g.offsetWidth; g.classList.add("play"); }
 addEventListener("resize", () => { if (state.all.length && perStrip() !== stripN) renderGrid(); });
+
+/* Lupe: folgt der Maus über den Bildern und zeigt den Ausschnitt 2,6-fach vergrößert */
+let loupe = null;
+const hideLoupe = () => { if (loupe) loupe.classList.remove("on"); };
+function setupLoupe(grid) {
+  grid.classList.add("has-loupe");
+  loupe = document.createElement("div"); loupe.className = "loupe"; loupe.setAttribute("aria-hidden", "true"); grid.appendChild(loupe);
+  const Z = 2.6, R = 95;
+  let cur = null;
+  grid.addEventListener("pointermove", (e) => {
+    const fr = e.target.closest && e.target.closest(".frame35");
+    if (!fr || e.pointerType !== "mouse") { hideLoupe(); cur = null; return; }
+    const img = fr.querySelector("img"), p = state.shown[+fr.dataset.i];
+    if (!img.naturalWidth) return;
+    if (cur !== fr) {   // neues Bild unter der Lupe: erst das kleine, dann das scharfe nachladen
+      cur = fr; loupe.style.backgroundImage = `url("${img.currentSrc || img.src}")`;
+      const hi = new Image(); hi.onload = () => { if (cur === fr) loupe.style.backgroundImage = `url("${hi.src}")`; }; hi.src = sized(p.src, 1080);
+    }
+    // Bildfläche innerhalb des 3:2-Rahmens (object-fit: contain)
+    const fb = fr.getBoundingClientRect(), gb = grid.getBoundingClientRect();
+    const r = img.naturalWidth / img.naturalHeight, boxR = fb.width / fb.height;
+    const cw = r > boxR ? fb.width : fb.height * r, ch = r > boxR ? fb.width / r : fb.height;
+    const cx = fb.left + (fb.width - cw) / 2, cy = fb.top + (fb.height - ch) / 2;
+    const x = e.clientX - cx, y = e.clientY - cy;
+    loupe.style.left = (e.clientX - gb.left) + "px"; loupe.style.top = (e.clientY - gb.top) + "px";
+    loupe.style.backgroundSize = (cw * Z) + "px " + (ch * Z) + "px";
+    loupe.style.backgroundPosition = (R - x * Z) + "px " + (R - y * Z) + "px";
+    loupe.classList.add("on");
+  });
+  grid.addEventListener("pointerleave", () => { hideLoupe(); cur = null; });
+}
 
 /* ---------- Lightbox ---------- */
 const lb = $("lb");
@@ -1231,7 +1299,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Alle": "All", "Kontaktabzüge meiner liebsten Bilder. Antippen zum Vergrößern – wie mit der Lupe.": "Contact prints of my favourite frames. Tap to enlarge – like using a loupe.", "Lichtbilder": "Photographs", "Ausgewählte Lichtbilder": "Selected photographs",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1266,7 +1334,7 @@ function renderTeaser() {
   const box = $("teaser"); box.innerHTML = "";
   const pics = kbPhotos().slice(0, 4);
   if (pics.length < 4) return;
-  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Ausgewählte Lichtbilder"); box.appendChild(lab);
+  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Vom Leuchttisch"); box.appendChild(lab);
   pics.forEach((p, i) => {
     const b = document.createElement("button"), im = document.createElement("img");
     b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
@@ -1279,7 +1347,7 @@ function renderTeaser() {
 /* ---------- BETA: Weiterblättern am Ende jeder Unterseite ---------- */
 let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
 const pageList = () => ["top", "kontaktbogen", "bildstrecken", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
-const PAGE_NAMES = { top: "Titelblatt", kontaktbogen: "Lichtbilder", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
+const PAGE_NAMES = { top: "Titelblatt", kontaktbogen: "Leuchttisch", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
 function renderPagers() {
   const PAGES = pageList();
   // Seitennummern an den Überschriften (01 = Titelblatt)
@@ -1458,6 +1526,7 @@ function applyRoute() {
   document.querySelectorAll("#mainNav a").forEach((a) => {   // aktuelle Seite im Menü markieren
     if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });
+  if (v === "kontaktbogen") replayTable();
   if (v === "ueber-mich") { const im = $("heroImg"); im.classList.remove("develop"); void im.offsetWidth; im.classList.add("develop"); }
   let t = null;
   // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
