@@ -758,18 +758,16 @@
     font-family: var(--edge); font-weight: 600; letter-spacing: .14em; font-size: clamp(6px, 1.05vw, 9px); line-height: 1.2;
     color: #f0b94e; background: rgb(17, 15, 13);
   }
-  .frame35 { position: relative; aspect-ratio: 3 / 2; padding: 0; border: 0; background: #060605; cursor: zoom-in; }
-  .frame35 img { display: block; width: 100%; height: 100%; object-fit: contain; filter: brightness(1.04) saturate(1.05); }   /* von unten durchleuchtet */
+  .frame35 { position: relative; display: grid; place-items: center; aspect-ratio: 3 / 2; padding: 0; border: 0; background: #060605; cursor: zoom-in; overflow: hidden; }
+  /* Bild nur so groß wie sein Inhalt (statt mit schwarzen Rändern), damit der Übergang zur Großansicht sauber wächst */
+  .frame35 img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; min-width: 0; min-height: 0; }
   .frame35 .no {
     position: absolute; left: 2px; bottom: calc(-1 * clamp(13px, 2vw, 17px)); white-space: pre;
     font-family: var(--edge); font-weight: 600; letter-spacing: .1em; font-size: clamp(6px, 1.05vw, 9px); color: #f0b94e;
   }
-  /* roter Fettstift: beim Überfahren bzw. Antippen wird das Bild markiert */
-  .frame35::after {
-    content: ""; position: absolute; inset: -4px; border: 2.5px solid #d3291d; border-radius: 10px 6px 12px 7px;
-    opacity: 0; transform: scale(1.08) rotate(-1.2deg); transition: opacity .18s ease, transform .25s cubic-bezier(.2,.8,.2,1); pointer-events: none;
-  }
-  .frame35:hover::after, .frame35:focus-visible::after, .frame35:active::after { opacity: .92; transform: rotate(-.6deg); }
+  /* Rückmeldung beim Antippen: kurz etwas heller (kein bleibender Rahmen) */
+  .frame35:active img { opacity: .82; }
+  .frame35:focus-visible { outline: 2px solid #f0b94e; outline-offset: 2px; }
   /* Lupe (nur mit Maus): vergrößert, was unter ihr liegt */
   .loupe {
     position: absolute; z-index: 5; width: 190px; height: 190px; margin: -95px 0 0 -95px; border-radius: 50%; pointer-events: none;
@@ -1069,12 +1067,23 @@ function renderFilters() {
   });
 }
 
-/* BETA 5: Leuchttisch – Diafilm-Streifen auf leuchtender Scheibe, Bildnummern am Rand, Fettstift beim Antippen, Lupe mit der Maus.
+/* BETA 5: Leuchttisch – Diafilm-Streifen auf leuchtender Scheibe, Bildnummern am Rand, Lupe mit der Maus.
    Die Bilder laden schon im Hintergrund (geringe Priorität), während man noch auf der Startseite ist. Jeder Streifen wird erst
    „aufgelegt“, wenn seine Bilder da sind – so ploppt nichts einzeln auf. */
 const perStrip = () => innerWidth < 600 ? 3 : innerWidth < 1000 ? 4 : 6;
 const hasMouse = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
 let stripN = 0;
+const tableImgs = new Map();   // ein <img> je Foto, wird beim Umschalten nur umgehängt statt neu geladen
+function tableImg(p) {
+  let img = tableImgs.get(p.src);
+  if (!img) {
+    img = document.createElement("img");
+    img.alt = p.title + (p.film ? ", " + p.film : ""); img.decoding = "async"; img.fetchPriority = "low";
+    img.src = sized(p.src, 400);
+    tableImgs.set(p.src, img);
+  }
+  return img;
+}
 function renderGrid(mode) {
   state.shown = state.filter ? kbPhotos().filter((p) => (p.categories || []).includes(state.filter)) : kbPhotos();
   $("hint").textContent = tr(hasMouse() ? "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern."
@@ -1094,15 +1103,15 @@ function renderGrid(mode) {
     let left = chunk.length;
     const lay = () => strip.classList.add("laid");
     const one = () => { if (--left === 0) lay(); };
-    setTimeout(lay, 2500);   // spätestens dann, falls ein Bild hängt
+    if (mode === "swap") lay();   // Umschalten: Bilder sind schon da, Streifen sofort zeigen
+    else setTimeout(lay, 2500);   // spätestens dann, falls ein Bild hängt
     chunk.forEach((p, j) => {
       const i = s + j;
-      const fr = document.createElement("button"), img = document.createElement("img"), no = document.createElement("span");
+      const fr = document.createElement("button"), img = tableImg(p), no = document.createElement("span");
       fr.type = "button"; fr.className = "frame35"; fr.setAttribute("aria-label", p.title + " " + tr("vergrößern"));
-      img.alt = p.title + (p.film ? ", " + p.film : ""); img.decoding = "async"; img.fetchPriority = "low";
-      img.addEventListener("load", one, { once: true }); img.addEventListener("error", one, { once: true });
-      img.src = sized(p.src, 400);
-      if (img.complete) one();
+      img.style.viewTransitionName = "";
+      if (img.complete && img.naturalWidth) one();
+      else { img.addEventListener("load", one, { once: true }); img.addEventListener("error", one, { once: true }); }
       no.className = "no"; no.textContent = (i + 1) + "   ▸ " + (i + 1) + "A";
       fr.append(img, no); strip.appendChild(fr); els.push(img);
       fr.dataset.i = i;
