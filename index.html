@@ -805,6 +805,29 @@
   html { overflow-x: hidden; overscroll-behavior-x: none; }
   /* Umschalten Alle/Schwarzweiß/Farbe: sofort wechseln, ohne Überblenden (das Abdunkeln wirkte auf dem iPhone wie Flackern) */
   .leuchttisch.swap .strip35.laid { animation: none; }
+
+  /* Equipment: Kameras mit Foto, Produktionsjahren, Beschreibung und Link zu den Bildern */
+  .cams { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 2.2rem 1.75rem; }
+  .cam { scroll-margin-top: var(--headh, 8rem); border-radius: 2px; }
+  .cam-meta { display: block; margin-top: .25rem; font-family: var(--edge); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+  .cam-text { margin: .5rem 0 0; font-size: 1rem; line-height: 1.5; color: var(--ink-soft); max-width: 46ch; }
+  .cam-link, .lb-cam {
+    background: none; border: 0; padding: 0; color: inherit; cursor: pointer; text-align: left;
+    text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--ink-soft);
+  }
+  .cam-link { margin-top: .7rem; font-family: var(--edge); font-weight: 600; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; }
+  .lb-cam { font: inherit; }
+  .cam.flash { animation: camFlash 1.8s ease; }
+  @keyframes camFlash { 0%, 45% { box-shadow: 0 0 0 6px var(--paper), 0 0 0 7px var(--ink-soft); } 100% { box-shadow: 0 0 0 6px transparent, 0 0 0 7px transparent; } }
+  .back-to-photo {
+    position: fixed; left: 50%; bottom: max(1.1rem, env(safe-area-inset-bottom)); z-index: 30; transform: translateX(-50%);
+    padding: .75rem 1.2rem; border: 0; border-radius: 999px; background: var(--ink); color: var(--paper); cursor: pointer;
+    font-family: var(--edge); font-weight: 600; font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,.6); animation: backIn .3s cubic-bezier(.2,.8,.2,1);
+  }
+  .back-to-photo[hidden] { display: none; }
+  @keyframes backIn { from { opacity: 0; transform: translate(-50%, 12px); } }
+  @media (prefers-reduced-motion: reduce) { .cam.flash, .back-to-photo { animation: none; } }
 </style>
 </head>
 
@@ -903,16 +926,15 @@
   <h2 id="equip-titel">Equipment</h2>
   <div class="equip">
     <h3>Kameras</h3>
-    <!-- Kamerafotos: Dateiname aus dem Supabase-Bucket (wie beim Porträt) oder ein Pfad wie ./kameras/nikon-fe.jpg
-         zwischen die Anführungszeichen bei data-img schreiben. Leer = nur der Name. -->
-    <ul class="cams">
-      <li class="cam" data-img=""><span class="cam-name">Nikon FE</span></li>
-      <li class="cam" data-img=""><span class="cam-name">Canon AV-1</span></li>
-      <li class="cam" data-img=""><span class="cam-name">Seagull 4A</span></li>
-      <li class="cam" data-img=""><span class="cam-name">Canonet 28</span></li>
-      <li class="cam" data-img=""><span class="cam-name">Regula 3</span></li>
-      <li class="cam" data-img=""><span class="cam-name">Voigtländer Vitoret DR</span></li>
-      <li class="cam" data-img=""><span class="cam-name">Agfa Isolette 2</span></li>
+    <!-- Kameras kommen aus der Tabelle „cameras“ (im Admin pflegbar). Die Liste hier ist nur der Rückfall, falls das Laden scheitert. -->
+    <ul class="cams" id="cams">
+      <li class="cam"><span class="cam-name">Nikon FE</span></li>
+      <li class="cam"><span class="cam-name">Canon AV-1</span></li>
+      <li class="cam"><span class="cam-name">Seagull 4A</span></li>
+      <li class="cam"><span class="cam-name">Canonet 28</span></li>
+      <li class="cam"><span class="cam-name">Regula 3</span></li>
+      <li class="cam"><span class="cam-name">Voigtländer Vitoret DR</span></li>
+      <li class="cam"><span class="cam-name">Agfa Isolette 2</span></li>
     </ul>
   </div>
 </div></section>
@@ -930,6 +952,7 @@
   </section>
 
 </main>
+<button type="button" class="back-to-photo" id="backToPhoto" hidden>← <span>Zurück zum Bild</span></button>
 
 <footer>
   <div class="wrap">
@@ -1223,7 +1246,13 @@ function showLightbox() {
   rows.forEach(([k, v]) => {
     if (v === null || v === undefined || v === "") return;   // leere Angaben werden nicht angezeigt
     const dt = document.createElement("dt"); dt.textContent = tr(k);
-    const dd = document.createElement("dd"); dd.textContent = v;
+    const dd = document.createElement("dd");
+    const cam = k === "Kamera" && cameraByName(v);
+    if (cam) {   // Kamera anklickbar: führt zur Kamera unter „Über mich“, von dort zurück zu diesem Bild
+      const b = document.createElement("button"); b.type = "button"; b.className = "lb-cam"; b.textContent = v + " ▸";
+      b.addEventListener("click", () => goToCamera(cam));
+      dd.appendChild(b);
+    } else dd.textContent = v;
     dl.append(dt, dd);
   });
   if (p.link) {
@@ -1349,6 +1378,7 @@ loadPhotos().then((photos) => {
   idle(() => state.all.filter((f) => f.strecke).forEach((f) => probeRatio(f.src)));
   if (document.body.dataset.view === "bildstrecken") warmStrecken();
   renderCards();   // Bildstrecken brauchen die Fotos
+  loadCameras();   // Kameras brauchen die Fotos (Zahl und Link „Bilder mit dieser Kamera“)
 }).catch((err) => {
   console.error(err);
   $("status").textContent = "Die Fotos konnten nicht geladen werden. Prüfe URL und Key in index.html sowie die Lese-Richtlinie in Supabase.";
@@ -1366,7 +1396,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Bilder mit dieser Kamera": "photos taken with this camera", "Bild mit dieser Kamera": "photo taken with this camera", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1393,7 +1423,7 @@ function setLang(l) {
     n.nodeValue = l === "en" ? raw.replace(key, EN[key]) : raw;
   });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
-  renderCards(); renderPagers(); if (state.all.length) { renderFilters(); renderGrid("swap"); renderTeaser(); }
+  renderCards(); renderPagers(); renderCameras(); if (state.all.length) { renderFilters(); renderGrid("swap"); renderTeaser(); }
 }
 
 /* ---------- BETA: Vorschau auf dem Titelblatt (Handy) ---------- */
@@ -1628,17 +1658,75 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
   const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
   document.documentElement.style.setProperty("--bg", `url("${u}")`);
 }
-/* Kamerafotos auf der Equipment-Seite: data-img = Dateiname im Bucket ODER Adresse (https://… oder ./datei.jpg) */
-document.querySelectorAll(".cam[data-img]").forEach((li) => {
-  const f = li.dataset.img.trim();
-  if (!f) return;
-  const img = new Image();
-  img.src = /^(https?:|\.?\/)/.test(f) ? f : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${f.split("/").map(encodeURIComponent).join("/")}`;
-  img.alt = li.querySelector(".cam-name").textContent;
-  img.loading = "lazy"; img.width = 800; img.height = 600;
-  img.onerror = () => img.remove();   // fehlt die Datei, bleibt nur der Name stehen
-  li.prepend(img);
+/* ---------- Kameras (Equipment) aus der Datenbank ---------- */
+let cameras = [];
+const camKey = (n) => (n || "").trim().toLowerCase();
+const cameraByName = (n) => cameras.find((c) => camKey(c.name) === camKey(n));
+const photosWith = (c) => state.all.filter((f) => camKey(f.camera) === camKey(c.name));
+async function loadCameras() {
+  try {
+    const h = { apikey: CONFIG.supabaseKey };
+    if (CONFIG.supabaseKey.startsWith("eyJ")) h.Authorization = "Bearer " + CONFIG.supabaseKey;
+    const r = await fetch(`${CONFIG.supabaseUrl}/rest/v1/cameras?select=*&order=sort.asc,name.asc`, { headers: h });
+    if (r.ok) cameras = await r.json();
+  } catch (e) {}
+  renderCameras();
+}
+function renderCameras() {
+  if (!cameras.length) return;   // sonst bleibt die einfache Namensliste stehen
+  const ul = $("cams"); ul.innerHTML = "";
+  cameras.forEach((c) => {
+    const li = document.createElement("li"); li.className = "cam"; li.id = "kamera-" + c.id;
+    if (c.image) {
+      const img = document.createElement("img");
+      img.alt = c.name; img.loading = "lazy"; img.decoding = "async"; img.width = 800; img.height = 600;
+      const src = `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${c.image.split("/").map(encodeURIComponent).join("/")}`;
+      img.src = sized(src, 800); fadeIn(img, src); li.appendChild(img);
+    }
+    const name = document.createElement("span"); name.className = "cam-name"; name.textContent = c.name; li.appendChild(name);
+    const meta = [c.produktion, c.baujahr ? tr("Mein Exemplar") + ": " + c.baujahr : ""].filter(Boolean).join(" · ");
+    if (meta) { const m = document.createElement("span"); m.className = "cam-meta"; m.textContent = meta; li.appendChild(m); }
+    const text = (lang === "en" && c.text_en) || c.text_de;
+    if (text) { const t = document.createElement("p"); t.className = "cam-text"; t.textContent = text; li.appendChild(t); }
+    const pics = photosWith(c);
+    if (pics.length) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "cam-link";
+      b.textContent = pics.length + " " + tr(pics.length === 1 ? "Bild mit dieser Kamera" : "Bilder mit dieser Kamera") + " ▸";
+      b.addEventListener("click", () => openViewer(pics, 0, []));
+      li.appendChild(b);
+    }
+    ul.appendChild(li);
+  });
+}
+/* Von einem Bild zur Kamera springen und mit „Zurück zum Bild“ genau dorthin zurückkehren */
+let returnTo = null;
+function goToCamera(cam) {
+  returnTo = { list: state.lb, index: state.index, els: state.lbEls, hash: location.hash, scroll: scrollY };
+  const go = () => {
+    location.hash = "#equipment";
+    setTimeout(() => {
+      const card = $("kamera-" + cam.id); if (!card) return;
+      card.scrollIntoView({ block: "center", behavior: "instant" });
+      card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
+      $("backToPhoto").hidden = false;
+    }, reduceMotion() ? 50 : 450);
+  };
+  // das Schließen geht im Verlauf einen Schritt zurück; erst danach wechseln
+  if (history.state && history.state.lb) addEventListener("popstate", go, { once: true }); else setTimeout(go);
+  lb.close();
+}
+$("backToPhoto").addEventListener("click", () => {
+  const r = returnTo; if (!r) return;
+  $("backToPhoto").hidden = true; returnTo = null;
+  const reopen = () => setTimeout(() => { window.scrollTo({ top: r.scroll, behavior: "instant" }); openViewer(r.list, r.index, r.els); }, reduceMotion() ? 50 : 450);
+  if (!r.hash || r.hash === "#top") { try { history.pushState(null, "", location.pathname + location.search); } catch (e) {} route(); reopen(); }
+  else if (location.hash === r.hash) reopen();
+  else { location.hash = r.hash; reopen(); }
 });
+addEventListener("hashchange", () => {   // wer woanders hin navigiert, braucht den Zurück-Knopf nicht mehr
+  if (!["#equipment", "#ueber-mich", "#kontakt"].includes(location.hash)) { $("backToPhoto").hidden = true; returnTo = null; }
+});
+
 /* Menü (Handy): öffnen/schließen; Tippen daneben oder Escape schließt es */
 function setMenu(open) {
   $("mainNav").classList.toggle("open", open);

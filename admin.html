@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" sizes="64x64" href="logo/favicon-64.png?v=20261110">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261110">
 <meta name="theme-color" content="#0E0E0E">
-<title>Admin – A T F</title>
+<title>Admin – Analoge Welt</title>
 <style>
 :root{color-scheme:dark}body{margin:0;background:#0e0e0e;color:#ededeb;font:16px/1.5 system-ui,sans-serif}
 main{max-width:980px;margin:0 auto;padding:1.5rem}h1{font-weight:600;font-size:1.3rem}a{color:#a8a8a5}
@@ -71,6 +71,12 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 <div class="row"><textarea name="text_de" rows="3" placeholder="Text deutsch"></textarea><textarea name="text_en" rows="3" placeholder="Text englisch"></textarea></div>
 <button>Anlegen</button></form>
 <div id="plist"></div>
+<h1 style="margin-top:2.5rem">Kameras</h1>
+<p class="hint">Erscheinen auf „Über mich“ unter <b>Equipment</b>, mit Foto, Produktionsjahren und Beschreibung. Der <b>Name</b> muss genau so geschrieben sein wie im Feld „Kamera“ bei den Fotos, dann zeigt die Seite „Bilder mit dieser Kamera“ und verlinkt in der Großansicht auf die Kamera. Kamerafotos am besten im Querformat 4:3. Seriennummer und Baujahr sind für dich; das Baujahr erscheint als „Mein Exemplar: 1981“.</p>
+<form id="cf" class="box"><b>Neue Kamera</b>
+<div class="row"><input name="name" placeholder="Name, z. B. Nikon FE" required><input name="produktion" placeholder="Produktion, z. B. 1978–1983"></div>
+<button>Anlegen</button></form>
+<div id="clist"></div>
 <div class="order" id="ebar"><span id="estate">Keine ungespeicherten Änderungen.</span><button type="button" id="esave" disabled>Alle Änderungen speichern</button></div></div></div>
 <script>
 const U="https://owbbsnujnkhyyqvagtai.supabase.co",KEY="sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga";
@@ -109,7 +115,7 @@ $("login").onsubmit=async e=>{e.preventDefault();say("Anmelden …");
   tok=d.access_token;try{sessionStorage.setItem("tok",tok)}catch(x){}say("");load()}catch(x){say(x.message)}};
 /* Ungespeicherte Änderungen: jede geänderte Karte wird markiert. „Speichern“ an der Karte speichert nur sie,
    „Alle Änderungen speichern“ unten in der Leiste speichert alle markierten Fotos, Bildstrecken und Projekte auf einmal. */
-const pending=()=>[...document.querySelectorAll("#list .item.changed, #plist .item.changed")];
+const pending=()=>[...document.querySelectorAll("#list .item.changed, #plist .item.changed, #clist .item.changed")];
 function upd(){const n=pending().length;$("ebar").classList.toggle("dirty",n>0);$("esave").disabled=!n;
   $("estate").textContent=n?(n===1?"1 Eintrag geändert, noch nicht gespeichert.":n+" Einträge geändert, noch nicht gespeichert."):"Keine ungespeicherten Änderungen."}
 function track(d){const mark=e=>{if(e.target.closest(".strip"))return;d.classList.add("changed");upd()};d.addEventListener("input",mark);d.addEventListener("change",mark);
@@ -120,7 +126,7 @@ async function saveAll(){const list=pending();if(!list.length)return;$("esave").
 // vor dem Neuladen der Listen nachfragen, damit keine Änderung still verloren geht
 async function keep(){if(pending().length&&confirm("Es gibt ungespeicherte Änderungen. Vorher speichern?"))await saveAll()}
 addEventListener("beforeunload",e=>{if(pending().length){e.preventDefault();e.returnValue=""}});
-async function load(){try{await keep();rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();await loadP();draw();sortInit();show(true)}catch(x){say(x.message)}}
+async function load(){try{await keep();rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();await loadP();await loadC();draw();sortInit();show(true)}catch(x){say(x.message)}}
 function draw(){const L=$("list");L.innerHTML="";fillListFilter();rows.forEach(r=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;
   d.innerHTML='<img alt=""><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" data-k="kb"> Im Kontaktbogen</label></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   {fillSel(d.querySelector('[data-k="kfilm"]'),KFILM,filmOf(r.cat));fillStrecke(d.querySelector('[data-k="strecke"]'),r.strecke_id);d.querySelector('[data-k="kb"]').checked=r.im_kontaktbogen!==false}
@@ -248,5 +254,36 @@ function strip(host,r,table,field,legacy,prefix){
       r[field]=arr;draw2();say("Hinzugefügt.")}catch(e){say(e.message)}};
     host.append(b,inp)};
   draw2()}
+/* ---------- Kameras (Tabelle cameras) ---------- */
+let crows=[];
+const CF=[["name","Name (wie bei den Fotos)"],["produktion","Produktion, z. B. 1978–1983"],["sort","Reihenfolge"],["seriennummer","Seriennummer"],["baujahr","Baujahr meines Exemplars"]];
+async function loadC(){try{crows=await(await api("/rest/v1/cameras?select=*&order=sort.asc,name.asc")).json();drawC()}catch(x){say(x.message)}}
+function drawC(){const L=$("clist");L.innerHTML="";crows.forEach(r=>{const d=document.createElement("div");d.className="box item";
+  const n=rows.filter(x=>(x.camera||"").trim()===r.name).length;
+  d.innerHTML='<div><img alt=""><div class="strip" style="margin-top:.4rem"><button type="button" class="s up">Foto wählen</button><button type="button" class="s rm">Foto entfernen</button><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" hidden></div></div><div>'
+    +'<div class="row">'+CF.map(([k,ph])=>'<input data-k="'+k+'" type="'+(k==="sort"||k==="baujahr"?"number":"text")+'" placeholder="'+ph+'" title="'+ph+'">').join("")+'</div>'
+    +'<div class="row"><textarea data-k="text_de" rows="3" placeholder="Beschreibung deutsch"></textarea><textarea data-k="text_en" rows="3" placeholder="Beschreibung englisch"></textarea></div>'
+    +'<p class="hint" style="margin:.2rem 0 .6rem">'+(n?n+(n===1?" Foto ist":" Fotos sind")+" mit dieser Kamera verknüpft.":"Noch kein Foto mit genau diesem Kameranamen.")+'</p>'
+    +'<button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
+  const img=d.querySelector("img"),rm=d.querySelector(".rm");
+  const showImg=()=>{if(r.image){img.src=U+"/storage/v1/object/public/photos/"+enc(r.image);img.style.visibility=""}else img.style.visibility="hidden";rm.hidden=!r.image};showImg();
+  d.querySelectorAll("[data-k]").forEach(i=>i.value=r[i.dataset.k]??"");
+  const inp=d.querySelector("input[type=file]");d.querySelector(".up").onclick=()=>inp.click();
+  inp.onchange=async()=>{if(!inp.files[0])return;try{say("Lade Kamerafoto hoch …");const old=r.image,name=await putImage(inp.files[0],"kamera_");
+    await api("/rest/v1/cameras?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify({image:name})});r.image=name;showImg();
+    if(old)await api("/storage/v1/object/photos/"+enc(old),{method:"DELETE"}).catch(()=>{});say("Kamerafoto gespeichert.")}catch(x){say(x.message)}};
+  rm.onclick=async()=>{if(!confirm("Kamerafoto entfernen?"))return;try{const old=r.image;
+    await api("/rest/v1/cameras?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify({image:null})});r.image=null;showImg();
+    await api("/storage/v1/object/photos/"+enc(old),{method:"DELETE"}).catch(()=>{});say("Kamerafoto entfernt.")}catch(x){say(x.message)}};
+  d._save=async()=>{const o={};d.querySelectorAll("[data-k]").forEach(i=>{const v=i.value.trim(),k=i.dataset.k;o[k]=k==="sort"?(v===""?0:Number(v)):k==="baujahr"?(v===""?null:Number(v)):(v||null)});
+    if(!o.name)throw new Error("Die Kamera braucht einen Namen.");
+    await api("/rest/v1/cameras?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});Object.assign(r,o)};
+  track(d);
+  d.querySelector(".dl").onclick=async()=>{if(!confirm("Kamera „"+r.name+"“ wirklich löschen?"))return;try{await api("/rest/v1/cameras?id=eq."+r.id,{method:"DELETE"});
+    if(r.image)await api("/storage/v1/object/photos/"+enc(r.image),{method:"DELETE"}).catch(()=>{});say("Gelöscht.");await loadC()}catch(x){say(x.message)}};
+  L.appendChild(d)});upd()}
+$("cf").onsubmit=async e=>{e.preventDefault();try{const f=e.target.elements;
+  const o={name:f.name.value.trim(),produktion:f.produktion.value.trim()||null,sort:Math.max(0,...crows.map(r=>r.sort||0))+1};
+  await api("/rest/v1/cameras",{method:"POST",headers:J,body:JSON.stringify(o)});e.target.reset();say("Kamera angelegt.");loadC()}catch(x){say(x.message)}};
 if(tok)load();
 </script></main></body></html>
