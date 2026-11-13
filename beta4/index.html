@@ -744,7 +744,7 @@
   <div class="head-right">
     <nav id="mainNav" aria-label="Hauptnavigation">
       <a href="#top" class="nav-home">Titelblatt</a>
-      <a href="#kontaktbogen">Auswahl</a>
+      <a href="#kontaktbogen">Lichtbilder</a>
       <a href="#bildstrecken">Bildstrecken</a>
       <a href="#projekte" class="nav-proj" hidden>Projekte</a>
       <a href="#ueber-mich">Über mich</a>
@@ -779,7 +779,7 @@
 
   <section class="works view" id="kontaktbogen" aria-labelledby="arbeiten-titel">
     <div class="wrap">
-      <h2 id="arbeiten-titel">Auswahl</h2>
+      <h2 id="arbeiten-titel">Lichtbilder</h2>
       <p class="hint" id="hint"></p>
       <div class="sheet">
         <div class="filters" id="filters" role="group" aria-label="Kategorien"></div>
@@ -1228,7 +1228,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Alle": "All", "Auswahl": "Selection", "Aus der Auswahl": "From the selection", "Meine liebsten Bilder.": "My favourite frames.",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Alle": "All", "Lichtbilder": "Photographs", "Ausgewählte Lichtbilder": "Selected photographs", "Meine liebsten Bilder.": "My favourite frames.",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1263,7 +1263,7 @@ function renderTeaser() {
   const box = $("teaser"); box.innerHTML = "";
   const pics = kbPhotos().slice(0, 4);
   if (pics.length < 4) return;
-  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Aus der Auswahl"); box.appendChild(lab);
+  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Ausgewählte Lichtbilder"); box.appendChild(lab);
   pics.forEach((p, i) => {
     const b = document.createElement("button"), im = document.createElement("img");
     b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
@@ -1276,7 +1276,7 @@ function renderTeaser() {
 /* ---------- BETA: Weiterblättern am Ende jeder Unterseite ---------- */
 let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
 const pageList = () => ["top", "kontaktbogen", "bildstrecken", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
-const PAGE_NAMES = { top: "Titelblatt", kontaktbogen: "Auswahl", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
+const PAGE_NAMES = { top: "Titelblatt", kontaktbogen: "Lichtbilder", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
 function renderPagers() {
   const PAGES = pageList();
   // Seitennummern an den Überschriften (01 = Titelblatt)

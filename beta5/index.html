@@ -773,7 +773,7 @@
   <div class="head-right">
     <nav id="mainNav" aria-label="Hauptnavigation">
       <a href="#top" class="nav-home">Titelblatt</a>
-      <a href="#kontaktbogen">Kontaktbogen</a>
+      <a href="#kontaktbogen">Lichtbilder</a>
       <a href="#bildstrecken">Bildstrecken</a>
       <a href="#projekte" class="nav-proj" hidden>Projekte</a>
       <a href="#ueber-mich">Über mich</a>
@@ -808,7 +808,7 @@
 
   <section class="works view" id="kontaktbogen" aria-labelledby="arbeiten-titel">
     <div class="wrap">
-      <h2 id="arbeiten-titel">Kontaktbogen</h2>
+      <h2 id="arbeiten-titel">Lichtbilder</h2>
       <p class="hint" id="hint"></p>
       <div class="sheet">
         <div class="filters" id="filters" role="group" aria-label="Kategorien"></div>
@@ -1028,7 +1028,7 @@ const perStrip = () => innerWidth < 600 ? 3 : innerWidth < 1000 ? 4 : 6;
 let stripN = 0;
 function renderGrid() {
   state.shown = state.filter ? kbPhotos().filter((p) => (p.categories || []).includes(state.filter)) : kbPhotos();
-  $("hint").textContent = tr("Antippen zum Vergrößern – wie mit der Lupe.");
+  $("hint").textContent = tr("Kontaktabzüge meiner liebsten Bilder. Antippen zum Vergrößern – wie mit der Lupe.");
   const grid = $("grid"), els = [], per = perStrip();
   stripN = per; grid.innerHTML = ""; grid.className = "contact-sheet"; grid.style.setProperty("--per", per);
   for (let s = 0; s < state.shown.length; s += per) {
@@ -1231,7 +1231,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Alle": "All", "Antippen zum Vergrößern – wie mit der Lupe.": "Tap to enlarge – like using a loupe.",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Alle": "All", "Kontaktabzüge meiner liebsten Bilder. Antippen zum Vergrößern – wie mit der Lupe.": "Contact prints of my favourite frames. Tap to enlarge – like using a loupe.", "Lichtbilder": "Photographs", "Ausgewählte Lichtbilder": "Selected photographs",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1266,7 +1266,7 @@ function renderTeaser() {
   const box = $("teaser"); box.innerHTML = "";
   const pics = kbPhotos().slice(0, 4);
   if (pics.length < 4) return;
-  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Aus dem Kontaktbogen"); box.appendChild(lab);
+  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Ausgewählte Lichtbilder"); box.appendChild(lab);
   pics.forEach((p, i) => {
     const b = document.createElement("button"), im = document.createElement("img");
     b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
@@ -1279,7 +1279,7 @@ function renderTeaser() {
 /* ---------- BETA: Weiterblättern am Ende jeder Unterseite ---------- */
 let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
 const pageList = () => ["top", "kontaktbogen", "bildstrecken", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
-const PAGE_NAMES = { top: "Titelblatt", kontaktbogen: "Kontaktbogen", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
+const PAGE_NAMES = { top: "Titelblatt", kontaktbogen: "Lichtbilder", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
 function renderPagers() {
   const PAGES = pageList();
   // Seitennummern an den Überschriften (01 = Titelblatt)
