@@ -632,7 +632,7 @@
     /* Kopfzeile bleibt oben stehen: Logo und Schalter, darunter die Rubriken – immer sichtbar */
     .wrap.site-head {
       position: sticky; top: 0; flex-wrap: wrap; padding-block: .75rem 0; margin-bottom: 1.25rem;
-      background: var(--paper); box-shadow: 0 0 0 100vmax var(--paper); clip-path: inset(0 -100vmax);
+      background: var(--paper);
     }
     .menu-btn, .nav-backdrop { display: none !important; }
     .head-right { display: contents; }
@@ -779,6 +779,26 @@
   .loupe.on { opacity: 1; transform: none; }
   @media (hover: hover) and (pointer: fine) { .leuchttisch.has-loupe .frame35 { cursor: none; } }
   @media (prefers-reduced-motion: reduce) { .leuchttisch.play .strip35.laid { animation: none; } }
+
+  /* ==========================================================================
+     Flüssiger auf Handy und Tablet (Ruckeln beim Scrollen und Öffnen)
+     ========================================================================== */
+  /* Kopfzeile randlos hinterlegen – als eigene Fläche statt mit einem riesigen Schatten */
+  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
+    .wrap.site-head::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(50% - 50vw); right: calc(50% - 50vw); z-index: -1; background: var(--paper); }
+  }
+  /* Touch-Geräte: Filmkorn-Überlagerung aus (Mischmodus über der ganzen Seite = Neuberechnung bei jedem Scrollschritt),
+     Leuchtschein um den Tisch kleiner */
+  @media (hover: none), (pointer: coarse) {
+    body::after { display: none; }
+    .leuchttisch { box-shadow: 0 0 0 5px #c4c3bd, 0 0 0 6px #8e8d88, 0 0 0 7px #d9d8d3, 0 22px 40px -24px rgba(0,0,0,.8); }
+  }
+  /* kein Filter auf jedem einzelnen Bild (Safari legt dafür je Bild eine eigene Ebene an) */
+  .frame35 img { filter: none; }
+  /* Auflegen: nur Deckkraft und kleine Verschiebung, keine Drehung während der Animation */
+  @keyframes lay { from { opacity: 0; transform: translateX(var(--shift, 0px)) translateY(-8px) rotate(var(--tilt, 0deg)); } }
+  /* bis zum Auflegen bleiben die Streifen unsichtbar (kein kurzes Aufblitzen beim Seitenwechsel) */
+  .leuchttisch.prep .strip35 { opacity: 0; animation: none; }
 </style>
 </head>
 
@@ -1086,7 +1106,8 @@ function renderGrid() {
   if (hasMouse()) setupLoupe(grid);
 }
 /* Beim Öffnen der Seite die Streifen nacheinander auflegen */
-function replayTable() { const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("play"); void g.offsetWidth; g.classList.add("play"); }
+function prepTable() { const g = $("grid"); if (g.classList.contains("leuchttisch")) { g.classList.remove("play"); g.classList.add("prep"); } }
+function replayTable() { const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("prep", "play"); void g.offsetWidth; g.classList.add("play"); }
 addEventListener("resize", () => { if (state.all.length && perStrip() !== stripN) renderGrid(); });
 
 /* Lupe: folgt der Maus über den Bildern und zeigt den Ausschnitt 2,6-fach vergrößert */
@@ -1517,7 +1538,8 @@ function route() {
   if (routedOnce && document.startViewTransition && !reduceMotion()) {
     const vt = startVT(applyRoute);
     if (toTop) vt.finished.then(() => window.scrollTo({ top: 0, behavior: "instant" })).catch(() => {});   // Safari: sicher ganz oben
-  } else applyRoute();
+    vt.finished.then(() => { if (document.body.dataset.view === "kontaktbogen") replayTable(); }).catch(() => {});
+  } else { applyRoute(); if (document.body.dataset.view === "kontaktbogen") replayTable(); }
   routedOnce = true;
 }
 function applyRoute() {
@@ -1526,7 +1548,7 @@ function applyRoute() {
   document.querySelectorAll("#mainNav a").forEach((a) => {   // aktuelle Seite im Menü markieren
     if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });
-  if (v === "kontaktbogen") replayTable();
+  if (v === "kontaktbogen") prepTable();   // aufgelegt wird nach dem Seitenwechsel (siehe route)
   if (v === "ueber-mich") { const im = $("heroImg"); im.classList.remove("develop"); void im.offsetWidth; im.classList.add("develop"); }
   let t = null;
   // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
