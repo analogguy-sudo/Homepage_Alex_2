@@ -188,7 +188,7 @@
   .filters-sub { margin: 1rem 0 .2rem; font-family: var(--edge); font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
   .lb-strecke { background: none; border: 0; padding: 0; margin-top: .8rem; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .strecke h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1; margin: 0 0 .6rem; }
-  .strecke > p { max-width: 52ch; margin: 0 0 .4rem; font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--ink-soft); }
+  .strecke-head > p { max-width: 52ch; margin: 0 0 .4rem; font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--ink-soft); }
 
   /* Über mich: Text als lesbare Spalte, Porträt darunter (Handy) bzw. rechts daneben (Tablet quer, Computer) */
   #ueber-mich .about { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 clamp(3rem, 7vw, 7rem); align-items: start; }
@@ -742,6 +742,53 @@
   .back-to-photo[hidden] { display: none; }
   @keyframes backIn { from { opacity: 0; transform: translate(-50%, 12px); } }
   @media (prefers-reduced-motion: reduce) { .cam.flash, .back-to-photo { animation: none; } }
+
+  /* ==========================================================================
+     13. Feinschliff am Computer: Bildstrecken, Equipment, Titelblatt
+     ========================================================================== */
+  /* Unterzeile im Menü nur im Inhaltsverzeichnis des Titelblatts (Computer/Tablet quer) */
+  .nav-sub { display: none; }
+  .latest { display: none; }
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    /* Hochformat-Aufmacher links, Titel und Text rechts daneben – wie eine Magazinseite.
+       Die Strecke löst sich dafür in das Raster des Artikels auf (display: contents), am Handy bleibt alles untereinander. */
+    .strecke.lead-split {
+      display: grid; grid-template-columns: 1fr 1fr; align-items: start; max-width: 1100px;
+      gap: clamp(1.75rem, 5vw, 3.5rem) clamp(.6rem, 2.4vw, 1.75rem);
+    }
+    .strecke.lead-split > .story { display: contents; }
+    .strecke.lead-split > .strecke-head { grid-column: 2; grid-row: 1; align-self: center; padding: 0 0 0 .5rem; }
+    .strecke.lead-split > .story > .shot.lead { grid-column: 1; grid-row: 1; justify-self: end; }
+    /* Aufmacher so hoch, dass er samt Bildunterschrift unter der Kopfzeile auf den Bildschirm passt */
+    .strecke.lead-split .shot.lead button, .strecke.lead-split .shot.lead figcaption { width: min(100%, calc(72vh * var(--r, .75))); }
+    .strecke.lead-split .strecke-head h3 { font-size: clamp(2.4rem, 4vw, 3.8rem); }
+    /* einzelne Hoch- und Quadratformate mittig statt links mit Leerraum daneben */
+    .shot.solo button, .shot.solo figcaption { margin-inline: auto; }
+    /* Equipment: drei Kameras pro Reihe – lesbare Texte, größere Kamerafotos */
+    .cams { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.6rem 2.5rem; }
+    .cam-text { max-width: none; }
+  }
+  /* Titelblatt-Inhaltsverzeichnis: Nummer links, Rubrik rechts, darunter eine kurze Unterzeile */
+  @media (min-width: 1024px) and (min-height: 501px) and (orientation: landscape) and (hover: none),
+         (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+    body:not([data-view]) .site-head nav a { padding-top: .6rem; padding-bottom: .6rem; }
+    body:not([data-view]) .site-head nav a::before {
+      content: attr(data-no); float: left; margin-top: .1rem; font-family: var(--edge); font-size: .78em; letter-spacing: .14em; color: var(--amber);
+    }
+    body:not([data-view]) .site-head nav .nav-sub {
+      display: block; margin-top: .2rem; font-family: var(--serif); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0;
+      font-size: .82em; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: .15em;   /* Kursiv-Überhang nicht abschneiden */
+    }
+    /* Zuletzt hinzugefügt: unter der Überschrift links */
+    body:not([data-view]) .latest {
+      display: flex; flex-direction: column; gap: .3rem; margin-top: 2.2rem; padding-top: .9rem; border-top: 1px solid var(--rule);
+      text-decoration: none; color: inherit;
+    }
+    body:not([data-view]) .latest[hidden] { display: none; }
+    .latest small { font-family: var(--edge); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+    .latest span { font-family: var(--display); font-size: 1.35rem; line-height: 1.05; text-transform: uppercase; letter-spacing: .03em; }
+    .latest:hover span { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+  }
 </style>
 </head>
 
@@ -757,10 +804,10 @@
   <div class="head-right">
     <nav id="mainNav" aria-label="Hauptnavigation">
       <a href="#top" class="nav-home">Titelblatt</a>
-      <a href="#leuchttisch">Leuchttisch</a>
-      <a href="#bildstrecken">Bildstrecken</a>
-      <a href="#projekte" class="nav-proj" hidden>Projekte</a>
-      <a href="#ueber-mich">Über mich</a>
+      <a href="#leuchttisch"><span class="nav-t">Leuchttisch</span><span class="nav-sub">Meine liebsten Bilder</span></a>
+      <a href="#bildstrecken"><span class="nav-t">Bildstrecken</span><span class="nav-sub">Fotos, die zusammengehören</span></a>
+      <a href="#projekte" class="nav-proj" hidden><span class="nav-t">Projekte</span><span class="nav-sub">Arbeiten rund um den Film</span></a>
+      <a href="#ueber-mich"><span class="nav-t">Über mich</span><span class="nav-sub">Kameras und Kontakt</span></a>
     </nav>
     <span class="tools">
       <button class="icon" id="theme" type="button" aria-label="Hell / Dunkel" title="Hell / Dunkel"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg></button>
@@ -775,6 +822,7 @@
     <div>
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
       <p data-en="Analogue photography<br>on 35 mm and medium format.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.</p>
+      <a class="latest" id="latest" href="#bildstrecken" hidden><small>Zuletzt hinzugefügt</small><span id="latestTitle"></span></a>
     </div>
     <div class="mobile-hero-copy">
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
@@ -952,7 +1000,7 @@ function warmStrecken() {   // beim Öffnen der Seite „Bildstrecken“: Aufmac
 }
 /* Hoch- und quadratische Formate paarweise nebeneinander; wer keinen Partner hat, steht allein und größer */
 function pairUp(story) {
-  const shots = [...story.children];
+  const shots = [...story.querySelectorAll(":scope > .shot")];
   const half = (n) => n && !n.classList.contains("lead") && !n.classList.contains("wide");
   for (let i = 1; i < shots.length; i++) {
     if (!half(shots[i])) continue;
@@ -982,7 +1030,7 @@ async function loadPhotos() {
   if (!res.ok) throw new Error("Supabase antwortete mit Status " + res.status);
   const rows = await res.json();
   return rows.filter((r) => r.storage_path).map((r) => ({
-    strecke: r.strecke_id, kb: r.im_kontaktbogen !== false,
+    strecke: r.strecke_id, kb: r.im_kontaktbogen !== false, added: r.created_at || "",
     title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, categories: (r.cat || "").split(",").map((c) => c.trim()).filter(Boolean), year: r.year, location: r.location, focal: r.focal, shutter: r.shutter, aperture: r.aperture,
     src: `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${r.storage_path.split("/").map(encodeURIComponent).join("/")}`,
     details: (r.details || []).map((n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`)
@@ -1307,7 +1355,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Meine liebsten Bilder": "My favourite frames", "Fotos, die zusammengehören": "Photos that belong together", "Arbeiten rund um den Film": "Work around film", "Kameras und Kontakt": "Cameras and contact", "Zuletzt hinzugefügt": "Recently added", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1329,7 +1377,7 @@ function setLang(l) {
     n.nodeValue = l === "en" ? raw.replace(key, EN[key]) : raw;
   });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
-  renderCards(); renderPagers(); renderCameras(); if (state.all.length) { renderFilters(); renderGrid("swap"); renderTeaser(); }
+  renderCards(); renderPagers(); renderCameras(); renderLatest(); if (state.all.length) { renderFilters(); renderGrid("swap"); renderTeaser(); }
 }
 
 /* ---------- Vorschau auf dem Titelblatt (Handy) ---------- */
@@ -1351,10 +1399,23 @@ function renderTeaser() {
 let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
 const pageList = () => ["top", "leuchttisch", "bildstrecken", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
 const PAGE_NAMES = { top: "Titelblatt", leuchttisch: "Leuchttisch", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
+/* Titelblatt (Computer): Hinweis auf die Bildstrecke mit dem zuletzt hochgeladenen Foto */
+function renderLatest() {
+  const items = streckenItems(); if (!items.length || !state.all.length) return;
+  const newest = state.all.filter((f) => f.strecke).sort((a, b) => (b.added > a.added ? 1 : b.added < a.added ? -1 : 0))[0];
+  const k = newest ? items.findIndex((x) => x.id === newest.strecke) : -1; if (k < 0) return;
+  $("latestTitle").textContent = tr(items[k].title) + " →";
+  const a = $("latest"); a.hidden = false;
+  a.onclick = () => { projSel.bildstrecke = k; renderCards(); };   // die Adresse #bildstrecken öffnet danach die Seite
+}
 function renderPagers() {
   const PAGES = pageList();
   // Seitennummern an den Überschriften (01 = Titelblatt)
-  PAGES.forEach((id, i) => { const h = document.querySelector("#" + id + " h2"); if (h) h.dataset.num = String(i + 1).padStart(2, "0"); });
+  PAGES.forEach((id, i) => {
+    const no = String(i + 1).padStart(2, "0");
+    const h = document.querySelector("#" + id + " h2"); if (h) h.dataset.num = no;
+    const a = document.querySelector('#mainNav a[href="#' + id + '"]'); if (a) a.dataset.no = no;
+  });
   document.querySelectorAll(".pager").forEach((n) => n.remove());
   PAGES.slice(1).forEach((id) => {
     // „Über mich“ endet mit dem Kontakt, dort steht das Weiterblättern
@@ -1394,6 +1455,7 @@ async function loadProjects() {
   } catch (e) {}
   projLoaded = true;
   hasProjects = projects.some((p) => (p.kind || "projekt") === "projekt");
+  renderLatest();
   document.querySelector(".nav-proj").hidden = !hasProjects;
   renderCards(); renderPagers();
 }
@@ -1435,9 +1497,10 @@ function renderKind(kind, pre) {
     state.index = k; showLightbox(); lb.showModal();
   };
   const box = document.createElement("article"); box.className = strecke ? "strecke" : "pbox";
-  const h = document.createElement("h3"); h.textContent = tr(p.title); box.appendChild(h);
-  if (text) { const t = document.createElement("p"); t.textContent = text; box.appendChild(t); }
-  if (p.url) { const a = document.createElement("a"); a.className = "plink"; a.href = p.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸"; box.appendChild(a); }
+  const head = document.createElement("div"); head.className = "strecke-head"; box.appendChild(head);   // Titel und Text
+  const h = document.createElement("h3"); h.textContent = tr(p.title); head.appendChild(h);
+  if (text) { const t = document.createElement("p"); t.textContent = text; head.appendChild(t); }
+  if (p.url) { const a = document.createElement("a"); a.className = "plink"; a.href = p.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸"; head.appendChild(a); }
   if (strecke && fotos.length) {
     // Bildstrecke wie eine Magazinstrecke – erstes Bild groß, Querformate über die volle Breite,
     // Hochformate paarweise nebeneinander, darunter eine Zeile wie der Rand eines Negativs
@@ -1453,6 +1516,7 @@ function renderKind(kind, pre) {
       im.alt = f.title + (f.location ? ", " + f.location : ""); im.decoding = "async"; if (k > 3) im.loading = "lazy";
       // Form (Hoch/Quer) aus dem vorab gemessenen Seitenverhältnis; das große Bild lädt sofort, ohne auf etwas zu warten
       const shape = (r) => {
+        if (k === 0 && r <= .87) box.classList.add("lead-split");   // Hochformat-Aufmacher: am Computer Titel und Text daneben
         b.style.aspectRatio = String(r);
         fig.style.setProperty("--r", r.toFixed(4));   // für die Höhenbegrenzung
         fig.classList.add(r >= 1.15 ? "wide" : r <= .87 ? "tall" : "even");
