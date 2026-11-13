@@ -4,14 +4,13 @@
 <meta charset="utf-8">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<link rel="icon" href="favicon.ico?v=20261110" sizes="32x32">
-<link rel="icon" type="image/png" sizes="64x64" href="logo/favicon-64.png?v=20261110">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261110">
-<link rel="manifest" href="manifest.webmanifest?v=20261110">
+<link rel="icon" href="favicon.ico?v=20261113" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png?v=20261113">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261113">
+<link rel="manifest" href="manifest.webmanifest?v=20261113">
 <meta name="theme-color" content="#0E0E0E">
-<meta name="apple-mobile-web-app-title" content="A T F">
-<title>Datenschutz – A T F</title>
+<meta name="apple-mobile-web-app-title" content="Analoge Welt">
+<title>Datenschutz – Analoge Welt</title>
 <link href="fonts/fonts.css" rel="stylesheet">
 
 <style>
@@ -70,6 +69,8 @@
   [lang="en"] .de, [lang="de"] .en { display: none; }
 
   footer { padding-block: 1.75rem; font-size: .92rem; color: var(--ink-soft); }
+  /* BETA: deutlicher Weg zurück */
+  .back { display: inline-block; margin: 1.5rem 0 .5rem; font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: .95rem; text-decoration: none; border-bottom: 1px solid var(--ink-soft); padding-bottom: .2rem; -webkit-user-select: none; user-select: none; }
 </style>
 </head>
 <body>
@@ -83,6 +84,7 @@
 </header>
 
 <main class="wrap">
+  <a class="back" href="./" onclick="if (document.referrer && new URL(document.referrer).origin === location.origin) { history.back(); return false; }"><span class="de">← Zurück zur Seite</span><span class="en">← Back to the site</span></a>
 
   <!-- ===================== DEUTSCH ===================== -->
   <article class="de">
@@ -91,7 +93,7 @@
     <p>Diese Website ist ein privates Fotografie-Portfolio ohne kommerzielle Absichten. Ich verkaufe nichts, schalte keine Werbung, setze keine Cookies und verwende keine Analyse- oder Tracking-Werkzeuge.</p>
 
     <h2>Verantwortlich</h2>
-    <p>Alex F.<br>E-Mail: <a href="mailto:a_t_f@outlook.de">a_t_f@outlook.de</a></p>
+    <p>Alexander Fichter<br>Am Großen Berge 20, 60431 Frankfurt am Main<br>E-Mail: <a href="mailto:a_t_f@outlook.de">a_t_f@outlook.de</a><br>Weitere Angaben im <a href="impressum.html">Impressum</a>.</p>
 
     <h2>Hosting über GitHub Pages</h2>
     <p>Die Seite wird über GitHub Pages bereitgestellt, einen Dienst der GitHub Inc. (USA). Beim Aufruf verarbeitet GitHub technisch notwendige Daten, insbesondere Ihre IP-Adresse, Datum und Uhrzeit, die aufgerufene Seite sowie Browser- und Systemangaben, um die Seite auszuliefern und vor Missbrauch zu schützen. Auf diese Protokolle habe ich keinen Zugriff.</p>
@@ -129,7 +131,7 @@
     <p>This website is a private, non-commercial photography portfolio. I don’t sell anything, show no ads, set no cookies and use no analytics or tracking tools.</p>
 
     <h2>Controller</h2>
-    <p>Alex F.<br>Email: <a href="mailto:a_t_f@outlook.de">a_t_f@outlook.de</a></p>
+    <p>Alexander Fichter<br>Am Großen Berge 20, 60431 Frankfurt am Main, Germany<br>Email: <a href="mailto:a_t_f@outlook.de">a_t_f@outlook.de</a><br>Further details in the <a href="impressum.html">legal notice</a>.</p>
 
     <h2>Hosting on GitHub Pages</h2>
     <p>This site is served by GitHub Pages, a service of GitHub Inc. (USA). When you visit, GitHub processes technically necessary data, in particular your IP address, date and time, the page requested and browser and system details, in order to deliver the site and protect it against abuse. I have no access to these logs.</p>
@@ -164,12 +166,13 @@
 
 <footer class="wrap">
   <a href="./">← <span class="de">Zurück zur Startseite</span><span class="en">Back to the homepage</span></a>
+  &nbsp;·&nbsp; <a href="impressum.html"><span class="de">Impressum</span><span class="en">Legal notice</span></a>
 </footer>
 
 <script>
 function setLang(l) {
   document.documentElement.lang = l;
-  document.title = l === "en" ? "Privacy – A T F" : "Datenschutz – A T F";
+  document.title = l === "en" ? "Privacy – Analoge Welt" : "Datenschutz – Analoge Welt";
   try { localStorage.setItem("lang", l); } catch (e) {}
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
 }
