@@ -617,7 +617,9 @@
   /* Über mich: Equipment und Kontakt stehen auf derselben Seite darunter */
   body[data-view="ueber-mich"] #equipment, body[data-view="ueber-mich"] #kontakt { display: block; }
   body[data-view="ueber-mich"] #ueber-mich { padding-bottom: 0; }
-  #equipment, #kontakt { padding-top: 0; scroll-margin-top: var(--headh, 7rem); }
+  #equipment, #kontakt { padding-top: 0; }
+  /* Sprungziele (Bildstrecke, Projekt, Kontakt …) landen unterhalb der festen Kopfzeile, nicht darunter versteckt */
+  #strkDetail, #projDetail, #grid, #equipment, #kontakt { scroll-margin-top: var(--headh, 8rem); }
   #equipment > .wrap, #kontakt > .wrap { border-top: 1px solid var(--rule); padding-top: clamp(1.5rem, 4vw, 2.5rem); margin-top: clamp(1.5rem, 4vw, 2.5rem); }
   #equipment { padding-bottom: 0; }
   #equipment h2, #kontakt h2 { font-size: clamp(1.6rem, 3vw, 2rem) !important; }
@@ -1229,10 +1231,18 @@ function applyRoute() {
   let t = null;
   // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
   try { if (h && h !== "top" && (!v || ALIAS[h])) t = document.querySelector("#" + h); } catch (e) {}
-  document.documentElement.style.setProperty("--headh", (document.querySelector(".site-head").offsetHeight + 16) + "px");
   if (t) t.scrollIntoView({ behavior: "instant" }); else window.scrollTo({ top: 0, behavior: "instant" });
 }
 addEventListener("hashchange", route);
+/* Höhe der Kopfzeile für die Sprungziele: am Handy steht sie fest oben, also Abstand = Höhe + etwas Luft */
+const setHeadH = () => {
+  const head = document.querySelector(".site-head");
+  const pinned = getComputedStyle(head).position === "sticky";
+  document.documentElement.style.setProperty("--headh", (pinned ? head.offsetHeight + 16 : 16) + "px");
+};
+setHeadH();
+if (window.ResizeObserver) new ResizeObserver(setHeadH).observe(document.querySelector(".site-head"));
+addEventListener("resize", setHeadH);
 /* Zurück zum Titelblatt (Logo, „Titelblatt“, „← 01“): ohne Sprungmarke, damit Safari nicht selbst
    unter die Kopfzeile scrollt – Adresse ohne #, Ansicht wechseln, ganz nach oben */
 document.addEventListener("click", (e) => {
