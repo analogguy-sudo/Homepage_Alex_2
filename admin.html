@@ -134,13 +134,16 @@ addEventListener("beforeunload",e=>{if(pending().length){e.preventDefault();e.re
 async function cacheList(){const r=await(await api("/storage/v1/object/list/photos",{method:"POST",headers:J,body:JSON.stringify({prefix:"",limit:1000})})).json();
   return r.filter(o=>o.id&&!/max-age=31536000/.test((o.metadata||{}).cacheControl||""))}
 async function cacheCheck(){try{const l=await cacheList();$("cfixinfo").textContent=l.length?l.length+" Bilder werden bei jedem Aufruf neu vom Server geholt. Einmal tippen, dann bleiben sie im Browser gespeichert (Inhalt bleibt gleich).":"Alle Bilder sind auf schnelles Laden eingestellt.";$("cfix").hidden=!l.length;if(l.length)$("cfixbox").hidden=false}catch(x){$("cfixinfo").textContent=x.message}}
-async function cacheFix(){const l=await cacheList();let ok=0,err="";$("cfix").disabled=true;
-  for(const o of l){try{$("cfixinfo").textContent="Stelle um … "+(ok+1)+" von "+l.length;
+async function cacheFix(){const l=await cacheList();let ok=0,bad=0,last="",i=0;$("cfix").disabled=true;
+  const one=async o=>{try{
     const r=await fetch(U+"/storage/v1/object/public/photos/"+enc(o.name)+"?fix="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("Download "+r.status);
     const blob=await r.blob();
     await api("/storage/v1/object/photos/"+enc(o.name),{method:"PUT",headers:{"Content-Type":(o.metadata||{}).mimetype||blob.type||"image/jpeg","cache-control":"max-age=31536000","x-upsert":"true"},body:blob});ok++}
-  catch(x){err=o.name+": "+x.message}}
-  $("cfix").disabled=false;say(err?ok+" umgestellt, Fehler bei "+err:ok+" Bilder umgestellt.");cacheCheck()}
+    catch(x){bad++;last=o.name+": "+x.message}
+    $("cfixinfo").textContent="Stelle um … "+(ok+bad)+" von "+l.length+(bad?" ("+bad+" Fehler)":"")+" – bitte die Seite offen lassen."};
+  // vier gleichzeitig: dauert so nur etwa eine halbe Minute; bricht es ab (App gewechselt), einfach nochmal tippen – es macht beim Rest weiter
+  await Promise.all([0,1,2,3].map(async()=>{while(i<l.length)await one(l[i++])}));
+  $("cfix").disabled=false;say(bad?ok+" umgestellt, "+bad+" nicht. Letzter Fehler: "+last:ok+" Bilder umgestellt.");cacheCheck()}
 $("cfix").onclick=cacheFix;
 async function load(){try{await keep();cacheCheck();rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();await loadP();await loadC();draw();sortInit();show(true)}catch(x){say(x.message)}}
 function draw(){const L=$("list");L.innerHTML="";fillListFilter();rows.forEach(r=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;
