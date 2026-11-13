@@ -1708,9 +1708,9 @@ const setHeadH = () => {
 function setTocTop() {
   const p = document.querySelector(".hero > div:first-child > p"), root = document.documentElement;
   const ok = p && p.offsetParent && getComputedStyle(p).position === "static" && !document.body.dataset.view;
-  // halbe Höhe zwischen Kopfzeilen-Linie und der Linie unter dem Titel
+  // ein Viertel des Weges von der Kopfzeilen-Linie zur Linie unter dem Titel
   const headB = parseFloat(getComputedStyle(root).getPropertyValue("--headb")) || 0;
-  if (ok) root.style.setProperty("--toct", Math.round((headB + p.getBoundingClientRect().top + scrollY) / 2) + "px"); else root.style.removeProperty("--toct");
+  if (ok) root.style.setProperty("--toct", Math.round(headB + (p.getBoundingClientRect().top + scrollY - headB) * .25) + "px"); else root.style.removeProperty("--toct");
   root.classList.toggle("toc-at-head", !ok);
 }
 if (document.fonts) document.fonts.ready.then(setTocTop);
