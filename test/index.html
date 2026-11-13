@@ -838,10 +838,11 @@
       background-size: cover; background-position: 50% 50%;
     }
   }
-  /* Handy und Tablet hoch: dieselbe Bilderfolge unter dem Knopf, statt der vier kleinen Vorschaubilder */
+  /* Handy und Tablet hoch: das Titelbild selbst wechselt (an der Stelle des Seagull), Filmrand-Zeile darunter */
   @media (max-width: 1100px) and (orientation: portrait) {
-    body:not([data-view]) .mobile-hero-copy > .slides.ready { display: block; position: relative; overflow: hidden; width: 100%; aspect-ratio: 1; margin-top: 1.75rem; background: #0b0b0b; }
-    body:not([data-view]) .mobile-hero-copy > .slides.ready + .slide-cap { display: block; margin-top: .7rem; }
+    body:not([data-view]) .hero.has-slides::before { display: none; }
+    body:not([data-view]) .hero.has-slides > .slides.ready { display: block; order: -1; position: relative; overflow: hidden; width: 100%; aspect-ratio: 1978 / 1315; background: #0b0b0b; }
+    body:not([data-view]) .hero.has-slides .mobile-hero-copy > .slide-cap { display: block; margin: 0 0 .9rem; }
     body:not([data-view]) .hero.has-slides #teaser { display: none !important; }
   }
 </style>
@@ -1412,7 +1413,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Zur Bildstrecke": "To the photo series", "Meine liebsten Bilder": "My favourite frames", "Fotos, die zusammengehören": "Photos that belong together", "Arbeiten rund um den Film": "Work around film", "Kameras und Kontakt": "Cameras and contact", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Zur Bildstrecke": "To the photo series", "Titelbild": "Cover", "Meine liebsten Bilder": "My favourite frames", "Fotos, die zusammengehören": "Photos that belong together", "Arbeiten rund um den Film": "Work around film", "Kameras und Kontakt": "Cameras and contact", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1681,29 +1682,35 @@ function setupSlides() {
   const box = $("slides"); if (!box) return;
   const pics = kbPhotos().slice(0, 12);
   if (pics.length < 2) return;
-  slideState.list = pics;
-  box.innerHTML = "";
-  pics.forEach((p, k) => {
-    const im = document.createElement("img"); im.className = "slide" + (k === 0 ? " on" : ""); im.alt = p.title; im.decoding = "async";
-    im.dataset.src = sized(p.src, 640);
-    if (k === 0) im.src = im.dataset.src;
-    im.addEventListener("click", () => openViewer(pics, k, []));
-    box.appendChild(im);
-  });
-  box.classList.add("ready"); box.closest(".hero").classList.add("has-slides");
-  placeSlides(); mqPortrait.addEventListener("change", placeSlides);
+  slideState.pics = pics;
+  box.closest(".hero").classList.add("has-slides");
   box.addEventListener("pointerenter", () => { slideState.hover = true; });
   box.addEventListener("pointerleave", () => { slideState.hover = false; });
-  slideCaption(0);
-  if (!reduceMotion()) queueSlide();
+  buildSlides(); mqPortrait.addEventListener("change", buildSlides);
 }
-/* Handy/Tablet hoch: unter den Knopf in der Handy-Spalte; sonst links unter den Titel */
+/* Handy/Tablet hoch: das Titelbild selbst wechselt (Seagull zuerst), Filmrand-Zeile darunter.
+   Computer: Seagull bleibt groß, die Bilderfolge läuft links unter dem Titel. */
 const mqPortrait = matchMedia("(max-width: 1100px) and (orientation: portrait)");
-function placeSlides() {
-  const box = $("slides"), cap = document.querySelector(".slide-cap-d");
-  const target = mqPortrait.matches ? document.querySelector(".mobile-hero-copy") : document.querySelector(".hero > div:first-child");
-  if (box.parentElement !== target) { target.appendChild(box); target.appendChild(cap); }
-  requestAnimationFrame(sizeSlides);
+function buildSlides() {
+  const box = $("slides"), cap = document.querySelector(".slide-cap-d"), hero = box.closest(".hero"), pics = slideState.pics;
+  const mobile = mqPortrait.matches;
+  const seagullSrc = getComputedStyle(document.documentElement).getPropertyValue("--bg").replace(/^\s*url\(["']?|["']?\)\s*$/g, "");
+  slideState.list = (mobile && seagullSrc ? [{ seagull: true, src: seagullSrc, title: "Seagull 4A" }] : []).concat(pics.map((p, n) => ({ ...p, no: n + 1 })));
+  clearTimeout(slideState.timer); slideState.busy = false; slideState.i = 0;
+  box.innerHTML = "";
+  slideState.list.forEach((p, k) => {
+    const im = document.createElement("img"); im.className = "slide" + (k === 0 ? " on" : "") + (p.seagull ? " seagull" : ""); im.alt = p.title; im.decoding = "async";
+    im.dataset.src = p.seagull ? p.src : sized(p.src, mobile ? 1080 : 640);
+    if (p.seagull) im.style.objectPosition = "center 19%";
+    else im.addEventListener("click", () => openViewer(pics, p.no - 1, []));
+    if (k === 0) im.src = im.dataset.src;
+    box.appendChild(im);
+  });
+  if (mobile) { hero.appendChild(box); document.querySelector(".mobile-hero-copy").prepend(cap); }
+  else { const col = hero.querySelector(":scope > div:first-child"); col.appendChild(box); col.appendChild(cap); }
+  box.classList.add("ready");
+  slideCaption(0); requestAnimationFrame(sizeSlides);
+  if (!reduceMotion()) queueSlide();
 }
 /* Computer: so groß wie möglich – bis knapp über die Fußzeile, höchstens so breit wie die Spalte */
 function sizeSlides() {
@@ -1757,8 +1764,8 @@ function slideCaption(k) {
   document.querySelectorAll(".slide-cap").forEach((cap) => {
     cap.innerHTML = "";
     const line = document.createElement("div");
-    const no = document.createElement("span"); no.className = "no"; no.textContent = "▸ " + (k + 1) + "A  ";
-    line.append(no, document.createTextNode([p.title, p.location, p.film].filter(Boolean).join(" · ")));
+    const no = document.createElement("span"); no.className = "no"; no.textContent = p.seagull ? "▸ " : "▸ " + p.no + "A  ";
+    line.append(no, document.createTextNode(p.seagull ? tr("Titelbild") + " · Seagull 4A" : [p.title, p.location, p.film].filter(Boolean).join(" · ")));
     cap.appendChild(line);
     const sIdx = p.strecke ? streckenItems().findIndex((x) => x.id === p.strecke) : -1;
     if (sIdx >= 0) {
