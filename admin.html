@@ -90,6 +90,8 @@ function fillSel(sel,list,cur){list.concat(cur&&!list.includes(cur)?[cur]:[]).fo
 // Film aus dem Kategorie-Feld lesen (ältere Einträge enthalten dort noch das Motiv)
 const filmOf=c=>(c||"").split(",").map(x=>x.trim()).find(x=>KFILM.includes(x))||"";
 const enc=p=>p.split("/").map(encodeURIComponent).join("/"),say=t=>$("msg").textContent=t||"";
+// kleine Vorschaubilder (statt der Originale) – die Liste lädt am Handy sonst ~50 MB
+const thumb=n=>U+"/storage/v1/render/image/public/photos/"+enc(n)+"?width=240&height=720&resize=contain";
 async function decode(file){
   try{return await createImageBitmap(file)}
   catch(e){throw new Error("Dieses Bildformat kann der Browser nicht lesen ("+((file.name.split(".").pop())||"?").toUpperCase()+"). Bitte als JPG oder PNG exportieren, in Photoshop über Datei → Exportieren → Exportieren als.")}
@@ -128,9 +130,9 @@ async function keep(){if(pending().length&&confirm("Es gibt ungespeicherte Ände
 addEventListener("beforeunload",e=>{if(pending().length){e.preventDefault();e.returnValue=""}});
 async function load(){try{await keep();rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();await loadP();await loadC();draw();sortInit();show(true)}catch(x){say(x.message)}}
 function draw(){const L=$("list");L.innerHTML="";fillListFilter();rows.forEach(r=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;
-  d.innerHTML='<img alt=""><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" data-k="kb"> Im Kontaktbogen</label></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
+  d.innerHTML='<img alt="" loading="lazy"><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" data-k="kb"> Im Kontaktbogen</label></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   {fillSel(d.querySelector('[data-k="kfilm"]'),KFILM,filmOf(r.cat));fillStrecke(d.querySelector('[data-k="strecke"]'),r.strecke_id);d.querySelector('[data-k="kb"]').checked=r.im_kontaktbogen!==false}
-  d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);
+  d.querySelector("img").src=thumb(r.storage_path);
   d.querySelectorAll("input").forEach(i=>i.value=r[i.dataset.k]??"");
   {const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"photos","details",null,"detail_")}
   d._save=async()=>{const o=body(k=>d.querySelector('[data-k="'+k+'"]').value.trim());o.im_kontaktbogen=d.querySelector('[data-k="kb"]').checked;
@@ -164,8 +166,8 @@ function sortDraw(){const F2=$("sfilter");F2.innerHTML="";sfList().forEach(([k,l
   const G=$("sgrid"),v=visible();G.innerHTML="";
   v.forEach((id,k)=>{const r=rows.find(x=>x.id===id),t=document.createElement("div");t.className="tile";t.draggable=true;t.dataset.id=id;
     const dup=rows.some(x=>x.id!==id&&(srcName(x)===srcName(r)||(x.title||"").trim().toLowerCase()===(r.title||"").trim().toLowerCase()));
-    t.innerHTML='<img alt=""><div class="t"></div>'+(dup?'<div class="dup">doppelt? gleiche Datei oder gleicher Titel</div>':'')+'<div class="mv"><button type="button" title="nach vorne">←</button><span class="n">'+(ord.indexOf(id)+1)+'</span><button type="button" title="nach hinten">→</button><button type="button" class="del" title="Foto löschen">✕</button></div>';
-    t.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.storage_path);t.querySelector(".t").textContent=r.title||"Ohne Titel";
+    t.innerHTML='<img alt="" loading="lazy"><div class="t"></div>'+(dup?'<div class="dup">doppelt? gleiche Datei oder gleicher Titel</div>':'')+'<div class="mv"><button type="button" title="nach vorne">←</button><span class="n">'+(ord.indexOf(id)+1)+'</span><button type="button" title="nach hinten">→</button><button type="button" class="del" title="Foto löschen">✕</button></div>';
+    t.querySelector("img").src=thumb(r.storage_path);t.querySelector(".t").textContent=r.title||"Ohne Titel";
     {const im=t.querySelector("img"),f=document.createElement("div");f.className="fmt";t.querySelector(".t").after(f);   // Format zeigen: hoch, quer oder quadratisch
      im.onload=()=>{const q=im.naturalWidth/im.naturalHeight;f.textContent=q>1.08?"▭ quer":q<.92?"▯ hoch":"□ quadratisch"}}
     const [l,rt,del]=t.querySelectorAll("button");l.onclick=()=>move(id,k-1);rt.onclick=()=>move(id,k+1);
@@ -220,8 +222,8 @@ async function putImage(file,prefix="projekt_"){const bmp=await decode(file),sc=
   await api("/storage/v1/object/photos/"+name,{method:"POST",headers:{"Content-Type":"image/jpeg"},body:blob});return name}
 async function loadP(){try{await keep();prows=await(await api("/rest/v1/projects?select=*&order=sort.asc")).json();drawP();fillStrecke($("up-strecke"),$("up-strecke").value);fillStrecke($("bulk-strecke"),$("bulk-strecke").value)}catch(x){say(x.message)}}
 function drawP(){const L=$("plist");L.innerHTML="";prows.forEach(r=>{const d=document.createElement("div");d.className="box item";
-  d.innerHTML='<img alt=""><div><div class="row">'+PF.map(k=>k.startsWith("text")?'<textarea data-k="'+k+'" rows="3" placeholder="'+k+'"></textarea>':'<input data-k="'+k+'" type="'+(k==="sort"?"number":"text")+'" placeholder="'+k+'">').join("")+'<select data-k="kind"><option value="projekt">Projekt</option><option value="bildstrecke">Bildstrecke</option></select><select data-k="bereich"><option value="besonders">Reisen &amp; Touren</option><option value="allgemein">Allgemeines Thema</option></select></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
-  if(r.image)d.querySelector("img").src=U+"/storage/v1/object/public/photos/"+enc(r.image);else d.querySelector("img").style.visibility="hidden";
+  d.innerHTML='<img alt="" loading="lazy"><div><div class="row">'+PF.map(k=>k.startsWith("text")?'<textarea data-k="'+k+'" rows="3" placeholder="'+k+'"></textarea>':'<input data-k="'+k+'" type="'+(k==="sort"?"number":"text")+'" placeholder="'+k+'">').join("")+'<select data-k="kind"><option value="projekt">Projekt</option><option value="bildstrecke">Bildstrecke</option></select><select data-k="bereich"><option value="besonders">Reisen &amp; Touren</option><option value="allgemein">Allgemeines Thema</option></select></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
+  if(r.image)d.querySelector("img").src=thumb(r.image);else d.querySelector("img").style.visibility="hidden";
   d.querySelectorAll("[data-k]").forEach(i=>i.value=r[i.dataset.k]??"");
   if(r.kind!=="bildstrecke"){const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"projects","images","image","bild_")}
   d._save=async()=>{const o={};d.querySelectorAll("[data-k]").forEach(i=>{const v=i.value.trim();o[i.dataset.k]=i.dataset.k==="sort"?(v===""?0:Number(v)):(v||null)});
@@ -238,7 +240,7 @@ function strip(host,r,table,field,legacy,prefix){
   const draw2=()=>{host.innerHTML="";
     const lab=document.createElement("span");lab.textContent=prefix==="detail_"?"Detailbilder:":"Bilder:";host.appendChild(lab);
     list().forEach(n=>{const t=document.createElement("div");t.className="th";
-      const im=document.createElement("img");im.alt="";im.src=U+"/storage/v1/object/public/photos/"+enc(n);
+      const im=document.createElement("img");im.alt="";im.src=thumb(n);
       const x=document.createElement("button");x.type="button";x.className="s";x.textContent="×";x.title="Nur dieses Bild entfernen";
       x.onclick=async()=>{if(!confirm("Dieses Bild entfernen?"))return;try{
         const o={};if(legacy&&r[legacy]===n)o[legacy]=null;else o[field]=(r[field]||[]).filter(v=>v!==n);
@@ -260,13 +262,13 @@ const CF=[["name","Name (wie bei den Fotos)"],["produktion","Produktion, z. B. 1
 async function loadC(){try{crows=await(await api("/rest/v1/cameras?select=*&order=sort.asc,name.asc")).json();drawC()}catch(x){say(x.message)}}
 function drawC(){const L=$("clist");L.innerHTML="";crows.forEach(r=>{const d=document.createElement("div");d.className="box item";
   const n=rows.filter(x=>(x.camera||"").trim()===r.name).length;
-  d.innerHTML='<div><img alt=""><div class="strip" style="margin-top:.4rem"><button type="button" class="s up">Foto wählen</button><button type="button" class="s rm">Foto entfernen</button><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" hidden></div></div><div>'
+  d.innerHTML='<div><img alt="" loading="lazy"><div class="strip" style="margin-top:.4rem"><button type="button" class="s up">Foto wählen</button><button type="button" class="s rm">Foto entfernen</button><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" hidden></div></div><div>'
     +'<div class="row">'+CF.map(([k,ph])=>'<input data-k="'+k+'" type="'+(k==="sort"||k==="baujahr"?"number":"text")+'" placeholder="'+ph+'" title="'+ph+'">').join("")+'</div>'
     +'<div class="row"><textarea data-k="text_de" rows="3" placeholder="Beschreibung deutsch"></textarea><textarea data-k="text_en" rows="3" placeholder="Beschreibung englisch"></textarea></div>'
     +'<p class="hint" style="margin:.2rem 0 .6rem">'+(n?n+(n===1?" Foto ist":" Fotos sind")+" mit dieser Kamera verknüpft.":"Noch kein Foto mit genau diesem Kameranamen.")+'</p>'
     +'<button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
   const img=d.querySelector("img"),rm=d.querySelector(".rm");
-  const showImg=()=>{if(r.image){img.src=U+"/storage/v1/object/public/photos/"+enc(r.image);img.style.visibility=""}else img.style.visibility="hidden";rm.hidden=!r.image};showImg();
+  const showImg=()=>{if(r.image){img.src=thumb(r.image);img.style.visibility=""}else img.style.visibility="hidden";rm.hidden=!r.image};showImg();
   d.querySelectorAll("[data-k]").forEach(i=>i.value=r[i.dataset.k]??"");
   const inp=d.querySelector("input[type=file]");d.querySelector(".up").onclick=()=>inp.click();
   inp.onchange=async()=>{if(!inp.files[0])return;try{say("Lade Kamerafoto hoch …");const old=r.image,name=await putImage(inp.files[0],"kamera_");
