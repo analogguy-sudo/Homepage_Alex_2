@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")}catch(e){document.documentElement.dataset.theme="dark"}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../favicon.ico?v=20261110" sizes="32x32">
+<link rel="icon" type="image/png" sizes="64x64" href="../logo/favicon-64.png?v=20261110">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png?v=20261110">
+<link rel="manifest" href="../manifest.webmanifest?v=20261110">
+<meta name="theme-color" content="#0E0E0E">
+<meta name="apple-mobile-web-app-title" content="Analoge Welt">
+<title>Analoge Welt – Analoge Fotografie von A.T. Fichter</title>
+<meta name="description" content="Analoge Fotografie auf 35 mm und Mittelformat, von Hand entwickelt: Bildstrecken aus Frankfurt, Mannheim, der Pfalz und Andalusien.">
+<!-- BETA: Testversion, nicht in Suchmaschinen aufnehmen. Beim Übernehmen in die Hauptseite diese Zeile entfernen. -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://analogewelt.com/">
+<!-- Vorschau beim Teilen (WhatsApp, Signal, Mastodon …) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Analoge Welt">
+<meta property="og:title" content="Analoge Welt – Licht auf Film, von Hand entwickelt">
+<meta property="og:description" content="Analoge Fotografie auf 35 mm und Mittelformat.">
+<meta property="og:url" content="https://analogewelt.com/">
+<meta property="og:image" content="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/seagull_4a.jpg?width=1200&height=630&resize=cover&quality=80">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"Analoge Welt","url":"https://analogewelt.com/","inLanguage":["de","en"],
+ "author":{"@type":"Person","name":"A.T. Fichter","sameAs":["https://instagram.com/a_t_f_analog","https://pixelfed.social/@atf_analog"]}}
+</script>
+<link rel="preconnect" href="https://owbbsnujnkhyyqvagtai.supabase.co" crossorigin>
+<link href="../fonts/fonts.css" rel="stylesheet">
+
+<style>
+  /* ==========================================================================
+     Analoge Welt – Stylesheet
+     Aufbau: 1. Farben und Schriften · 2. Grundlagen · 3. Kopfzeile · 4. Titelblatt · 5. Unterseiten
+             6. Fußzeile · 7. Detailansicht (Lightbox) · danach die Geräte-Anpassungen:
+             A. Handy und Tablet hoch · B. Tablet hoch · C. Tablet quer und Computer
+             D. Touch-Tablets quer · E. Computer mit Maus (Titelblatt als Zeitung) · F. Handy quer
+     Geräte-Gruppen (A und C ergänzen sich, jedes Gerät gehört zu genau einer der beiden):
+       A = schmaler als 821px, Tablet/Handy hochkant bis 1100px, oder Handy quer (höchstens 500px hoch)
+       C = alles andere: Tablet quer, Laptop, Computer
+     ========================================================================== */
+
+  /* ===== 1. Farben und Schriften (hell; dunkel darunter) ===== */
+  :root {
+    --paper: #EFEFED; --paper-deep: #E3E3E0; --print: #FAFAF8;
+    --ink: #141414; --ink-soft: #5C5C59; --amber: #6B6B67; --safelight: #444;   /* --amber dunkler: kleine Beschriftungen gut lesbar */
+    --veil: rgba(239,239,237,.1);   /* Schleier über dem Seagull */
+    --rule: rgba(128,128,128,.35);  /* feine Linien */
+
+    --display: "League Gothic", "Arial Narrow", Impact, sans-serif;   /* Überschriften */
+    --serif:   "Crimson Pro", Georgia, "Times New Roman", serif;       /* Titel, Details */
+    --sans:    "Crimson Pro", Georgia, "Times New Roman", serif;       /* Fließtext */
+    --edge:    "Barlow Condensed", "Arial Narrow", sans-serif;         /* Filmrand-Beschriftung, Menü */
+  }
+  :root[data-theme="dark"] {
+    --paper: #0E0E0E; --paper-deep: #151515; --print: #1B1B1B;
+    --ink: #EDEDEB; --ink-soft: #A2A29F; --safelight: #CFCFCB; --amber: #8C8C88;
+    --veil: rgba(14,14,14,.35);
+    color-scheme: dark;
+  }
+
+  /* ===== 2. Grundlagen ===== */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  html.lb-open, html.lb-open body { overflow: hidden; }   /* Detailansicht offen: Hintergrund bleibt stehen */
+  body {
+    margin: 0; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 1.2rem; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  main { flex: 1; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--safelight); outline-offset: 3px; }
+  .wrap { width: min(1760px, 100% - 4rem); margin-inline: auto; }
+
+  /* Filmkorn über der ganzen Seite */
+  body::after {
+    content: ""; position: fixed; inset: -50%; z-index: 100; pointer-events: none;
+    opacity: .12; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation: grain 0.9s steps(6) infinite;
+  }
+  :root[data-theme="dark"] body::after { filter: invert(1); mix-blend-mode: screen; opacity: .06; }
+  @keyframes grain {
+    0%   { transform: translate(0, 0); }
+    20%  { transform: translate(-3%, 2%); }
+    40%  { transform: translate(2%, -3%); }
+    60%  { transform: translate(-2%, -1%); }
+    80%  { transform: translate(3%, 3%); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* Bilderschutz: kein Ziehen, kein Auswählen, kein Speichermenü per Langdruck (iOS) */
+  img, .print button, .pimgs button, .lb-stage, .strip { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  img { -webkit-user-drag: none; }
+
+  /* Seagull-Foto im Hintergrund (nur Titelblatt) */
+  .bgfix { position: fixed; inset: 0; z-index: -1; background: var(--bg, none) 50% 50% / contain no-repeat; }
+  .bgfix::after { content: ""; position: absolute; inset: 0; background: var(--veil); }
+
+  /* ===== 3. Kopfzeile: Logo, Datumszeile, Menü, Hell/Dunkel, DE/EN ===== */
+  .site-head {
+    display: flex; flex-wrap: wrap; gap: .75rem 2rem; align-items: center; justify-content: space-between;
+    padding-block: 1.75rem; border-bottom: 1px solid var(--rule);
+  }
+  .brand { font-family: var(--display); font-size: 2.2rem; letter-spacing: .05em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
+  .dateline { display: none; }
+  /* Logo (Blende mit aTF, ohne Filmring; logo/atf-bildmarke.svg): als Maske, Farbe folgt dem Hell/Dunkel-Schalter über --ink */
+  .logo { display: block; aspect-ratio: 1; background-color: var(--ink); -webkit-mask: url(../logo/atf-bildmarke.svg?v=20261111) center / contain no-repeat; mask: url(../logo/atf-bildmarke.svg?v=20261111) center / contain no-repeat; }
+  .home-link { display: inline-flex; align-items: center; gap: .8rem; color: inherit; text-decoration: none; }
+  .logo-head { width: var(--logo, 52px); flex: none; }
+  .head-right { display: flex; align-items: center; gap: 1.75rem; }
+  .site-head nav { display: flex; flex-wrap: wrap; align-items: center; gap: 1.75rem; }
+  .site-head nav a {
+    text-decoration: none; font-weight: 600; border-bottom: 2px solid transparent;
+    font-family: var(--edge); text-transform: uppercase; letter-spacing: .12em; font-size: .95rem;
+  }
+  .site-head nav a:hover { border-color: var(--safelight); }
+  .site-head nav a[aria-current="page"] { border-color: var(--ink); }
+  body:not([data-view]) .site-head nav .nav-home { display: none; }   /* „Titelblatt“ nur auf den Unterseiten */
+  .tools { display: flex; align-items: center; gap: .6rem; margin-left: .8rem; }
+  .icon, .langs button {
+    background: none; border: 0; color: var(--ink); cursor: pointer;
+    font-family: var(--edge); letter-spacing: .12em; text-transform: uppercase; font-size: .72rem; padding: .1rem .2rem;
+  }
+  .icon { display: inline-flex; line-height: 0; }
+  .icon svg { width: 13px; height: 13px; }
+  .menu-btn { display: none; }
+  .langs { display: inline-flex; align-items: center; gap: .15rem; color: var(--ink-soft); }
+  .langs button { color: var(--ink-soft); }
+  .langs button[aria-pressed="true"] { color: var(--ink); border-bottom: 1px solid var(--ink); }
+
+  /* ===== 4. Titelblatt ===== */
+  .hero {
+    display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 4fr); gap: clamp(2rem, 5vw, 5rem); align-items: center;
+    padding-block: clamp(1.5rem, 5vw, 4rem) clamp(3rem, 8vw, 6rem);
+  }
+  body[data-view] .hero { display: none; }
+  .hero h1 {
+    font-family: var(--display); font-weight: 400; text-transform: uppercase;
+    font-size: clamp(2rem, 3.2vw, 2.8rem); line-height: .94; letter-spacing: .01em; margin: 0 0 1.5rem;
+  }
+  .hero p {
+    max-width: 34ch; margin: 0 0 2rem; font-size: 1.05rem; color: var(--ink);
+    text-shadow: 0 1px 14px color-mix(in srgb, var(--paper) 85%, transparent);
+  }
+  .mobile-hero-copy { display: none; }   /* eigene Textfassung fürs Hochformat, siehe unten */
+
+  /* ===== 5. Unterseiten (Kontaktbogen, Equipment, Projekte, Über mich, Kontakt) =====
+     Der Seagull gehört nur aufs Titelblatt. Unterseiten haben einen ruhigen Hintergrund und normalen Seitenfluss:
+     oben links der Titel mit Seitenzahl, darunter der Inhalt, so breit wie die Kopfzeile. Nichts ist fest
+     verankert, längere Texte schieben die Seite einfach nach unten. Nur die Spaltenzahl wechselt mit der Breite. */
+  .view { display: none; padding-block: clamp(1.5rem, 4vw, 3.5rem) clamp(2.5rem, 6vw, 5rem); }
+  body[data-view="kontaktbogen"] #kontaktbogen, body[data-view="projekte"] #projekte, body[data-view="bildstrecken"] #bildstrecken, body[data-view="ueber-mich"] #ueber-mich,
+  body[data-view="equipment"] #equipment, body[data-view="kontakt"] #kontakt { display: block; }
+  body[data-view] .bgfix { display: none; }
+  h2 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; line-height: 1; margin: 0 0 1.5rem; }
+  /* Seitennummer (BETA: schlicht „03“ statt „Seite 3“), Reihenfolge wie im Menü (Titelblatt = 01) */
+  h2::before { display: block; font-family: var(--edge); font-size: .85rem; letter-spacing: .14em; color: var(--amber); margin-bottom: .4rem; }
+  #kontaktbogen h2::before { content: "02"; } #bildstrecken h2::before { content: "03"; } #projekte h2::before { content: "04"; }
+  #equipment h2::before { content: "05"; } #ueber-mich h2::before { content: "06"; } #kontakt h2::before { content: "07"; }
+  .hint { font-style: italic; font-size: .95rem; color: var(--ink); margin: -.6rem 0 1.6rem; }
+
+  /* Kontaktbogen und Projekte: Liste (Kategorien bzw. Projekte) links, Inhalt rechts */
+  .sheet { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+  .filters { display: flex; flex-direction: column; align-items: stretch; gap: .25rem; position: sticky; top: 1rem; }
+  .chip {
+    font: inherit; font-weight: 600; font-family: var(--display); font-size: 1.35rem; letter-spacing: .04em; text-transform: uppercase;
+    text-align: left; overflow-wrap: anywhere; padding: .45rem .9rem; cursor: pointer;
+    background: transparent; color: var(--ink); border: 0; border-left: 3px solid var(--rule); border-radius: 0;
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-left-color: var(--ink); }
+  .status { color: var(--ink-soft); margin: 0 0 1.5rem; }
+  /* Fotos im Bilderrahmen */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 28px; align-items: start; }
+  .print { margin: 0; }
+  .print button {
+    display: block; width: 100%; padding: 22px; cursor: zoom-in;
+    background: #e8e7e2; border: 12px solid; border-color: #2e2e2d #1b1b1a #121211 #252524;
+    box-shadow: inset 0 0 12px rgba(0,0,0,.28), 0 0 0 1px rgba(255,255,255,.07), 0 16px 30px -14px rgba(0,0,0,.9);
+  }
+  .print img { width: 100%; height: auto; background: var(--paper-deep); border: 0; box-shadow: 0 0 0 3px #faf9f5, 0 0 0 4px rgba(0,0,0,.22); }
+  /* Alle Rahmen gleich groß und quadratisch, das Foto sitzt mittig im Passepartout, egal ob hoch, quer oder quadratisch.
+     So bleibt das Raster ruhig und jedes Bild wird ganz gezeigt. */
+  .print button { aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; }
+  .print img { width: auto; height: auto; max-width: 100%; max-height: 100%; min-height: 0; }
+  /* Projekte */
+  .pbox { max-width: 760px; background: var(--print); border: 1px solid var(--rule); padding: 1.4rem; }
+  .pbox h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: 1.8rem; margin: 0 0 .5rem; }
+  .pbox p { margin: 0 0 .9rem; color: var(--ink-soft); }
+  .plink { display: inline-block; margin-bottom: .6rem; font-family: var(--edge); text-transform: uppercase; letter-spacing: .1em; font-size: .85rem; color: var(--ink); }
+  .pimgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: .8rem; }
+  .pimgs button { padding: 0; border: 0; background: none; cursor: zoom-in; }
+  .pimgs img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  /* Bildstrecken */
+  .filters-sub { margin: 1rem 0 .2rem; font-family: var(--edge); font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+  .lb-strecke { background: none; border: 0; padding: 0; margin-top: .8rem; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .strecke h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: 1.8rem; margin: 0 0 .4rem; }
+  .strecke > p { max-width: 62ch; margin: 0 0 .4rem; font-family: var(--serif); font-style: italic; color: var(--ink-soft); }
+  /* Bilder im selben Rahmen wie im Kontaktbogen, mit leichtem 3D-Effekt: beim Überfahren heben sie sich an und kippen leicht */
+  .strecke .grid { margin-top: 1.4rem; perspective: 1400px; }
+  .strecke .print button { transition: transform .4s cubic-bezier(.2,.8,.3,1), box-shadow .4s ease; transform-origin: 50% 60%; }
+  .strecke .print button:hover, .strecke .print button:focus-visible {
+    transform: translateY(-8px) rotateX(5deg) scale(1.02);
+    box-shadow: inset 0 0 12px rgba(0,0,0,.28), 0 0 0 1px rgba(255,255,255,.07), 0 30px 46px -18px rgba(0,0,0,.9);
+  }
+  @media (prefers-reduced-motion: reduce) { .strecke .print button { transition: none; } .strecke .print button:hover { transform: none; } }
+
+  /* Über mich: Text als lesbare Spalte, Porträt darunter (Handy) bzw. rechts daneben (Tablet quer, Computer) */
+  #ueber-mich .about { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 clamp(3rem, 7vw, 7rem); align-items: start; }
+  #ueber-mich .about > div:first-child { display: contents; }
+  #ueber-mich .about h2 { grid-column: 1 / -1; }
+  #ueber-mich .about-text p { max-width: 60ch; margin: 0 0 1.1rem; font-size: 1.1rem; line-height: 1.6; }
+  #ueber-mich .about > .strip { width: min(100%, 320px); margin: 1rem 0 0; justify-self: start; }
+  .frame { aspect-ratio: 5 / 4; overflow: hidden; }
+  .frame img { width: 100%; height: 100%; object-fit: cover; }
+  .frame img.develop { animation: develop 2.8s cubic-bezier(.2, .6, .3, 1) both; }   /* Porträt „entwickelt“ sich beim Öffnen */
+  @keyframes develop {
+    from { filter: brightness(.2) contrast(1.4) blur(6px); }
+    60%  { filter: brightness(.8) contrast(1.15) blur(1px); }
+    to   { filter: none; }
+  }
+
+  /* Equipment: Kameras als Raster. Mit Foto (data-img am Eintrag) erscheint das Bild über dem Namen,
+     ohne Foto steht nur der Name unter einer feinen Linie – beides sieht fertig aus. */
+  .equip h3 { font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .14em; font-size: .85rem; color: var(--amber); margin: 0 0 1rem; }
+  .cams { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1.5rem 1.25rem; }
+  .cam { margin: 0; padding-top: .7rem; border-top: 1px solid var(--rule); }
+  .cam img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; margin-bottom: .7rem; background: var(--paper-deep); }
+  .cam-name { display: block; font-family: var(--serif); font-size: 1.15rem; line-height: 1.3; }
+
+  /* Kontakt: Titel, darunter E-Mail und Profile */
+  .mail {
+    font-family: var(--serif); font-size: clamp(1.1rem, 2vw, 1.35rem); word-break: break-word;
+    text-underline-offset: 8px; text-decoration-thickness: 2px; text-decoration-color: var(--ink-soft);
+  }
+  .other { max-width: 50ch; margin: 1.25rem 0 0; color: var(--ink-soft); }
+  .other span { display: block; }
+  .other span[hidden] { display: none; }
+
+  /* ===== 6. Fußzeile ===== */
+  footer { padding-block: 1.75rem; font-size: .92rem; color: var(--ink-soft); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; justify-content: space-between; }
+  footer a { text-underline-offset: 3px; }
+  #copy { -webkit-user-select: none; user-select: none; touch-action: manipulation; }   /* Doppeltippen zoomt nicht und markiert nichts */
+
+  /* ===== 7. Detailansicht (Lightbox): Foto links, Angaben rechts, Bedienknöpfe unten rechts ===== */
+  dialog.lb {
+    border: 0; padding: 0; background: transparent; color: #EDEDEB; overscroll-behavior: contain;
+    width: 100%; max-width: 100%; height: 100%; max-height: 100%;
+  }
+  dialog.lb::backdrop { background: rgba(6,6,6,.985); }
+  .lb-inner {
+    height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: 1fr;
+    gap: 2rem; padding: 1.5rem 2rem; justify-items: stretch; align-items: center;
+  }
+  .lb-inner:focus { outline: none; }
+  .lb-stage { min-height: 0; display: grid; place-items: center; width: 100%; }
+  .lb-stage img { max-width: 100%; max-height: calc(100vh - 3rem); max-height: calc(100dvh - 3rem); width: auto; height: auto; object-fit: contain; }
+  .lb-side { display: flex; flex-direction: column; gap: 1.2rem; }
+  .lb-info { margin: 0; padding: 1.2rem 1.3rem; background: #151515; border: 1px solid #2c2c2c; color: #EDEDEB; }
+  .lb-info dt { font-family: var(--edge); text-transform: uppercase; letter-spacing: .12em; font-size: .8rem; color: #8C8C88; margin-top: .9rem; }
+  .lb-info dt:first-child { margin-top: 0; }
+  .lb-info dd { margin: .1rem 0 0; font-size: 1.1rem; }
+  .lb-info a { color: #EDEDEB; }
+  .lb-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .lb-thumbs button { width: 64px; height: 64px; padding: 0; border: 1px solid #444; background: none; cursor: pointer; opacity: .65; }
+  .lb-thumbs button[aria-current="true"] { border-color: #EDEDEB; opacity: 1; }
+  .lb-thumbs img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .lb-ctrl { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+  .lb-ctrl span { color: #A8A8A5; font-size: .92rem; margin-right: .5rem; }
+  .lb-ctrl button {
+    font: inherit; font-weight: 500; color: #EDEDEB; background: transparent;
+    border: 1.5px solid #EDEDEB; border-radius: 2px; padding: .4rem .9rem; cursor: pointer;
+  }
+  .lb-ctrl button:hover { background: #EDEDEB; color: #0E0E0E; }
+  .lb-ctrl button:focus:not(:focus-visible) { outline: none; }
+
+
+  /* ===== A. Handy und Tablet hoch (sowie Handy quer) ===== */
+  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
+    :root { --veil: rgba(239,239,237,.25); }
+    :root[data-theme="dark"] { --veil: rgba(14,14,14,.6); }
+    body { overflow-x: clip; }
+    body::after { inset: 0; animation: none; }
+    .bgfix { bottom: auto; height: 100vh; height: 100lvh; background-size: cover; background-position: 50% 35%; }   /* stabil trotz Safari-Leiste */
+
+    /* Kopfzeile: Logo und Schalter, Menü klappt über das ☰-Symbol auf; Datumszeile über der Doppellinie */
+    .wrap.site-head { flex-wrap: nowrap; position: relative; padding-block: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--rule); }
+    .brand { font-size: 2rem; letter-spacing: .03em; }
+    .home-link { gap: .55rem; }
+    .logo-head { width: 38px; }
+    .wrap.site-head { column-gap: 1rem; }
+    .home-link .brand { font-size: clamp(1.15rem, (100vw - 280px) / 4.5, 2rem); }   /* Logo + Schriftzug passen neben die Schalter */
+    .dateline {
+      display: block; position: absolute; left: 0; right: 0; bottom: .45rem; margin: 0; white-space: nowrap; overflow: hidden;
+      font-family: var(--edge); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
+    }
+    .head-right { gap: .5rem; }
+    .tools { margin-left: 0; }
+    .icon, .langs button { font-size: .85rem; padding: .2rem .3rem; }
+    .icon svg { width: 18px; height: 18px; }
+    .menu-btn { display: inline-flex; }
+    .menu-btn svg { width: 22px; height: 22px; }
+    .site-head nav {
+      display: none; position: absolute; left: 0; right: 0; top: 100%; z-index: 20;
+      flex-direction: column; gap: 0; padding: .4rem 0; background: var(--paper); border: 1px solid var(--rule);
+    }
+    .site-head nav.open { display: flex; }
+    .site-head nav::before {
+      content: none;   /* BETA: „In dieser Ausgabe“ entfernt */
+      font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--ink-soft);
+    }
+    .site-head nav a { padding: .85rem 1.2rem; font-size: 1.05rem; align-self: stretch; text-align: center; }
+    .site-head nav a:not(:last-child) { border-bottom: 1px solid var(--rule); }
+
+    /* Titelblatt und Unterseiten */
+    .hero { grid-template-columns: 1fr; padding-block: 1.5rem 2.5rem; }
+    .hero h1 { font-size: 2.3rem; line-height: 1.02; }
+    .view h2 { font-size: 2.3rem; }
+    .sheet { grid-template-columns: 1fr; }
+    .filters { position: static; }
+    .grid { grid-template-columns: 1fr 1fr; gap: 12px; }   /* zwei Fotos nebeneinander, Tippen vergrößert */
+    .print button { padding: 7px; border-width: 5px; box-shadow: inset 0 0 8px rgba(0,0,0,.28), 0 10px 18px -10px rgba(0,0,0,.9); }
+    .print img { box-shadow: 0 0 0 2px #faf9f5, 0 0 0 3px rgba(0,0,0,.22); }
+
+    /* Detailansicht: Foto oben, Angaben darunter, Bedienknöpfe unten immer sichtbar */
+    dialog.lb { overflow: auto; }
+    .lb-inner {
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: .75rem;
+      min-height: 100%; height: auto; overflow: auto; padding: max(.75rem, env(safe-area-inset-top)) .75rem 0;
+    }
+    .lb-stage img { max-height: 46dvh; }
+    .lb-side { flex: 1 1 auto; gap: .6rem; }
+    .lb-info { display: grid; grid-template-columns: auto 1fr; gap: .3rem .9rem; align-items: baseline; padding: .75rem 1rem; }
+    .lb-info dt { margin: 0; font-size: .7rem; }
+    .lb-info dd { margin: 0; font-size: .98rem; }
+    .lb-info dd:nth-child(odd) { grid-column: 1 / -1; }
+    .lb-ctrl { position: sticky; bottom: 0; margin-top: auto; background: #060606; padding: .6rem 0 max(.75rem, env(safe-area-inset-bottom)); }
+    .lb-ctrl button { font-size: .9rem; padding: .35rem .7rem; }
+  }
+
+  /* ===== B. Tablet hoch (iPad): Aufbau wie am Handy, Überschriften größer, Fotos zweispaltig ===== */
+  @media (min-width: 700px) and (max-width: 1100px) and (orientation: portrait) {
+    .home-link .brand { font-size: 2.4rem; }
+    .logo-head { width: 48px; }
+    .hero h1, .view h2 { font-size: 3.6rem; }
+    .hero p { font-size: 1.15rem; }
+    .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .print button { padding: 10px; border-width: 7px; }
+  }
+
+  /* Handy und Tablet hoch, Titelblatt: Seagull vollständig über der Beschriftung statt im Hintergrund */
+  @media (max-width: 1100px) and (orientation: portrait) {
+    body:not([data-view]) .bgfix { display: none; }
+    body:not([data-view]) .hero { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding-top: 0; }
+    body:not([data-view]) .hero::before {
+      content: ""; display: block; width: 100%; aspect-ratio: 1978 / 1315;
+      background: var(--bg, none) center 19% / cover no-repeat;
+    }
+    body:not([data-view]) .hero > div:first-child { display: none; }
+    body:not([data-view]) .hero > .mobile-hero-copy { display: block; padding-top: 1.25rem; }
+  }
+
+  /* Handy quer: Detailansicht nebeneinander (der Rest der Seite liegt hinter dem Hinweis zum Drehen) */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .lb-inner { flex-direction: row; align-items: flex-start; }
+    .lb-stage { flex: 1 1 auto; width: auto; }
+    .lb-stage img { max-height: calc(100vh - 1.5rem); max-height: calc(100dvh - 1.5rem); }
+    .lb-side { flex: none; width: 280px; }
+  }
+
+  /* ===== C. Tablet quer und Computer ===== */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    /* Seagull eingepasst (Seitenverhältnis 1978:2000). --imgw = Bildbreite, --imgl = linke Bildkante,
+       --free = Platz zwischen Seitenrand und Bild; Logo, Text und Linien richten sich danach. */
+    :root {
+      --minleft: 0px; --minright: 0px; --minbottom: 0px;   /* Mindestplatz um das Bild (Touch-Tablet siehe D) */
+      --imgw: min(100vw, 98.9vh, 100vw - var(--minleft) - var(--minright), (100vh - 2 * var(--minbottom)) * .989);
+      --imgl: max((100vw - var(--imgw)) / 2, min(var(--minleft), 100vw - var(--imgw)));
+      --free: calc(var(--imgl) - max(2rem, 50vw - 880px) - 1rem);
+    }
+    .bgfix { background-size: var(--imgw) auto; background-position: var(--imgl) 50%; }
+
+    /* Kopfzeile: Logo links, Menü mittig, Schalter rechts; Doppellinie darunter, über dem Seagull unterbrochen */
+    .wrap.site-head { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; position: relative; border-bottom: 0; }
+    .wrap.site-head::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none;
+      background: var(--rule);
+      --cut-l: calc(var(--imgl) - max(2rem, 50vw - 880px) - 1.25rem);
+      --cut-r: calc(var(--imgl) + var(--imgw) - max(2rem, 50vw - 880px) + 1.25rem);
+      -webkit-mask: linear-gradient(to right, #000 var(--cut-l), transparent var(--cut-l), transparent var(--cut-r), #000 var(--cut-r));
+      mask: linear-gradient(to right, #000 var(--cut-l), transparent var(--cut-l), transparent var(--cut-r), #000 var(--cut-r));
+    }
+    body[data-view] .wrap.site-head::after { -webkit-mask: none; mask: none; }   /* Unterseiten: Linie ohne Lücke */
+    .dateline {
+      position: absolute; left: 0; bottom: .45rem; margin: 0;
+      font-family: var(--edge); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
+    }
+    .head-right { display: contents; }
+    .site-head nav { grid-column: 2; justify-content: center; gap: 1.5rem; }
+    .tools { grid-column: 3; justify-self: end; margin-left: 0; }
+    /* Unterseiten: Rubriken mit feinen senkrechten Trennstrichen wie in der Zeitung */
+    body[data-view] .site-head nav { gap: 0; }
+    body[data-view] .site-head nav a { padding-inline: .9rem; }
+    body[data-view] .site-head nav a + a { border-left: 1px solid var(--rule); }
+    body[data-view] .site-head nav a[aria-current="page"] { border-bottom-color: var(--ink); }
+
+    /* Titelblatt: Überschrift links neben dem Foto, Beschreibung unten links über der Fußzeile */
+    .hero > div:first-child { max-width: min(460px, 34vw, max(8rem, var(--free) + .5rem)); }
+    .hero h1 { font-size: min(3.2vw, clamp(1.25rem, var(--free) / 6.6, 2.8rem)); line-height: 1.04; }   /* etwas Luft zwischen den zwei Zeilen */
+    body:not([data-view]) .hero > div:first-child > p {
+      position: fixed; z-index: 2; left: max(2rem, 50vw - 880px); bottom: 8rem; margin: 0;
+      width: max(8rem, var(--free) + .5rem); max-width: none;
+      padding-top: 1rem; border-top: 1px solid var(--rule);
+    }
+    footer .wrap > span:first-child { max-width: max(8rem, var(--free) + 1rem); }   /* Copyright bricht vor dem Foto um */
+    body[data-view] footer .wrap > span:first-child { max-width: none; }
+
+    /* Unterseiten zweispaltig, wo es passt */
+    .view h2 { font-size: clamp(2.2rem, 3vw, 2.8rem); }
+    #ueber-mich .about { grid-template-columns: minmax(0, 60ch) min(360px, 30vw); justify-content: start; }
+    #ueber-mich .about > .strip { grid-column: 2; grid-row: 2; width: 100%; margin: .35rem 0 0; filter: grayscale(1); }   /* Porträt schwarzweiß */
+    .cams { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem 2rem; }
+
+    /* Detailansicht: Angaben oben rechts, Bedienknöpfe fest unten rechts */
+    .lb-inner { align-items: stretch; }
+    .lb-side { align-self: start; margin-top: 3rem; }
+    .lb-info { padding: 1rem 1.2rem; max-height: calc(100vh - 11rem); max-height: calc(100dvh - 11rem); overflow: auto; }
+    .lb-info dt { margin-top: .6rem; }
+    .lb-info dd { font-size: 1.02rem; }
+    .lb-ctrl { position: fixed; right: 2rem; bottom: 1.5rem; flex-wrap: nowrap; }
+    .lb-ctrl span { margin-right: .75rem; }
+    .lb-ctrl button { width: 7rem; text-align: center; white-space: nowrap; }
+  }
+
+  /* ===== D. Touch-Tablets quer (iPad, Android-Tablets) ===== */
+  /* Foto etwas kleiner und nach rechts gerückt: links Platz für Logo und Text, rechts für die Schalter */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (pointer: coarse) {
+    :root { --minleft: 300px; --minright: 160px; --minbottom: 4.5rem; }
+    .hero h1 { font-size: clamp(2.4rem, var(--free) / 6.6, 3.2rem); }
+    .hero p { font-size: 1rem; }
+  }
+  /* Datumszeile unter dem Logo – einzeilig und nie breiter als die Doppellinie darunter */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (hover: none) {
+    .dateline {
+      display: block; white-space: nowrap; overflow: hidden; font-size: .74rem; letter-spacing: .1em;
+      max-width: calc(var(--imgl, 50vw - 49.45vh) - max(2rem, 50vw - 880px) - 1.25rem);
+    }
+  }
+  /* Ab 1024px: Titelblatt-Menü als Inhaltsverzeichnis rechts neben dem Foto. Die Schrift richtet sich nach dem
+     freien Platz (--navw), damit „Kontaktbogen“ (≈ 7 × Schriftgröße breit) auch beim iPad hineinpasst. */
+  @media (min-width: 1024px) and (min-height: 501px) and (orientation: landscape) and (hover: none) {
+    :root { --navw: calc(100vw - var(--imgl, 50vw - 49.45vh) - var(--imgw, 98.9vh) - max(2rem, 50vw - 880px) - 1.5rem); }
+    body:not([data-view]) .site-head nav {
+      position: fixed; z-index: 5;
+      left: calc(var(--imgl, 50vw - 49.45vh) + var(--imgw, 98.9vh) + 1.5rem); right: max(2rem, 50vw - 880px);
+      top: calc(7rem + clamp(1.5rem, 5vw, 4rem));
+      flex-direction: column; flex-wrap: nowrap; align-items: flex-end; gap: 0;
+    }
+    body:not([data-view]) .site-head nav::before {
+      content: ""; display: block; align-self: stretch; border-bottom: 1px solid var(--rule);   /* BETA: ohne „In dieser Ausgabe“ */
+    }
+    body:not([data-view]) .site-head nav a {
+      font-size: clamp(.75rem, var(--navw) / 7.4, 1rem); padding: .45rem 0; align-self: stretch; text-align: right; border-bottom: 1px solid var(--rule);
+    }
+  }
+
+  /* ===== E. Computer: Titelblatt als Zeitung ===== */
+  /* Ohne genug Platz neben dem Foto: Startseitentext leicht nach links versetzt (bei genau 3:2 gilt die Regel darunter)
+     (margin statt transform: ein transform würde die fixierte Beschreibung an die Textspalte binden) */
+  @media (min-width: 1101px) and (min-height: 501px) and (hover: hover) and (max-aspect-ratio: 3/2) {
+    body:not([data-view]) .hero > div:first-child, body:not([data-view]) .hero > div:first-child > p { margin-left: -18px; }
+  }
+  /* Breite Bildschirme mit Maus oder Trackpad: Logo und Datumszeile links, Überschrift bündig darunter,
+     rechts neben dem Seagull das Menü als Inhaltsverzeichnis „In dieser Ausgabe“ */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+    /* Foto mit minimalem Abstand oben und unten (--imgpad) */
+    :root {
+      --imgpad: .5rem;
+      --imgw: min(100vw, (100vh - 2 * var(--imgpad)) * .989);
+      --imgl: calc((100vw - var(--imgw)) / 2);
+      --free: calc(var(--imgl) - max(2rem, 50vw - 880px) - 3rem);   /* linke Textspalte endet vor der Linie */
+      --logo: clamp(68px, (var(--imgl) - max(2rem, 50vw - 880px) - 1.5rem) * .3, 96px);   /* Logo oben links, wächst mit dem Platz links vom Foto */
+    }
+    .brand { font-size: clamp(1.6rem, (var(--imgl) - max(2rem, 50vw - 880px) - 1.5rem - var(--logo) - .8rem) / 4.7, 3.2rem); }   /* Schriftzug ≈ 4,7 × Schriftgröße, davor das Logo (--logo + Abstand) */
+    body:not([data-view]) .hero > div:first-child > p { font-size: 1.18rem; }
+    body:not([data-view]) .site-head nav {
+      position: fixed; z-index: 5;
+      left: calc(var(--imgl) + var(--imgw) + 2.5rem); right: 2rem;
+      top: calc(7rem + clamp(1.5rem, 5vw, 4rem));
+      flex-direction: column; flex-wrap: nowrap; align-items: flex-end; gap: 0;
+    }
+    body:not([data-view]) .site-head nav::before {
+      content: ""; display: block; align-self: stretch; border-bottom: 1px solid var(--rule);   /* BETA: ohne „In dieser Ausgabe“ */
+    }
+    body:not([data-view]) .site-head nav a {
+      font-size: 1.05rem; padding: .45rem .8rem .45rem 0; align-self: stretch; text-align: right;
+      border-bottom: 1px solid var(--rule); border-right: 2px solid transparent;
+      transition: border-color .2s, padding-right .2s;
+    }
+    body:not([data-view]) .site-head nav a:hover,
+    body:not([data-view]) .site-head nav a:focus-visible { border-right-color: var(--safelight); padding-right: 1.05rem; }
+  }
+
+  /* ===== F. Handy quer: Hinweis zum Drehen (Tablets und Computer nicht) ===== */
+  .rotate-hint { display: none; }
+  @media (orientation: landscape) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
+    body { overflow: hidden; }
+    .rotate-hint {
+      display: flex; position: fixed; inset: 0; z-index: 1000;
+      flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem;
+      background: var(--paper); color: var(--ink); text-align: center; padding: 2rem;
+    }
+    .rotate-hint svg { width: 64px; height: 64px; }
+    .rotate-hint p { margin: 0; font-family: var(--display); text-transform: uppercase; letter-spacing: .04em; font-size: 1.6rem; line-height: 1.1; }
+  }
+
+  /* Weniger Bewegung, wenn im System so eingestellt */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    body::after { animation: none; }
+    .frame img.develop { animation: none; }
+  }
+
+  /* ==========================================================================
+     BETA – Führung, Übergänge, Bildladen (Rückmeldung vom 12.11.2026)
+     ========================================================================== */
+  /* Bedienelemente fühlen sich wie eine App an: kein Markieren per Langdruck, kein blauer Tipp-Blitz,
+     kurze Druck-Rückmeldung. Fließtext (Über mich, E-Mail) bleibt markierbar. */
+  .site-head, .chip, .lb-ctrl, .cta, .pager, h1, h2, h3, .filters-sub, .hint, footer { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  a, button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .chip, .cta a, .pager a, .lb-ctrl button { transition: transform .12s ease, background-color .2s, color .2s; }
+  .chip:active, .cta a:active, .pager a:active, .lb-ctrl button:active, .teaser button:active { transform: scale(.97); }
+
+  /* Klickbare Rubriken sehen klickbar aus: Pfeil rechts; die gewählte trägt zusätzlich ein Häkchen (nicht nur Farbe) */
+  .chip { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+  .chip::after { content: "›"; font-family: var(--serif); font-size: 1.3em; line-height: 1; opacity: .5; transition: transform .2s, opacity .2s; }
+  .chip:hover::after { transform: translateX(3px); opacity: .9; }
+  .chip[aria-pressed="true"]::after { content: "✓"; font-size: 1em; opacity: 1; transform: none; }
+  #strkDetail, #projDetail, #grid { scroll-margin-top: 1rem; }
+
+  /* Handy: Menü legt sich über eine abgedunkelte, unscharfe Fläche – nichts schaut mehr darunter hervor */
+  .nav-backdrop { display: none; }
+  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
+    .wrap.site-head { z-index: 20; view-transition-name: site-head; }
+    .nav-backdrop {
+      display: block; position: fixed; inset: 0; z-index: 15; opacity: 0; pointer-events: none; transition: opacity .25s ease;
+      background: color-mix(in srgb, var(--paper) 86%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    }
+    html.menu-open .nav-backdrop { opacity: 1; pointer-events: auto; }
+    html.menu-open, html.menu-open body { overflow: hidden; }
+    .site-head nav.open { animation: navIn .24s cubic-bezier(.2,.8,.3,1); box-shadow: 0 28px 48px -24px rgba(0,0,0,.7); }
+    .menu-btn svg path { transition: d .25s; }
+    html.menu-open .menu-btn svg path { d: path("M5 5l12 12M17 5L5 17"); }   /* ☰ wird zu ✕ */
+  }
+  @keyframes navIn { from { opacity: 0; transform: translateY(-10px); } }
+
+  /* Titelblatt am Handy: klarer Einstieg statt leerer Fläche */
+  .cta, .teaser { display: none; }
+  @media (max-width: 1100px) and (orientation: portrait) {
+    body:not([data-view]) .cta { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.4rem; }
+    .cta a {
+      font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: .95rem;
+      text-decoration: none; padding: .55rem 0; border-bottom: 1px solid var(--ink-soft);
+    }
+    .cta .cta-main { padding: .85rem 1.25rem; background: var(--ink); color: var(--paper); border: 0; }
+    body:not([data-view]) .teaser { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 1.75rem; }
+    .teaser:empty { display: none !important; }
+    .teaser button { padding: 0; border: 0; background: var(--paper-deep); aspect-ratio: 1; overflow: hidden; cursor: zoom-in; }
+    .teaser img { width: 100%; height: 100%; object-fit: cover; }
+    .hero .teaser-label { grid-column: 1 / -1; margin: 0 0 .1rem; max-width: none; text-shadow: none; font-family: var(--edge); font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+  }
+
+  /* Bilder „entwickeln“ sich beim Laden: aus dem Dunkel ins Bild, statt ruckartig aufzuploppen */
+  .print img, .pimgs img, .teaser img, .cam img { opacity: 0; }
+  img.is-in { animation: imgIn .7s cubic-bezier(.2,.6,.3,1) forwards; }
+  @keyframes imgIn { from { opacity: 0; filter: brightness(.3) blur(4px); } to { opacity: 1; filter: none; } }
+  #lbImg { transition: opacity .25s ease; }
+  #lbImg.loading { opacity: .25; }
+
+  /* Weiterblättern am Ende jeder Unterseite, wie in der Zeitung */
+  .pager {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    margin-top: clamp(2.5rem, 6vw, 4.5rem); padding-top: 1.1rem; border-top: 1px solid var(--rule);
+  }
+  .pager a { display: flex; flex-direction: column; gap: .2rem; text-decoration: none; padding: .3rem 0; }
+  .pager .next { grid-column: 2; align-items: flex-end; text-align: right; }
+  .pager small { font-family: var(--edge); font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+  .pager span { font-family: var(--display); font-size: clamp(1.4rem, 4vw, 1.9rem); text-transform: uppercase; letter-spacing: .04em; line-height: 1.05; }
+  .pager a:hover span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
+
+  /* Seitenwechsel: sanftes Überblenden (nur wo der Browser es kann und Bewegung erwünscht ist) */
+  ::view-transition-old(root) { animation: vtOut .16s ease both; }
+  ::view-transition-new(root) { animation: vtIn .34s cubic-bezier(.2,.8,.3,1) both; }
+  @keyframes vtOut { to { opacity: 0; } }
+  @keyframes vtIn { from { opacity: 0; transform: translateY(12px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    img.is-in { animation: none; opacity: 1; }
+    .site-head nav.open { animation: none; }
+    ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  }
+
+  /* ==========================================================================
+     BETA 2 – sichtbare Navigation statt Hamburger, weniger Menüpunkte
+     Equipment und Kontakt gehören jetzt zur Seite „Über mich“ (darunter, mit eigener Zwischenüberschrift).
+     ========================================================================== */
+  .site-head nav a[hidden] { display: none !important; }
+  .home-link { color: inherit; }
+  .foot-links { display: inline-flex; gap: 1.5rem; }
+
+  /* Über mich: Equipment und Kontakt stehen auf derselben Seite darunter */
+  body[data-view="ueber-mich"] #equipment, body[data-view="ueber-mich"] #kontakt { display: block; }
+  body[data-view="ueber-mich"] #ueber-mich { padding-bottom: 0; }
+  #equipment, #kontakt { padding-top: 0; }
+  /* Sprungziele (Bildstrecke, Projekt, Kontakt …) landen unterhalb der festen Kopfzeile, nicht darunter versteckt */
+  #strkDetail, #projDetail, #grid, #equipment, #kontakt { scroll-margin-top: var(--headh, 8rem); }
+  #equipment > .wrap, #kontakt > .wrap { border-top: 1px solid var(--rule); padding-top: clamp(1.5rem, 4vw, 2.5rem); margin-top: clamp(1.5rem, 4vw, 2.5rem); }
+  #equipment { padding-bottom: 0; }
+  #equipment h2, #kontakt h2 { font-size: clamp(1.6rem, 3vw, 2rem) !important; }
+  #equipment h2::before, #kontakt h2::before { content: none !important; }
+  .equip h3 { display: none; }   /* „Kameras“ doppelt sich mit der Überschrift */
+  /* Seitennummern kommen jetzt aus dem Skript (je nachdem, welche Seiten es gibt) */
+  .view h2::before { content: attr(data-num) !important; }
+
+  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
+    /* Kopfzeile bleibt oben stehen: Logo und Schalter, darunter die Rubriken – immer sichtbar */
+    .wrap.site-head {
+      position: sticky; top: 0; flex-wrap: wrap; padding-block: .75rem 0; margin-bottom: 1.25rem;
+      background: var(--paper); box-shadow: 0 0 0 100vmax var(--paper); clip-path: inset(0 -100vmax);
+    }
+    .menu-btn, .nav-backdrop { display: none !important; }
+    .head-right { display: contents; }
+    .tools { margin-left: auto; }
+    .site-head nav, .site-head nav.open {
+      display: flex; position: static; order: 3; flex: 1 0 100%; flex-direction: row; flex-wrap: nowrap; justify-content: space-between;
+      gap: .75rem; margin-top: .6rem; padding: 0; background: none; border: 0; box-shadow: none; animation: none;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .site-head nav::-webkit-scrollbar { display: none; }
+    .site-head nav .nav-home { display: none !important; }   /* zurück zum Titelblatt: Logo antippen */
+    .site-head nav a, .site-head nav a:not(:last-child) {
+      flex: none; padding: .7rem 0 .6rem; text-align: left; align-self: auto; white-space: nowrap;
+      font-size: clamp(.74rem, 3.5vw, .9rem); letter-spacing: .07em; color: var(--ink-soft);
+      border-bottom: 2px solid transparent;
+    }
+    .site-head nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
+  }
+  /* Tablet/Computer: Rubriken in der ersten Zeile halten */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    .site-head nav { grid-row: 1; }
+    .menu-btn { display: none; }
+  }
+
+  /* ==========================================================================
+     BETA 3 – Bilder als Bühne: Bildstrecken als Geschichte, fließende Vollansicht, Zoom
+     ========================================================================== */
+  .strecke h3 { font-size: clamp(2.2rem, 6vw, 3.4rem) !important; line-height: 1; margin-bottom: .6rem !important; }
+  .strecke > p { font-size: 1.15rem; max-width: 52ch; }
+  .story {
+    display: grid; grid-template-columns: 1fr 1fr; align-items: start;
+    gap: clamp(1.75rem, 5vw, 3.5rem) clamp(.6rem, 2.4vw, 1.75rem); max-width: 1100px; margin-top: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .shot { margin: 0; min-width: 0; }
+  .shot.lead, .shot.wide, .shot.solo { grid-column: 1 / -1; }
+  /* nie höher als ~86 % des Bildschirms: Breite richtet sich nach dem Seitenverhältnis (--r) */
+  .shot button, .shot figcaption { width: min(100%, calc(86vh * var(--r, 1.5))); }
+  .shot.solo button, .shot.solo figcaption { width: min(100%, 640px, calc(86vh * var(--r, 1))); }
+  @media (min-width: 821px) { .shot.solo.tall button, .shot.solo.tall figcaption { width: min(100%, 520px, calc(86vh * var(--r, 1))); } }
+  .shot button {
+    position: relative; display: block; aspect-ratio: 4 / 3; padding: 0; border: 0; overflow: hidden;   /* Breite: siehe Höhenbegrenzung oben */
+    background: var(--paper-deep); cursor: zoom-in;
+  }
+  .shot button::before {   /* unscharfe Vorschau, solange das große Bild lädt */
+    content: ""; position: absolute; inset: -12%; background: var(--lqip) center / cover no-repeat; filter: blur(16px) saturate(1.1);
+  }
+  .shot img { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; }
+  .shot figcaption {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .9rem; margin-top: .55rem;
+    font-family: var(--edge); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .shot figcaption .no { color: var(--amber); }
+  .shot figcaption .ti { color: var(--ink); }
+  .shot figcaption .me:empty { display: none; }
+  .shot { opacity: 0; transform: translateY(22px); transition: opacity .8s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+  .shot.in { opacity: 1; transform: none; }
+  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait) {
+    .shot.lead { margin-inline: calc(50% - 50vw); }   /* Aufmacher am Handy randlos */
+    .shot.lead figcaption { padding-inline: 2rem; }
+    .shot figcaption { font-size: .68rem; }
+    .shot.tall figcaption .me, .shot.even figcaption .me { flex-basis: 100%; }
+  }
+
+  /* Vollansicht: fließender Übergang und Zoom */
+  ::view-transition-group(photo) { animation-duration: .42s; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+  ::view-transition-old(photo), ::view-transition-new(photo) { height: 100%; object-fit: contain; }
+  .lb-stage.zoomed { display: block; overflow: auto; height: calc(100dvh - 3rem); -webkit-overflow-scrolling: touch; cursor: zoom-out; }
+  .lb-stage.zoomed img { max-width: none !important; max-height: none !important; width: 240%; height: auto; }
+  @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait) {
+    .lb-stage.zoomed { height: 62dvh; }
+  }
+  .lb-stage img { cursor: zoom-in; touch-action: manipulation; }   /* Doppeltippen zoomt das Bild, nicht die ganze Seite */
+
+  @media (prefers-reduced-motion: reduce) {
+    .shot { opacity: 1; transform: none; transition: none; }
+  }
+
+  /* Kontaktbogen/Auswahl: einspaltig, Umschalter als kleine Knöpfe über den Bildern */
+  #kontaktbogen .sheet { grid-template-columns: 1fr; gap: 1.1rem; }
+  #filters { flex-direction: row; flex-wrap: wrap; gap: .45rem; position: static; }
+  .seg {
+    font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: .8rem;
+    padding: .5rem 1rem; border: 1px solid var(--rule); border-radius: 999px; background: none; color: var(--ink-soft); cursor: pointer;
+    transition: background-color .2s, color .2s, transform .12s;
+  }
+  .seg[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .seg:active { transform: scale(.96); }
+  #kontaktbogen .hint { margin-bottom: 1rem; }
+
+  /* BETA 4: Auswahl in echten Formaten, Reihen gleicher Höhe */
+  .justified { display: flex; flex-wrap: wrap; gap: 6px; max-width: 1400px; }
+  .jt { position: relative; flex: none; padding: 0; border: 0; overflow: hidden; background: var(--paper-deep); cursor: zoom-in; width: 31%; aspect-ratio: 3 / 2; }
+  .jt[style*="height"] { aspect-ratio: auto; }
+  .jt::before { content: ""; position: absolute; inset: -12%; background: var(--lqip) center / cover no-repeat; filter: blur(14px); }
+  .jt img { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+  @media (hover: hover) { .jt:hover img { transform: scale(1.025); } }
+</style>
+</head>
+
+<body>
+<div class="rotate-hint" role="alert">
+  <svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="22" y="8" width="20" height="36" rx="3"/><path d="M30 39h4"/><path d="M10 34a22 22 0 0 0 18 20"/><path d="M24 50l4 4-5 3"/></svg>
+  <p data-en="Please turn your phone<br>to portrait">Bitte das Handy<br>ins Hochformat drehen</p>
+</div>
+<div class="bgfix" aria-hidden="true"></div>
+
+<header class="wrap site-head">
+  <a class="home-link" href="#top" aria-label="Analoge Welt – Startseite"><span class="logo logo-head" aria-hidden="true"></span><span class="brand">Analoge Welt</span></a>
+  <div class="head-right">
+    <nav id="mainNav" aria-label="Hauptnavigation">
+      <a href="#top" class="nav-home">Titelblatt</a>
+      <a href="#kontaktbogen">Auswahl</a>
+      <a href="#bildstrecken">Bildstrecken</a>
+      <a href="#projekte" class="nav-proj" hidden>Projekte</a>
+      <a href="#ueber-mich">Über mich</a>
+    </nav>
+    <span class="tools">
+      <button class="icon" id="theme" type="button" aria-label="Hell / Dunkel" title="Hell / Dunkel"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg></button>
+      <span class="langs" role="group" aria-label="Sprache"><button type="button" data-lang="de">DE</button><span aria-hidden="true">/</span><button type="button" data-lang="en">EN</button></span>
+    </span>
+    <button class="icon menu-btn" id="menuBtn" type="button" aria-label="Menü" aria-expanded="false" aria-controls="mainNav"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button>
+  </div>
+</header>
+<div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
+
+<main id="top">
+
+  <div class="wrap hero">
+    <div>
+      <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
+      <p data-en="Analogue photography<br>on 35 mm and medium format.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.</p>
+    </div>
+    <div class="mobile-hero-copy">
+      <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
+      <p data-en="Analogue photography on 35 mm and medium format.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.</p>
+      <nav class="cta" aria-label="Einstieg">
+        <a href="#bildstrecken" class="cta-main" data-en="View photo series&nbsp;→">Bildstrecken ansehen&nbsp;→</a>
+      </nav>
+      <div class="teaser" id="teaser"></div>
+    </div>
+
+    
+  </div>
+
+  <section class="works view" id="kontaktbogen" aria-labelledby="arbeiten-titel">
+    <div class="wrap">
+      <h2 id="arbeiten-titel">Auswahl</h2>
+      <p class="hint" id="hint"></p>
+      <div class="sheet">
+        <div class="filters" id="filters" role="group" aria-label="Kategorien"></div>
+        <div>
+          <p class="status" id="status" role="status">Fotos werden geladen …</p>
+          <div class="grid" id="grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="bildstrecken" aria-labelledby="strk-titel"><div class="wrap">
+  <h2 id="strk-titel">Bildstrecken</h2>
+  <p class="hint" id="strkHint"></p>
+  <div class="sheet">
+    <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"></div>
+    <div id="strkDetail"></div>
+  </div>
+</div></section>
+
+  <section class="view" id="projekte" aria-labelledby="proj-titel"><div class="wrap">
+  <h2 id="proj-titel">Projekte</h2>
+  <p class="hint" id="projHint"></p>
+  <div class="sheet">
+    <div class="filters" id="projList" role="group" aria-label="Projekte"></div>
+    <div id="projDetail"></div>
+  </div>
+</div></section>
+
+<section class="view" id="ueber-mich" aria-labelledby="about-titel">
+    <div class="wrap about">
+      <div>
+        <h2 id="about-titel">Über mich</h2>
+        <div class="about-text">
+        <p>Ich fotografiere seit über zehn Jahren auf Film, auf Kleinbild und im Mittelformat. Mich reizt, dass jede Aufnahme Zeit kostet: Man schaut länger hin, wartet aufs richtige Licht und sieht das Ergebnis erst Tage später.</p>
+        <p>Unterwegs bin ich meist mit einer Nikon FE, einer Canon AV-1 oder der Seagull 4A, einer zweiäugigen Mittelformatkamera. Im Gepäck sind Kodak Tri-X, Ilford HP5 oder Portra 400. Meine Schwarzweißfilme entwickle ich selbst.</p>
+        </div>
+      </div>
+      <div class="strip"><div class="frame"><img id="heroImg" alt="" width="1200" height="800"></div><div class="edge" hidden><span id="edgeLeft"></span><span id="edgeRight"></span></div></div>
+      
+    </div>
+  </section>
+
+  <section class="view" id="equipment" aria-labelledby="equip-titel"><div class="wrap">
+  <h2 id="equip-titel">Equipment</h2>
+  <div class="equip">
+    <h3>Kameras</h3>
+    <!-- Kamerafotos: Dateiname aus dem Supabase-Bucket (wie beim Porträt) oder ein Pfad wie ./kameras/nikon-fe.jpg
+         zwischen die Anführungszeichen bei data-img schreiben. Leer = nur der Name. -->
+    <ul class="cams">
+      <li class="cam" data-img=""><span class="cam-name">Nikon FE</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Canon AV-1</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Seagull 4A</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Canonet 28</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Regula 3</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Voigtländer Vitoret DR</span></li>
+      <li class="cam" data-img=""><span class="cam-name">Agfa Isolette 2</span></li>
+    </ul>
+  </div>
+</div></section>
+
+<section class="contact view" id="kontakt" aria-labelledby="kontakt-titel">
+    <div class="wrap">
+      <h2 id="kontakt-titel">Kontakt</h2>
+      <a class="mail" id="mail"></a>
+      <p class="other">
+        <span id="insta">Instagram: <a rel="noopener"></a></span>
+        <span id="pixel">Pixelfed: <a rel="noopener"></a></span>
+        <span id="flickr">Flickr: <a rel="noopener"></a></span>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><span id="copy">©</span> <span id="year"></span> <span id="copyName"></span></span>
+    <span class="foot-links"><a href="#kontakt">Kontakt</a> <a href="impressum.html">Impressum</a> <a href="datenschutz.html">Datenschutz</a></span>
+  </div>
+</footer>
+
+<dialog class="lb" id="lb" aria-label="Fotoansicht">
+  <div class="lb-inner" tabindex="-1" autofocus>
+    <div class="lb-stage"><img id="lbImg" alt=""></div>
+    <aside class="lb-side">
+      <dl class="lb-info" id="lbInfo"></dl>
+      <div class="lb-thumbs" id="lbThumbs"></div>
+      <div class="lb-ctrl">
+        <span id="lbCount"></span>
+        <button type="button" id="lbPrev">Zurück</button>
+        <button type="button" id="lbNext">Weiter</button>
+        <button type="button" id="lbClose">Schließen</button>
+      </div>
+    </aside>
+  </div>
+</dialog>
+
+<script>
+/* ============================================================
+   EINSTELLUNGEN – hier trägst du deine Supabase-Daten ein
+   (Project Settings → API: "Project URL" und "anon public" Key)
+   ============================================================ */
+const CONFIG = {
+  supabaseUrl: "https://owbbsnujnkhyyqvagtai.supabase.co",
+  supabaseKey: "sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga",
+  table:  "photos",  // Tabelle mit den Foto-Infos
+  bucket: "photos",  // öffentlicher Storage-Bucket mit den Bilddateien
+  bgImage: "seagull_4a.jpg",       // Dateiname deines Seagull-4A-Fotos im Bucket (Hintergrund, bleibt beim Scrollen fest)
+  heroImage: "Alex_Vintage.jpg",     // Dateiname deines Porträts im Bucket, ZWISCHEN den Anführungszeichen, z. B. "portrait.jpg" (leer = erstes Galerie-Foto)
+  heroPosition: "70% 50%"  // Bildausschnitt, z. B. "50% 25%" rückt den Ausschnitt nach oben
+};
+
+/* Deine Daten: hier einmal eintragen, die Seite übernimmt sie überall */
+const PROFILE = {
+  name: "Analoge Welt",                     // Logo oben links
+  copyright: "A.T. Fichter · Analoge Welt", // Fußzeile
+  title: "Analoge Welt – Analoge Fotografie von A.T. Fichter",   // Titel im Browser-Tab (BETA: einheitlicher Name)
+  email: "a_t_f@outlook.de",                // z. B. "name@beispiel.de"
+  instagram: "a_t_f_analog",                // nur der Profilname, ohne @
+  pixelfed: "atf_analog", pixelfedServer: "pixelfed.social",
+  flickr: "",
+  langFlags: false,                         // true = Flaggen statt DE / EN
+  schutz: "bilder"                          // Rechtsklick sperren: "bilder" (nur auf Fotos), "alles" (ganze Seite) oder "aus"
+};
+
+/* ---------- Daten laden ---------- */
+const state = { all: [], shown: [], filter: null, index: 0 };
+const $ = (id) => document.getElementById(id);
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* Vorschaubilder: Supabase verkleinert das Bild auf dem Server (ca. 100 statt 800 KB). Klappt das nicht, kommt das Original. */
+const thumb = (src, w = 600) => src.includes("/storage/v1/object/public/")
+  ? src.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + `?width=${w}&height=${w}&resize=contain&quality=72` : src;
+/* BETA 3: Bild in passender Breite vom Server (Seitenverhältnis bleibt, Höhe ist nur Obergrenze) */
+const sized = (src, w, q = 75) => src.includes("/storage/v1/object/public/")
+  ? src.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + `?width=${w}&height=${w * 3}&resize=contain&quality=${q}` : src;
+/* BETA 3: Hoch- und quadratische Formate paarweise nebeneinander; wer keinen Partner hat, steht allein und größer */
+function pairUp(story) {
+  const shots = [...story.children];
+  const half = (n) => n && !n.classList.contains("lead") && !n.classList.contains("wide");
+  for (let i = 1; i < shots.length; i++) {
+    if (!half(shots[i])) continue;
+    if (half(shots[i + 1])) { i++; continue; }
+    shots[i].classList.add("solo");
+  }
+}
+/* BETA 3: Elemente gleiten sanft ins Bild, sobald man zu ihnen scrollt */
+const revealIO = window.IntersectionObserver && !reduceMotion()
+  ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); revealIO.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" })
+  : null;
+function revealOnScroll(nodes) { nodes.forEach((n) => { if (revealIO) revealIO.observe(n); else n.classList.add("in"); }); }
+/* Bild sanft einblenden, sobald es geladen ist; fehlt ein Vorschaubild, das Original nehmen */
+function fadeIn(img, original) {
+  const done = () => img.classList.add("is-in");
+  img.addEventListener("load", done, { once: true });
+  img.addEventListener("error", () => { if (original && img.src !== original) img.src = original; else done(); });
+  if (img.complete && img.naturalWidth) done();
+}
+
+async function loadPhotos() {
+  const url = `${CONFIG.supabaseUrl}/rest/v1/${CONFIG.table}?select=*&order=sort.asc,created_at.desc`;
+  const headers = { apikey: CONFIG.supabaseKey };
+  // Alte anon-Keys sind JWTs (beginnen mit "eyJ"); neue Publishable Keys (sb_publishable_…) brauchen den Header nicht.
+  if (CONFIG.supabaseKey.startsWith("eyJ")) headers.Authorization = `Bearer ${CONFIG.supabaseKey}`;
+  const res = await fetch(url, { headers });
+  if (!res.ok) throw new Error("Supabase antwortete mit Status " + res.status);
+  const rows = await res.json();
+  return rows.filter((r) => r.storage_path).map((r) => ({
+    strecke: r.strecke_id, kb: r.im_kontaktbogen !== false,
+    title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, categories: (r.cat || "").split(",").map((c) => c.trim()).filter(Boolean), year: r.year, location: r.location, focal: r.focal, shutter: r.shutter, aperture: r.aperture,
+    src: `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${r.storage_path.split("/").map(encodeURIComponent).join("/")}`,
+    details: (r.details || []).map((n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`)
+  }));
+}
+
+/* ---------- Anzeige ---------- */
+function renderHero(p) {
+  const img = $("heroImg");
+  if (CONFIG.heroImage) {
+    const f = CONFIG.heroImage;
+    img.src = /^https?:/.test(f)
+      ? f
+      : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${f.split("/").map(encodeURIComponent).join("/")}`;
+    img.alt = "Porträt";
+    $("edgeLeft").textContent = "▸ 1   1A";
+    $("edgeRight").textContent = "";
+  } else {
+    img.src = p.src;
+    img.alt = p.title + (p.location ? ", " + p.location : "");
+    const idx = state.all.indexOf(p) + 1;
+    $("edgeLeft").textContent = "▸ " + idx + "   " + idx + "A";
+    $("edgeRight").textContent = (p.film || "").toUpperCase();
+  }
+  img.style.objectPosition = CONFIG.heroPosition || "50% 50%";
+  img.classList.add("develop");
+}
+
+/* Kontaktbogen = Auswahl der besten Bilder (Haken im Admin); Rubriken nur nach Film, die Motive stecken in den Bildstrecken */
+const CATS = ["Schwarzweiß", "Farbe"];
+const kbPhotos = () => state.all.filter((p) => p.kb);
+function renderFilters() {
+  // Umschalter „Alle · Schwarzweiß · Farbe“ über den Bildern
+  const box = $("filters"); box.innerHTML = "";
+  const cats = CATS.filter((c) => kbPhotos().some((p) => (p.categories || []).includes(c)));
+  if (!cats.length) return;
+  [null, ...cats].forEach((f) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "seg"; b.textContent = f ? tr(f) : tr("Alle");
+    b.setAttribute("aria-pressed", String(f === state.filter));
+    b.addEventListener("click", () => { state.filter = f; renderFilters(); renderGrid(); });
+    box.appendChild(b);
+  });
+}
+
+/* BETA 4: Auswahl – jedes Bild in seinem echten Format, Reihen gleicher Höhe (wie in Apple Fotos oder Flickr) */
+const ratioCache = new Map();
+function probeRatio(src) {
+  if (ratioCache.has(src)) return Promise.resolve(ratioCache.get(src));
+  return new Promise((res) => {
+    const i = new Image();
+    i.onload = () => { const r = i.naturalWidth / i.naturalHeight || 1.5; ratioCache.set(src, r); res(r); };
+    i.onerror = () => res(1.5);
+    i.src = sized(src, 24, 40);
+  });
+}
+let gridToken = 0;
+function renderGrid() {
+  state.shown = state.filter ? kbPhotos().filter((p) => (p.categories || []).includes(state.filter)) : kbPhotos();
+  $("hint").textContent = tr("Meine liebsten Bilder.");
+  const grid = $("grid"), token = ++gridToken, els = [];
+  grid.innerHTML = ""; grid.className = "justified";
+  const items = state.shown.map((p, i) => {
+    const btn = document.createElement("button"), img = document.createElement("img");
+    btn.type = "button"; btn.className = "jt"; btn.setAttribute("aria-label", p.title + " " + tr("vergrößern"));
+    btn.style.setProperty("--lqip", `url("${sized(p.src, 24, 40)}")`);
+    img.alt = p.title + (p.film ? ", " + p.film : ""); img.decoding = "async"; if (i > 5) img.loading = "lazy";
+    btn.appendChild(img); grid.appendChild(btn); els.push(img);
+    btn.addEventListener("click", () => openViewer(state.shown, i, els));
+    return { btn, img, p };
+  });
+  Promise.all(items.map((it) => probeRatio(it.p.src))).then((rs) => {
+    if (token !== gridToken) return;
+    items.forEach((it, k) => {
+      it.r = rs[k];
+      it.img.srcset = `${sized(it.p.src, 400)} 400w, ${sized(it.p.src, 800)} 800w, ${sized(it.p.src, 1200)} 1200w`;
+    });
+    grid._items = items; layoutJustified(grid);
+    items.forEach((it) => { it.img.src = sized(it.p.src, 800); fadeIn(it.img, it.p.src); });
+  });
+}
+function layoutJustified(grid) {
+  const items = grid._items, W = grid.clientWidth;
+  if (!items || !W) return;   // Seite gerade unsichtbar: passiert, sobald sie sichtbar wird
+  const gap = W < 600 ? 6 : 12, target = W < 600 ? 150 : W < 1000 ? 220 : 290;
+  grid.style.gap = gap + "px";
+  const place = (row, h) => row.forEach((it) => {
+    const w = Math.floor(it.r * h);
+    it.btn.style.width = w + "px"; it.btn.style.height = Math.round(h) + "px"; it.img.sizes = w + "px";
+  });
+  let row = [], sum = 0;
+  items.forEach((it) => {
+    row.push(it); sum += it.r;
+    const h = (W - gap * (row.length - 1)) / sum;
+    if (h <= target) { place(row, h); row = []; sum = 0; }
+  });
+  if (row.length) place(row, Math.min(target, (W - gap * (row.length - 1)) / sum));   // letzte Reihe nicht aufblähen
+}
+if (window.ResizeObserver) new ResizeObserver(() => layoutJustified($("grid"))).observe($("grid"));
+
+/* ---------- Lightbox ---------- */
+const lb = $("lb");
+/* Detailansicht: Hintergrund gesperrt, Zurück-Taste des Browsers schließt zuerst die Ansicht */
+const _show = lb.showModal.bind(lb);
+lb.showModal = () => {
+  _show(); document.documentElement.classList.add("lb-open");
+  try { history.pushState({ lb: true }, "", location.href); } catch (e) {}
+};
+lb.addEventListener("close", () => {
+  document.documentElement.classList.remove("lb-open");
+  if (history.state && history.state.lb) history.back();
+});
+addEventListener("popstate", () => { if (lb.open) lb.close(); });
+function showLightbox() {
+  const p = state.lb[state.index];
+  const big = $("lbImg");
+  setZoom(false);
+  big.onload = big.onerror = null; big.removeAttribute("srcset");
+  const el = state.lbEls && state.lbEls[state.index];
+  const quick = el && el.complete && el.naturalWidth ? el.currentSrc || el.src : null;
+  if (quick && quick !== p.src) {
+    // BETA 3: sofort das Vorschaubild zeigen (liegt schon im Speicher), das Original blendet danach unmerklich darüber
+    big.classList.remove("loading"); big.src = quick;
+    const full = new Image();
+    full.onload = () => { if (state.lb[state.index] === p) big.src = p.src; };
+    full.src = p.src;
+  } else {
+    if (big.getAttribute("src") !== p.src) { big.classList.add("loading"); big.onload = big.onerror = () => big.classList.remove("loading"); }
+    big.src = p.src;
+  }
+  big.alt = p.title || "";
+  // Nachbarbilder schon im Hintergrund laden, damit „Weiter“ und „Zurück“ sofort zeigen
+  [1, -1].forEach((d) => { const q = state.lb[(state.index + d + state.lb.length) % state.lb.length]; if (q && q !== p) new Image().src = q.src; });
+  const rows = p.rows || [["Name", p.title], ["Film", p.film], ["Kamera", p.camera], ["Ort", p.location], ["Jahr", p.year],
+                          ["Brennweite", p.focal], ["Zeit", p.shutter], ["Blende", p.aperture]];
+  const dl = $("lbInfo"); dl.innerHTML = "";
+  rows.forEach(([k, v]) => {
+    if (v === null || v === undefined || v === "") return;   // leere Angaben werden nicht angezeigt
+    const dt = document.createElement("dt"); dt.textContent = tr(k);
+    const dd = document.createElement("dd"); dd.textContent = v;
+    dl.append(dt, dd);
+  });
+  if (p.link) {
+    const dd = document.createElement("dd"), a = document.createElement("a");
+    a.href = p.link; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸";
+    dd.appendChild(a); dl.appendChild(dd);
+  }
+  if (p.strecke && document.body.dataset.view !== "bildstrecken") {
+    const k = streckenItems().findIndex((x) => x.id === p.strecke);
+    if (k >= 0) {
+      const dd = document.createElement("dd"), b = document.createElement("button");
+      b.type = "button"; b.className = "lb-strecke"; b.textContent = tr("Zur ganzen Bildstrecke") + " ▸";
+      const go = () => { projSel.bildstrecke = k; location.hash = "#bildstrecken"; renderCards(); };
+      // das Schließen geht im Verlauf einen Schritt zurück; erst danach wechseln, sonst überschreibt der Rückschritt die neue Seite
+      b.addEventListener("click", () => { if (history.state && history.state.lb) addEventListener("popstate", go, { once: true }); else setTimeout(go); lb.close(); });
+      dd.appendChild(b); dl.appendChild(dd);
+    }
+  }
+  const th = $("lbThumbs"); th.innerHTML = "";   // Detailbilder: kleine Vorschau, Klick tauscht das große Bild
+  if (p.details && p.details.length) {
+    [p.src, ...p.details].forEach((src, i) => {
+      const b = document.createElement("button"), im = document.createElement("img");
+      b.type = "button"; b.setAttribute("aria-current", String(i === 0)); im.alt = ""; im.src = src; b.appendChild(im);
+      b.addEventListener("click", () => {
+        $("lbImg").src = src;
+        th.querySelectorAll("button").forEach((x) => x.setAttribute("aria-current", String(x === b)));
+      });
+      th.appendChild(b);
+    });
+  }
+  $("lbCount").textContent = (state.index + 1) + " / " + state.lb.length;
+}
+function openLightbox(i) { openViewer(state.shown, i, []); }
+/* BETA 3: Das angetippte Bild wächst fließend zur Vollansicht auf (und schrumpft beim Schließen zurück) */
+const canMorph = () => !!document.startViewTransition && !reduceMotion();
+function openViewer(list, k, els) {
+  state.lb = list; state.index = k; state.lbEls = els || [];
+  const src = state.lbEls[k], big = $("lbImg");
+  const go = async () => {
+    if (src) src.style.viewTransitionName = "";
+    showLightbox(); lb.showModal();
+    big.style.viewTransitionName = "photo";
+    try { await Promise.race([big.decode(), new Promise((r) => setTimeout(r, 300))]); } catch (e) {}
+  };
+  if (!src || !canMorph()) { showLightbox(); lb.showModal(); return; }
+  src.style.viewTransitionName = "photo";
+  startVT(go).finished.finally(() => { big.style.viewTransitionName = ""; });
+}
+function closeViewer() {
+  const el = state.lbEls && state.lbEls[state.index], big = $("lbImg");
+  if (!lb.open) return;
+  if (!el || !el.isConnected || !canMorph() || big.closest(".zoomed")) { lb.close(); return; }
+  big.style.viewTransitionName = "photo";
+  startVT(() => {
+    big.style.viewTransitionName = ""; lb.close();
+    el.scrollIntoView({ block: "nearest", behavior: "instant" });   // man landet bei dem Bild, das man zuletzt angesehen hat
+    el.style.viewTransitionName = "photo";
+  }).finished.finally(() => { el.style.viewTransitionName = ""; });
+}
+function step(d) {
+  const n = state.lb.length;
+  state.index = (state.index + d + n) % n;
+  showLightbox();
+}
+$("lbPrev").addEventListener("click", () => step(-1));
+$("lbNext").addEventListener("click", () => step(1));
+$("lbClose").addEventListener("click", closeViewer);
+lb.addEventListener("click", (e) => { if (e.target === lb || e.target.classList.contains("lb-inner") || (e.target.classList.contains("lb-stage") && !e.target.classList.contains("zoomed"))) closeViewer(); });
+lb.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft") step(-1);
+  if (e.key === "ArrowRight") step(1);
+});
+/* BETA 3: Doppeltippen zoomt ins Bild (Ausschnitt dann mit dem Finger verschieben), nochmal doppeltippen = zurück */
+function setZoom(on, x, y) {
+  const stage = $("lbImg").parentElement, big = $("lbImg");
+  if (!on) { stage.classList.remove("zoomed"); stage.scrollTo(0, 0); return; }
+  const r = big.getBoundingClientRect(), fx = (x - r.left) / r.width, fy = (y - r.top) / r.height;
+  stage.classList.add("zoomed");
+  requestAnimationFrame(() => {
+    stage.scrollLeft = fx * big.offsetWidth - stage.clientWidth / 2;
+    stage.scrollTop = fy * big.offsetHeight - stage.clientHeight / 2;
+  });
+}
+const isZoomed = () => $("lbImg").parentElement.classList.contains("zoomed");
+$("lbImg").addEventListener("dblclick", (e) => setZoom(!isZoomed(), e.clientX, e.clientY));
+let lastTap = 0;
+/* Wischen in der Detailansicht: nach links = weiter, nach rechts = zurück */
+let swipeX = null, swipeY = null;
+$("lbImg").parentElement.addEventListener("touchstart", (e) => { swipeX = e.touches[0].clientX; swipeY = e.touches[0].clientY; }, { passive: true });
+$("lbImg").parentElement.addEventListener("touchend", (e) => {
+  if (swipeX === null) return;
+  const dx = e.changedTouches[0].clientX - swipeX, dy = e.changedTouches[0].clientY - swipeY;
+  swipeX = null;
+  if (isZoomed()) {   // im Zoom verschiebt der Finger nur den Ausschnitt
+    if (Math.abs(dx) < 10 && Math.abs(dy) < 10) { const t = Date.now(); if (t - lastTap < 320) { setZoom(false); lastTap = 0; } else lastTap = t; }
+    return;
+  }
+  if (Math.abs(dx) < 10 && Math.abs(dy) < 10 && e.target === $("lbImg")) {
+    const t = Date.now(), c = e.changedTouches[0];
+    if (t - lastTap < 320) { setZoom(true, c.clientX, c.clientY); lastTap = 0; } else lastTap = t;
+    return;
+  }
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5 && state.lb.length > 1) step(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+/* ---------- Start ---------- */
+$("year").textContent = new Date().getFullYear();
+
+loadPhotos().then((photos) => {
+  const status = $("status");
+  state.all = photos;
+  if (!photos.length) {
+    status.textContent = "Hier erscheinen bald die ersten Fotos.";
+    if (CONFIG.heroImage) renderHero(null);   // Porträt auch ohne Galeriefotos zeigen
+    return;
+  }
+  status.remove();
+  renderHero(photos[0]);
+  renderFilters();
+  renderGrid();
+  renderTeaser();
+  renderCards();   // Bildstrecken brauchen die Fotos
+}).catch((err) => {
+  console.error(err);
+  $("status").textContent = "Die Fotos konnten nicht geladen werden. Prüfe URL und Key in index.html sowie die Lese-Richtlinie in Supabase.";
+});
+
+/* ---------- Sprache ---------- */
+const EN = {
+  "Kontaktbogen": "Contact sheet", "Titelblatt": "Cover", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
+  "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series",
+  "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen der Pfalz": "Castle ruins of the Palatinate", "Öffnen": "Open",
+  "Fotos werden geladen …": "Loading photos …",
+  "Ich fotografiere seit über zehn Jahren auf Film, auf Kleinbild und im Mittelformat. Mich reizt, dass jede Aufnahme Zeit kostet: Man schaut länger hin, wartet aufs richtige Licht und sieht das Ergebnis erst Tage später.": "I have been shooting film for over ten years, on 35 mm and medium format. I love that every frame takes time: you look longer, wait for the right light and only see the result days later.",
+  "Unterwegs bin ich meist mit einer Nikon FE, einer Canon AV-1 oder der Seagull 4A, einer zweiäugigen Mittelformatkamera. Im Gepäck sind Kodak Tri-X, Ilford HP5 oder Portra 400. Meine Schwarzweißfilme entwickle ich selbst.": "I usually carry a Nikon FE, a Canon AV-1 or the Seagull 4A, a twin-lens medium format camera, loaded with Kodak Tri-X, Ilford HP5 or Portra 400. I develop my black-and-white films myself.",
+  "Kameras": "Cameras", "Entwicklung": "Development",
+  "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
+  "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
+  "Wähle eine Kategorie.": "Choose a category.",
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Alle": "All", "Auswahl": "Selection", "Aus der Auswahl": "From the selection", "Meine liebsten Bilder.": "My favourite frames.",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+};
+let lang = "de";
+try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
+const orig = new WeakMap();
+const tr = (k) => (lang === "en" && EN[k]) || k;
+function setDateline() {   // Datumszeile im Zeitungskopf: immer das heutige Datum
+  if (!$("dateline")) return;   // BETA: Datumszeile entfernt
+  $("dateline").textContent = new Date().toLocaleDateString(lang === "en" ? "en-GB" : "de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+function setLang(l) {
+  lang = l; document.documentElement.lang = l;
+  setDateline();
+  try { localStorage.setItem("lang", l); } catch (e) {}
+  document.querySelectorAll("[data-en]").forEach((el) => {   // Elemente mit eigener englischer Fassung (z. B. mit <br>)
+    if (el.dataset.de === undefined) el.dataset.de = el.innerHTML;
+    el.innerHTML = l === "en" ? el.dataset.en : el.dataset.de;
+  });
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), nodes = [];
+  while (w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach((n) => {
+    const raw = orig.has(n) ? orig.get(n) : n.nodeValue, key = raw.replace(/\s+/g, " ").trim();
+    if (!EN[key]) return;
+    if (!orig.has(n)) orig.set(n, raw);
+    n.nodeValue = l === "en" ? raw.replace(key, EN[key]) : raw;
+  });
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+  renderCards(); renderPagers(); if (state.all.length) { renderFilters(); renderGrid(); renderTeaser(); }
+}
+
+/* ---------- BETA: Vorschau auf dem Titelblatt (Handy) ---------- */
+function renderTeaser() {
+  const box = $("teaser"); box.innerHTML = "";
+  const pics = kbPhotos().slice(0, 4);
+  if (pics.length < 4) return;
+  const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Aus der Auswahl"); box.appendChild(lab);
+  pics.forEach((p, i) => {
+    const b = document.createElement("button"), im = document.createElement("img");
+    b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
+    im.alt = ""; im.decoding = "async"; im.src = thumb(p.src, 300); fadeIn(im, p.src); b.appendChild(im);
+    b.addEventListener("click", () => openViewer(pics, i, [...box.querySelectorAll("img")]));
+    box.appendChild(b);
+  });
+}
+
+/* ---------- BETA: Weiterblättern am Ende jeder Unterseite ---------- */
+let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
+const pageList = () => ["top", "kontaktbogen", "bildstrecken", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
+const PAGE_NAMES = { top: "Titelblatt", kontaktbogen: "Auswahl", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
+function renderPagers() {
+  const PAGES = pageList();
+  // Seitennummern an den Überschriften (01 = Titelblatt)
+  PAGES.forEach((id, i) => { const h = document.querySelector("#" + id + " h2"); if (h) h.dataset.num = String(i + 1).padStart(2, "0"); });
+  document.querySelectorAll(".pager").forEach((n) => n.remove());
+  PAGES.slice(1).forEach((id) => {
+    // „Über mich“ endet mit dem Kontakt, dort steht das Weiterblättern
+    const wrap = document.querySelector("#" + (id === "ueber-mich" ? "kontakt" : id) + " .wrap"); if (!wrap) return;
+    let nav = wrap.querySelector(":scope > .pager");
+    if (!nav) { nav = document.createElement("nav"); nav.className = "pager"; wrap.appendChild(nav); }
+    nav.setAttribute("aria-label", lang === "en" ? "Turn the page" : "Weiterblättern");
+    nav.innerHTML = "";
+    const k = PAGES.indexOf(id);
+    [[k - 1, "prev", "← "], [k + 1, "next", ""]].forEach(([j, cls, pre]) => {
+      if (j < 0 || j >= PAGES.length) return;
+      const a = document.createElement("a"); a.className = cls; a.href = "#" + PAGES[j];
+      const s = document.createElement("small"); s.textContent = pre + String(j + 1).padStart(2, "0") + (cls === "next" ? " →" : "");
+      const t = document.createElement("span"); t.textContent = tr(PAGE_NAMES[PAGES[j]]);
+      a.append(s, t); nav.appendChild(a);
+    });
+  });
+}
+document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+/* ---------- Projekte (aus Supabase, im Admin bearbeitbar) ---------- */
+let projects = [], projLoaded = false;
+async function loadProjects() {
+  try {
+    const h = { apikey: CONFIG.supabaseKey };
+    if (CONFIG.supabaseKey.startsWith("eyJ")) h.Authorization = "Bearer " + CONFIG.supabaseKey;
+    const r = await fetch(`${CONFIG.supabaseUrl}/rest/v1/projects?select=*&order=sort.asc`, { headers: h });
+    if (r.ok) projects = await r.json();
+    // BETA: Projektbilder, die im Speicher fehlen, nicht zeigen; ein Projekt ganz ohne Bild, Text und Link bleibt ausgeblendet
+    const pubUrl = (n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`;
+    const exists = (n) => fetch(pubUrl(n), { method: "HEAD" }).then((x) => x.ok).catch(() => true);
+    await Promise.all(projects.filter((p) => (p.kind || "projekt") === "projekt").map(async (p) => {
+      if (p.image && !(await exists(p.image))) p.image = null;
+      p.images = (await Promise.all((p.images || []).map(async (n) => ((await exists(n)) ? n : null)))).filter(Boolean);
+    }));
+    projects = projects.filter((p) => (p.kind || "projekt") !== "projekt" || p.image || p.images.length || p.text_de || p.text_en || p.url);
+  } catch (e) {}
+  projLoaded = true;
+  hasProjects = projects.some((p) => (p.kind || "projekt") === "projekt");
+  document.querySelector(".nav-proj").hidden = !hasProjects;
+  renderCards(); renderPagers();
+}
+/* Projekte und Bildstrecken liegen in derselben Tabelle, unterschieden durch "kind" */
+const projSel = { projekt: null, bildstrecke: null };
+function renderCards() { renderKind("projekt", "proj"); renderKind("bildstrecke", "strk"); }
+// allgemeine Themen zuerst, dann „Reisen & Touren“
+const streckenItems = () => projects.filter((p) => p.kind === "bildstrecke").sort((a, b) => (a.bereich === b.bereich ? 0 : a.bereich === "allgemein" ? -1 : 1) || (a.sort || 0) - (b.sort || 0));
+function renderKind(kind, pre) {
+  const list = $(pre + "List"), det = $(pre + "Detail"); list.innerHTML = ""; det.innerHTML = "";
+  if (!projLoaded) return;
+  const items = kind === "bildstrecke" ? streckenItems() : projects.filter((p) => (p.kind || "projekt") === kind), sel = projSel[kind];
+  const strecke = kind === "bildstrecke";
+  $(pre + "Hint").textContent = !items.length ? tr(strecke ? "Noch keine Bildstrecken." : "Noch keine Projekte.")
+    : sel === null ? tr(strecke ? "Wähle eine Bildstrecke." : "Wähle ein Projekt.") : "";
+  const pub = (n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`;
+  items.forEach((p, i) => {
+    if (strecke && p.bereich !== "allgemein" && (i === 0 || items[i - 1].bereich === "allgemein")) {
+      const sub = document.createElement("p"); sub.className = "filters-sub"; sub.textContent = tr("Reisen & Touren"); list.appendChild(sub);
+    }
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = tr(p.title);
+    b.setAttribute("aria-pressed", String(i === sel));
+    b.addEventListener("click", () => {
+      projSel[kind] = sel === i ? null : i; renderKind(kind, pre);
+      // Handy: Inhalt steht unter der Liste – sanft dorthin scrollen, damit man sieht, dass etwas passiert ist
+      if (projSel[kind] !== null) requestAnimationFrame(() => {
+        const d = $(pre + "Detail");
+        if (d.getBoundingClientRect().top > innerHeight * .55) d.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+      });
+    });
+    list.appendChild(b);
+  });
+  const p = items[sel]; if (!p) return;
+  const text = (lang === "en" && p.text_en) || p.text_de || "";
+  const fotos = strecke ? state.all.filter((f) => f.strecke === p.id) : [];
+  const imgs = strecke ? fotos.map((f) => f.src) : [p.image, ...(p.images || [])].filter(Boolean).map(pub);
+  const open = (k) => {
+    state.lb = strecke ? fotos : imgs.map((s2) => ({ src: s2, title: p.title, rows: [["Projekt", p.title], ["Info", text]], link: p.url }));
+    state.index = k; showLightbox(); lb.showModal();
+  };
+  const box = document.createElement("article"); box.className = strecke ? "strecke" : "pbox";
+  const h = document.createElement("h3"); h.textContent = tr(p.title); box.appendChild(h);
+  if (text) { const t = document.createElement("p"); t.textContent = text; box.appendChild(t); }
+  if (p.url) { const a = document.createElement("a"); a.className = "plink"; a.href = p.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = tr("Öffnen") + " ▸"; box.appendChild(a); }
+  if (strecke && fotos.length) {
+    // BETA 3: Bildstrecke wie eine Magazinstrecke – erstes Bild groß, Querformate über die volle Breite,
+    // Hochformate paarweise nebeneinander, darunter eine Zeile wie der Rand eines Negativs
+    const story = document.createElement("div"); story.className = "story";
+    const els = [];
+    let pending = fotos.length;
+    const settled = () => { if (--pending === 0) pairUp(story); };
+    fotos.forEach((f, k) => {
+      const fig = document.createElement("figure"); fig.className = "shot" + (k === 0 ? " lead" : "");
+      const b = document.createElement("button"), im = document.createElement("img");
+      b.type = "button"; b.setAttribute("aria-label", f.title + " " + tr("vergrößern"));
+      b.style.setProperty("--lqip", `url("${sized(f.src, 24, 40)}")`);
+      im.alt = f.title + (f.location ? ", " + f.location : ""); im.decoding = "async"; if (k > 1) im.loading = "lazy";
+      // Mini-Bild (wenige Hundert Byte) verrät das Seitenverhältnis, bevor das große Bild da ist – so springt nichts
+      const probe = new Image();
+      probe.onload = () => {
+        const r = probe.naturalWidth / probe.naturalHeight;
+        b.style.aspectRatio = probe.naturalWidth + " / " + probe.naturalHeight;
+        fig.style.setProperty("--r", r.toFixed(4));   // für die Höhenbegrenzung
+        fig.classList.add(r >= 1.15 ? "wide" : r <= .87 ? "tall" : "even");
+        const full = k === 0 || r >= 1.15;
+        im.sizes = full ? "(min-width: 1200px) 1100px, 100vw" : "(min-width: 1200px) 550px, 50vw";
+        im.srcset = `${sized(f.src, 640)} 640w, ${sized(f.src, 1080)} 1080w, ${sized(f.src, 1600)} 1600w`;
+        im.src = sized(f.src, 1080); fadeIn(im, f.src);
+        settled();
+      };
+      probe.onerror = () => { im.src = f.src; fadeIn(im); settled(); };
+      probe.src = sized(f.src, 24, 40);
+      els.push(im); b.appendChild(im);
+      b.addEventListener("click", () => openViewer(fotos, k, els));
+      const cap = document.createElement("figcaption");
+      const no = document.createElement("span"); no.className = "no"; no.textContent = "▸ " + (k + 1) + "A";
+      const ti = document.createElement("span"); ti.className = "ti"; ti.textContent = f.title;
+      const me = document.createElement("span"); me.className = "me"; me.textContent = [f.location, f.film].filter(Boolean).join(" · ");
+      cap.append(no, ti, me);
+      fig.append(b, cap); story.appendChild(fig);
+    });
+    box.appendChild(story);
+    revealOnScroll(story.querySelectorAll(".shot"));
+  } else if (imgs.length) {
+    const g = document.createElement("div"); g.className = strecke ? "grid" : "pimgs";
+    imgs.forEach((src, k) => {
+      const b = document.createElement("button"), im = document.createElement("img");
+      b.type = "button"; im.alt = strecke && fotos[k] ? fotos[k].title : p.title; im.loading = "lazy"; im.decoding = "async";
+      im.src = thumb(src); fadeIn(im, src); b.appendChild(im);
+      b.addEventListener("click", () => open(k));
+      if (strecke) { const f = document.createElement("figure"); f.className = "print"; f.appendChild(b); g.appendChild(f); }   // Rahmen wie im Kontaktbogen
+      else g.appendChild(b);
+    });
+    box.appendChild(g);
+  }
+  det.appendChild(box);
+}
+
+/* ---------- Deine Daten (Logo, Kontakt, Profile) ---------- */
+function applyProfile() {
+  document.title = PROFILE.title;
+  if (PROFILE.langFlags) { document.querySelector('[data-lang="de"]').textContent = "🇩🇪"; document.querySelector('[data-lang="en"]').textContent = "🇬🇧"; }
+  document.querySelector(".brand").textContent = PROFILE.name;
+  $("copyName").textContent = PROFILE.copyright;
+  const m = $("mail"); m.hidden = !PROFILE.email; m.href = "mailto:" + PROFILE.email; m.textContent = PROFILE.email;
+  [["insta", PROFILE.instagram, "https://instagram.com/" + PROFILE.instagram, "@" + PROFILE.instagram],
+   ["pixel", PROFILE.pixelfed, `https://${PROFILE.pixelfedServer}/@${PROFILE.pixelfed}`, "@" + PROFILE.pixelfed],
+   ["flickr", PROFILE.flickr, "https://www.flickr.com/photos/" + PROFILE.flickr, PROFILE.flickr]].forEach(([id, v, url, txt]) => {
+    const el = $(id); el.hidden = !v; if (!v) return;
+    const a = el.querySelector("a"); a.href = url; a.textContent = txt;
+  });
+}
+
+/* Seitenwechsel-Übergang starten; bricht der Browser ihn ab (z. B. Tab im Hintergrund), wird still auf den Sprung ohne Animation zurückgefallen */
+function startVT(cb) { const t = document.startViewTransition(cb); t.ready.catch(() => {}); t.finished.catch(() => {}); return t; }
+/* ---------- Ansichten, Hintergrund, Hell-Dunkel ---------- */
+const VIEWS = ["kontaktbogen", "bildstrecken", "projekte", "ueber-mich"];
+const ALIAS = { equipment: "ueber-mich", kontakt: "ueber-mich" };   // Teile der Seite „Über mich“
+/* BETA: Seitenwechsel mit sanftem Überblenden, wo der Browser es kann (View Transitions) */
+let routedOnce = false;
+function route() {
+  setMenu(false);
+  const toTop = !location.hash || location.hash === "#top";
+  if (routedOnce && document.startViewTransition && !reduceMotion()) {
+    const vt = startVT(applyRoute);
+    if (toTop) vt.finished.then(() => window.scrollTo({ top: 0, behavior: "instant" })).catch(() => {});   // Safari: sicher ganz oben
+  } else applyRoute();
+  routedOnce = true;
+}
+function applyRoute() {
+  const h = location.hash.slice(1), v = VIEWS.includes(h) ? h : (ALIAS[h] || "");
+  if (v) document.body.dataset.view = v; else delete document.body.dataset.view;
+  document.querySelectorAll("#mainNav a").forEach((a) => {   // aktuelle Seite im Menü markieren
+    if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+  if (v === "ueber-mich") { const im = $("heroImg"); im.classList.remove("develop"); void im.offsetWidth; im.classList.add("develop"); }
+  let t = null;
+  // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
+  try { if (h && h !== "top" && (!v || ALIAS[h])) t = document.querySelector("#" + h); } catch (e) {}
+  if (t) t.scrollIntoView({ behavior: "instant" }); else window.scrollTo({ top: 0, behavior: "instant" });
+}
+addEventListener("hashchange", route);
+/* Höhe der Kopfzeile für die Sprungziele: am Handy steht sie fest oben, also Abstand = Höhe + etwas Luft */
+const setHeadH = () => {
+  const head = document.querySelector(".site-head");
+  const pinned = getComputedStyle(head).position === "sticky";
+  document.documentElement.style.setProperty("--headh", (pinned ? head.offsetHeight + 16 : 16) + "px");
+};
+setHeadH();
+if (window.ResizeObserver) new ResizeObserver(setHeadH).observe(document.querySelector(".site-head"));
+addEventListener("resize", setHeadH);
+/* Zurück zum Titelblatt (Logo, „Titelblatt“, „← 01“): ohne Sprungmarke, damit Safari nicht selbst
+   unter die Kopfzeile scrollt – Adresse ohne #, Ansicht wechseln, ganz nach oben */
+document.addEventListener("click", (e) => {
+  const a = e.target.closest && e.target.closest('a[href="#top"]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  e.preventDefault();
+  if (location.hash) { try { history.pushState(null, "", location.pathname + location.search); } catch (err) {} route(); }
+  else window.scrollTo({ top: 0, behavior: reduceMotion() ? "instant" : "smooth" });
+});
+
+if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://… oder ./datei.jpg)
+  const b = CONFIG.bgImage;
+  const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
+  document.documentElement.style.setProperty("--bg", `url("${u}")`);
+}
+/* Kamerafotos auf der Equipment-Seite: data-img = Dateiname im Bucket ODER Adresse (https://… oder ./datei.jpg) */
+document.querySelectorAll(".cam[data-img]").forEach((li) => {
+  const f = li.dataset.img.trim();
+  if (!f) return;
+  const img = new Image();
+  img.src = /^(https?:|\.?\/)/.test(f) ? f : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${f.split("/").map(encodeURIComponent).join("/")}`;
+  img.alt = li.querySelector(".cam-name").textContent;
+  img.loading = "lazy"; img.width = 800; img.height = 600;
+  img.onerror = () => img.remove();   // fehlt die Datei, bleibt nur der Name stehen
+  li.prepend(img);
+});
+/* Menü (Handy): öffnen/schließen; Tippen daneben oder Escape schließt es */
+function setMenu(open) {
+  $("mainNav").classList.toggle("open", open);
+  document.documentElement.classList.toggle("menu-open", open);
+  $("menuBtn").setAttribute("aria-expanded", String(open));
+  $("menuBtn").setAttribute("aria-label", open ? (lang === "en" ? "Close menu" : "Menü schließen") : (lang === "en" ? "Menu" : "Menü"));
+}
+$("menuBtn").addEventListener("click", () => setMenu(!$("mainNav").classList.contains("open")));
+$("navBackdrop").addEventListener("click", () => setMenu(false));
+addEventListener("keydown", (e) => { if (e.key === "Escape" && $("mainNav").classList.contains("open")) { setMenu(false); $("menuBtn").focus(); } });
+$("mainNav").addEventListener("click", (e) => { if (e.target.closest("a")) setMenu(false); });
+$("theme").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("theme", next); } catch (e) {}
+});
+applyProfile(); loadProjects(); setLang(lang); route();
+
+/* ---------- Geheimer Zugang: zweimal schnell auf das © tippen öffnet den Admin-Bereich ---------- */
+let copyTap = 0;
+$("copy").addEventListener("click", () => {   // zwei Klicks statt dblclick, damit es auch mit dem Finger klappt
+  const now = Date.now();
+  if (now - copyTap < 450) location.href = "../admin.html"; else copyTap = now;
+});
+
+/* ---------- Bilderschutz: Rechtsklick und Ziehen sperren ---------- */
+document.addEventListener("contextmenu", (e) => {
+  const mode = PROFILE.schutz || "bilder";
+  if (mode === "alles" || (mode === "bilder" && e.target.closest && e.target.closest("img, .print, .pimgs, .lb-stage, .strip"))) e.preventDefault();
+});
+document.addEventListener("dragstart", (e) => { if (e.target.tagName === "IMG") e.preventDefault(); });
+</script>
+</body>
+</html>

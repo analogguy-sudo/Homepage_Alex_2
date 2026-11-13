@@ -1150,6 +1150,8 @@ function applyProfile() {
   });
 }
 
+/* Seitenwechsel-Übergang starten; bricht der Browser ihn ab (z. B. Tab im Hintergrund), wird still auf den Sprung ohne Animation zurückgefallen */
+function startVT(cb) { const t = document.startViewTransition(cb); t.ready.catch(() => {}); t.finished.catch(() => {}); return t; }
 /* ---------- Ansichten, Hintergrund, Hell-Dunkel ---------- */
 const VIEWS = ["kontaktbogen", "bildstrecken", "projekte", "ueber-mich", "equipment", "kontakt"];
 /* BETA: Seitenwechsel mit sanftem Überblenden, wo der Browser es kann (View Transitions) */
@@ -1158,7 +1160,7 @@ function route() {
   setMenu(false);
   const toTop = !location.hash || location.hash === "#top";
   if (routedOnce && document.startViewTransition && !reduceMotion()) {
-    const vt = document.startViewTransition(applyRoute);
+    const vt = startVT(applyRoute);
     if (toTop) vt.finished.then(() => window.scrollTo({ top: 0, behavior: "instant" })).catch(() => {});   // Safari: sicher ganz oben
   } else applyRoute();
   routedOnce = true;

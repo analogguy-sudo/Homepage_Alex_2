@@ -1082,14 +1082,14 @@ function openViewer(list, k, els) {
   };
   if (!src || !canMorph()) { showLightbox(); lb.showModal(); return; }
   src.style.viewTransitionName = "photo";
-  document.startViewTransition(go).finished.finally(() => { big.style.viewTransitionName = ""; });
+  startVT(go).finished.finally(() => { big.style.viewTransitionName = ""; });
 }
 function closeViewer() {
   const el = state.lbEls && state.lbEls[state.index], big = $("lbImg");
   if (!lb.open) return;
   if (!el || !el.isConnected || !canMorph() || big.closest(".zoomed")) { lb.close(); return; }
   big.style.viewTransitionName = "photo";
-  document.startViewTransition(() => {
+  startVT(() => {
     big.style.viewTransitionName = ""; lb.close();
     el.scrollIntoView({ block: "nearest", behavior: "instant" });   // man landet bei dem Bild, das man zuletzt angesehen hat
     el.style.viewTransitionName = "photo";
@@ -1380,6 +1380,8 @@ function applyProfile() {
   });
 }
 
+/* Seitenwechsel-Übergang starten; bricht der Browser ihn ab (z. B. Tab im Hintergrund), wird still auf den Sprung ohne Animation zurückgefallen */
+function startVT(cb) { const t = document.startViewTransition(cb); t.ready.catch(() => {}); t.finished.catch(() => {}); return t; }
 /* ---------- Ansichten, Hintergrund, Hell-Dunkel ---------- */
 const VIEWS = ["kontaktbogen", "bildstrecken", "projekte", "ueber-mich"];
 const ALIAS = { equipment: "ueber-mich", kontakt: "ueber-mich" };   // Teile der Seite „Über mich“
@@ -1389,7 +1391,7 @@ function route() {
   setMenu(false);
   const toTop = !location.hash || location.hash === "#top";
   if (routedOnce && document.startViewTransition && !reduceMotion()) {
-    const vt = document.startViewTransition(applyRoute);
+    const vt = startVT(applyRoute);
     if (toTop) vt.finished.then(() => window.scrollTo({ top: 0, behavior: "instant" })).catch(() => {});   // Safari: sicher ganz oben
   } else applyRoute();
   routedOnce = true;
