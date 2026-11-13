@@ -1569,8 +1569,10 @@ async function switchItem(kind, pre, items, next) {
     ready = im.decode().catch(() => {});
   }
   try {
+    // mit ausblenden: Weiterblättern und Fußzeile darunter – sie rücken an eine neue Stelle und sollen dabei nicht sichtbar springen
+    const group = () => [det, ...det.closest(".view").querySelectorAll(".pager"), document.querySelector("footer")].filter(Boolean);
     if (anim) {
-      det.style.transition = "opacity .2s ease"; det.style.opacity = "0";
+      group().forEach((e) => { e.style.transition = "opacity .2s ease"; e.style.opacity = "0"; });
       await Promise.all([wait(200), Promise.race([ready, wait(450)])]);
     }
     projSel[kind] = next; renderKind(kind, pre);
@@ -1582,12 +1584,13 @@ async function switchItem(kind, pre, items, next) {
       }
     }
     if (anim) {
-      det.style.transition = "none"; det.style.transform = "translateY(10px)"; det.getBoundingClientRect();
-      det.style.transition = "opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1)"; det.style.opacity = "1"; det.style.transform = "none";
-      await wait(450);
+      det.getBoundingClientRect();
+      group().forEach((e) => { e.style.transition = "opacity .3s ease"; e.style.opacity = "1"; });   // nur einblenden, ohne Bewegung
+      await wait(320);
     }
   } finally {
-    det.style.transition = det.style.opacity = det.style.transform = ""; switching = false;
+    [det, ...document.querySelectorAll(".pager"), document.querySelector("footer")].forEach((e) => { if (e) e.style.transition = e.style.opacity = ""; });
+    switching = false;
   }
 }
 function renderKind(kind, pre) {
@@ -1703,7 +1706,8 @@ function route() {
   const toTop = !location.hash || location.hash === "#top";
   if (routedOnce && isTouch() && !reduceMotion()) {
     applyRoute();
-    document.querySelector("main").animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+    // Inhalt und Fußzeile gemeinsam einblenden (sonst springt die Fußzeile sichtbar an ihre neue Stelle)
+    [document.querySelector("main"), document.querySelector("footer")].forEach((e) => e && e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: "ease-out" }));
   } else if (routedOnce && document.startViewTransition && !reduceMotion()) {
     const vt = startVT(applyRoute);
     if (toTop) vt.finished.then(() => window.scrollTo({ top: 0, behavior: "instant" })).catch(() => {});   // Safari: sicher ganz oben
