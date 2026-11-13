@@ -659,11 +659,6 @@
                 0 0 90px 10px rgba(255, 247, 222, .16),                         /* Licht strahlt in den dunklen Raum */
                 0 34px 60px -30px rgba(0, 0, 0, .85);
   }
-  .leuchttisch::before {   /* feines Raster auf der Scheibe, wie auf echten Leuchttischen */
-    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-    background-image: linear-gradient(rgba(60, 55, 40, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(60, 55, 40, .05) 1px, transparent 1px);
-    background-size: 22px 22px; background-position: -1px -1px;
-  }
   :root[data-theme="light"] .leuchttisch { box-shadow: 0 0 0 5px #c4c3bd, 0 0 0 6px #8e8d88, 0 0 0 7px #e4e3de, 0 26px 50px -28px rgba(0,0,0,.45); }
   .strip35 {
     position: relative; display: grid; grid-template-columns: repeat(var(--per), minmax(0, 1fr)); gap: clamp(4px, .8vw, 8px);
