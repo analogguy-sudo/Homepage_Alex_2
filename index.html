@@ -721,16 +721,15 @@
   /* Umschalten Alle/Schwarzweiß/Farbe: sofort wechseln, ohne Überblenden (das Abdunkeln wirkte auf dem iPhone wie Flackern) */
   .leuchttisch.swap .strip35.laid { animation: none; }
 
-  /* Equipment: Kameras mit Foto, Produktionsjahren, Beschreibung und Link zu den Bildern */
+  /* Equipment: Kameras mit Foto, Produktionsjahren und Beschreibung (aus der Großansicht verlinkt) */
   .cams { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 2.2rem 1.75rem; }
   .cam { scroll-margin-top: var(--headh, 8rem); border-radius: 2px; }
   .cam-meta { display: block; margin-top: .25rem; font-family: var(--edge); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
   .cam-text { margin: .5rem 0 0; font-size: 1rem; line-height: 1.5; color: var(--ink-soft); max-width: 46ch; }
-  .cam-link, .lb-cam {
+  .lb-cam {
     background: none; border: 0; padding: 0; color: inherit; cursor: pointer; text-align: left;
     text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--ink-soft);
   }
-  .cam-link { margin-top: .7rem; font-family: var(--edge); font-weight: 600; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; }
   .lb-cam { font: inherit; }
   .cam.flash { animation: camFlash 1.8s ease; }
   @keyframes camFlash { 0%, 45% { box-shadow: 0 0 0 6px var(--paper), 0 0 0 7px var(--ink-soft); } 100% { box-shadow: 0 0 0 6px transparent, 0 0 0 7px transparent; } }
@@ -1290,7 +1289,7 @@ loadPhotos().then((photos) => {
   idle(() => state.all.filter((f) => f.strecke).forEach((f) => probeRatio(f.src)));
   if (document.body.dataset.view === "bildstrecken") warmStrecken();
   renderCards();   // Bildstrecken brauchen die Fotos
-  loadCameras();   // Kameras brauchen die Fotos (Zahl und Link „Bilder mit dieser Kamera“)
+  loadCameras();
 }).catch((err) => {
   console.error(err);
   $("status").textContent = "Die Fotos konnten nicht geladen werden. Prüfe URL und Key in index.html sowie die Lese-Richtlinie in Supabase.";
@@ -1308,7 +1307,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Bilder mit dieser Kamera": "Photos taken with this camera", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1567,7 +1566,6 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
 let cameras = [];
 const camKey = (n) => (n || "").trim().toLowerCase();
 const cameraByName = (n) => cameras.find((c) => camKey(c.name) === camKey(n));
-const photosWith = (c) => state.all.filter((f) => camKey(f.camera) === camKey(c.name));
 async function loadCameras() {
   try {
     const h = { apikey: CONFIG.supabaseKey };
@@ -1593,13 +1591,6 @@ function renderCameras() {
     if (meta) { const m = document.createElement("span"); m.className = "cam-meta"; m.textContent = meta; li.appendChild(m); }
     const text = (lang === "en" && c.text_en) || c.text_de;
     if (text) { const t = document.createElement("p"); t.className = "cam-text"; t.textContent = text; li.appendChild(t); }
-    const pics = photosWith(c);
-    if (pics.length) {
-      const b = document.createElement("button"); b.type = "button"; b.className = "cam-link";
-      b.textContent = tr("Bilder mit dieser Kamera") + " ▸";
-      b.addEventListener("click", () => openViewer(pics, 0, []));
-      li.appendChild(b);
-    }
     ul.appendChild(li);
   });
 }
