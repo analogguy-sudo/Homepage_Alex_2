@@ -1159,15 +1159,25 @@ function tableImg(p) {
   return img;
 }
 function renderGrid(mode) {
-  state.shown = state.filter ? kbPhotos().filter((p) => (p.categories || []).includes(state.filter)) : kbPhotos();
+  // Schwarzweiß und Farbe nie auf demselben Streifen – ein Film ist entweder das eine oder das andere
+  const isCat = (p, c) => (p.categories || []).includes(c);
+  const groups = state.filter ? [kbPhotos().filter((p) => isCat(p, state.filter))]
+    : [kbPhotos().filter((p) => isCat(p, "Schwarzweiß")), kbPhotos().filter((p) => !isCat(p, "Schwarzweiß") && isCat(p, "Farbe")),
+       kbPhotos().filter((p) => !isCat(p, "Schwarzweiß") && !isCat(p, "Farbe"))].filter((g) => g.length);
+  // innerhalb von Schwarzweiß und Farbe nach Film geordnet (Bilder desselben Films nebeneinander, Reihenfolge sonst wie gepflegt)
+  const filmKey = (p) => (p.film || "").replace(/\s*\(.*\)$/, "").toLowerCase();
+  groups.forEach((g) => g.sort((x, y) => (!filmKey(x) - !filmKey(y)) || filmKey(x).localeCompare(filmKey(y))));   // ohne Filmangabe ans Ende
+  state.shown = groups.flat();
   $("hint").textContent = tr(hasMouse() ? "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern."
                                        : "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.");
   const grid = $("grid"), els = [], per = perStrip();
   stripN = per; grid.innerHTML = "";
   // „play“ = Streifen nacheinander auflegen (beim Öffnen der Seite); „swap“ = kurz überblenden (Filter, Sprache, Drehen)
   grid.className = "leuchttisch " + (mode || "play"); grid.style.setProperty("--per", per);
-  for (let s = 0, n = 0; s < state.shown.length; s += per, n++) {
-    const chunk = state.shown.slice(s, s + per);
+  const chunks = [];
+  groups.forEach((g) => { for (let k = 0; k < g.length; k += per) chunks.push(g.slice(k, k + per)); });
+  for (let n = 0, s = 0; n < chunks.length; s += chunks[n].length, n++) {
+    const chunk = chunks[n];
     const strip = document.createElement("div"); strip.className = "strip35";
     strip.style.setProperty("--i", n);
     strip.style.setProperty("--tilt", ((((n * 37) % 9) - 4) * 0.09) + "deg");      // leicht schief …
@@ -1933,6 +1943,21 @@ document.addEventListener("contextmenu", (e) => {
   if (mode === "alles" || (mode === "bilder" && e.target.closest && e.target.closest("img, .frame35, .shot, .pimgs, .lb-stage, .strip"))) e.preventDefault();
 });
 document.addEventListener("dragstart", (e) => { if (e.target.tagName === "IMG") e.preventDefault(); });
+/* Immer die aktuelle Fassung: Safari hält offene Tabs (und die Seite bis zu 10 Minuten im Speicher) fest.
+   Beim Öffnen und beim Zurückkehren zum Tab wird geprüft, ob es eine neuere Fassung gibt – dann einmal neu laden. */
+async function checkFresh() {
+  try {
+    const r = await fetch(location.pathname, { method: "HEAD", cache: "no-store" });
+    const net = Date.parse(r.headers.get("last-modified") || ""), mine = Date.parse(document.lastModified);
+    if (!net || !mine || net - mine < 5000) return;
+    const key = "reloadedFor", tag = String(net);
+    try { if (sessionStorage.getItem(key) === tag) return; sessionStorage.setItem(key, tag); } catch (e) {}
+    location.reload();
+  } catch (e) {}
+}
+checkFresh();
+addEventListener("visibilitychange", () => { if (!document.hidden) checkFresh(); });
+addEventListener("pageshow", (e) => { if (e.persisted) checkFresh(); });
 </script>
 </body>
 </html>
