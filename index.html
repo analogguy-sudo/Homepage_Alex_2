@@ -653,7 +653,8 @@
 
   /* ===== 11. Leuchttisch – Diafilm-Streifen auf einer leuchtenden Milchglasplatte im Aluminiumrahmen ===== */
   .leuchttisch {
-    position: relative; display: flex; flex-direction: column; gap: clamp(14px, 2.6vw, 28px); max-width: 1180px;
+    position: relative; display: flex; flex-flow: row wrap; align-items: flex-start; align-content: flex-start; max-width: 1180px;   /* kurze Streifen liegen nebeneinander */
+    gap: clamp(14px, 2.6vw, 28px) clamp(10px, 2vw, 22px);
     padding: clamp(22px, 4vw, 52px) clamp(12px, 3vw, 44px) clamp(28px, 4.5vw, 60px); border-radius: 5px;
     background: radial-gradient(120% 95% at 50% 42%, #fffef8 0%, #f8f6ed 52%, #e8e5d8 100%);
     box-shadow: 0 0 0 5px #c4c3bd, 0 0 0 6px #8e8d88, 0 0 0 7px #d9d8d3,      /* Aluminiumrahmen */
@@ -662,7 +663,10 @@
   }
   :root[data-theme="light"] .leuchttisch { box-shadow: 0 0 0 5px #c4c3bd, 0 0 0 6px #8e8d88, 0 0 0 7px #e4e3de, 0 26px 50px -28px rgba(0,0,0,.45); }
   .strip35 {
-    position: relative; display: grid; grid-template-columns: repeat(var(--per), minmax(0, 1fr)); gap: clamp(4px, .8vw, 8px);
+    /* --n Bilder auf diesem Streifen: kurze Filme ergeben einen kürzeren Streifen, die Bildgröße bleibt überall gleich */
+    --g: clamp(4px, .8vw, 8px);
+    width: calc((100% - (var(--per) + 1) * var(--g)) * var(--n, var(--per)) / var(--per) + (var(--n, var(--per)) + 1) * var(--g));
+    position: relative; display: grid; grid-template-columns: repeat(var(--n, var(--per)), minmax(0, 1fr)); gap: var(--g);
     padding: clamp(14px, 2.4vw, 20px) clamp(4px, .8vw, 8px) clamp(18px, 2.8vw, 24px);
     background: rgba(17, 15, 13, .95); box-shadow: 0 0 0 1px rgba(0, 0, 0, .25), 0 2px 6px rgba(0, 0, 0, .12);
     transform: translateX(var(--shift, 0px)) rotate(var(--tilt, 0deg)); opacity: 0;
@@ -1177,12 +1181,17 @@ function renderGrid(mode) {
   stripN = per; grid.innerHTML = "";
   // „play“ = Streifen nacheinander auflegen (beim Öffnen der Seite); „swap“ = kurz überblenden (Filter, Sprache, Drehen)
   grid.className = "leuchttisch " + (mode || "play"); grid.style.setProperty("--per", per);
+  // Ein Streifen = ein Stück Film: nie zwei verschiedene Filme auf einem Streifen (ein Film mit wenigen Bildern ergibt einen kurzen Streifen)
   const chunks = [];
-  groups.forEach((g) => { for (let k = 0; k < g.length; k += per) chunks.push(g.slice(k, k + per)); });
+  groups.forEach((g) => {
+    const byFilm = [];
+    g.forEach((p) => { const last = byFilm[byFilm.length - 1]; if (last && filmKey(last[0]) === filmKey(p)) last.push(p); else byFilm.push([p]); });
+    byFilm.forEach((f) => { for (let k = 0; k < f.length; k += per) chunks.push(f.slice(k, k + per)); });
+  });
   for (let n = 0, s = 0; n < chunks.length; s += chunks[n].length, n++) {
     const chunk = chunks[n];
     const strip = document.createElement("div"); strip.className = "strip35";
-    strip.style.setProperty("--i", n);
+    strip.style.setProperty("--i", n); strip.style.setProperty("--n", chunk.length);
     strip.style.setProperty("--tilt", ((((n * 37) % 9) - 4) * 0.09) + "deg");      // leicht schief …
     strip.style.setProperty("--shift", ((((n * 53) % 7) - 3) * (per <= 3 ? 1.5 : 4)) + "px");   // … und nicht ganz bündig, wie von Hand ausgelegt
     let left = chunk.length;
