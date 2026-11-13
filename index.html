@@ -294,6 +294,7 @@
       display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: .75rem;
       min-height: 100%; height: auto; overflow: auto; padding: max(.75rem, env(safe-area-inset-top)) .75rem 0;
     }
+    .lb-stage { height: 46dvh; }   /* feste Bildfläche: beim Weiterblättern springen Angaben und Knöpfe nicht */
     .lb-stage img { max-height: 46dvh; }
     .lb-side { flex: 1 1 auto; gap: .6rem; }
     .lb-info { display: grid; grid-template-columns: auto 1fr; gap: .3rem .9rem; align-items: baseline; padding: .75rem 1rem; }
@@ -527,10 +528,11 @@
   .pager a:hover span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
 
   /* Seitenwechsel: sanftes Überblenden (nur wo der Browser es kann und Bewegung erwünscht ist) */
-  ::view-transition-old(root) { animation: vtOut .16s ease both; }
-  ::view-transition-new(root) { animation: vtIn .34s cubic-bezier(.2,.8,.3,1) both; }
+  /* nacheinander statt übereinander: alte Seite kurz aus, neue ein – kein Doppelbild, keine Verschiebung (wirkte am iPhone wie ein Zucken) */
+  ::view-transition-old(root) { animation: vtOut .12s ease-out both; }
+  ::view-transition-new(root) { animation: vtIn .22s .08s ease-out both; }
   @keyframes vtOut { to { opacity: 0; } }
-  @keyframes vtIn { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes vtIn { from { opacity: 0; } }
 
   @media (prefers-reduced-motion: reduce) {
     img.is-in { animation: none; opacity: 1; }
@@ -627,7 +629,7 @@
   ::view-transition-group(photo) { animation-duration: .42s; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
   ::view-transition-old(photo), ::view-transition-new(photo) { height: 100%; object-fit: contain; }
   .lb-stage.zoomed { display: block; overflow: auto; height: calc(100dvh - 3rem); -webkit-overflow-scrolling: touch; cursor: zoom-out; }
-  .lb-stage.zoomed img { max-width: none !important; max-height: none !important; width: 240%; height: auto; }
+  .lb-stage.zoomed img { max-width: none !important; max-height: none !important; width: 240% !important; height: auto !important; }
   @media (max-width: 820px), (max-width: 1100px) and (orientation: portrait) {
     .lb-stage.zoomed { height: 62dvh; }
   }
@@ -666,9 +668,9 @@
     transform: translateX(var(--shift, 0px)) rotate(var(--tilt, 0deg)); opacity: 0;
   }
   .strip35.laid { opacity: 1; }
-  .leuchttisch.play .strip35.laid { animation: lay .45s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 45ms); }
+  .leuchttisch.play .strip35.laid { animation: lay .35s ease-out both; animation-delay: calc(.1s + var(--i) * 40ms); }
   /* Auflegen: nur Deckkraft und kleine Verschiebung (keine Drehung während der Animation – schont das iPhone) */
-  @keyframes lay { from { opacity: 0; transform: translateX(var(--shift, 0px)) translateY(-8px) rotate(var(--tilt, 0deg)); } }
+  @keyframes lay { from { opacity: 0; } }   /* Streifen nur einblenden, ohne Bewegung */
   /* Perforation: hier scheint das Licht des Tisches durch */
   .strip35::before, .strip35::after {
     content: ""; position: absolute; left: 4px; right: 4px; height: clamp(4px, .7vw, 7px); border-radius: 1.5px;
@@ -1312,11 +1314,11 @@ function openViewer(list, k, els) {
   const src = state.lbEls[k], big = $("lbImg");
   const go = async () => {
     if (src) src.style.viewTransitionName = "";
-    showLightbox(); lb.showModal();
+    showLightbox(); lb.showModal(); fitLb();
     big.style.viewTransitionName = "photo";
     try { await Promise.race([big.decode(), new Promise((r) => setTimeout(r, 120))]); } catch (e) {}   // Vorschaubild liegt schon im Speicher
   };
-  if (!src || !canMorph()) { showLightbox(); lb.showModal(); return; }
+  if (!src || !canMorph()) { showLightbox(); lb.showModal(); fitLb(); return; }
   src.style.viewTransitionName = "photo";
   document.documentElement.classList.add("vt-photo");
   startVT(go).finished.finally(() => { big.style.viewTransitionName = ""; document.documentElement.classList.remove("vt-photo"); });
@@ -1336,7 +1338,7 @@ function closeViewer() {
 function step(d) {
   const n = state.lb.length;
   state.index = (state.index + d + n) % n;
-  showLightbox();
+  showLightbox(); fitLb();
 }
 $("lbPrev").addEventListener("click", () => step(-1));
 $("lbNext").addEventListener("click", () => step(1));
@@ -1347,10 +1349,25 @@ lb.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight") step(1);
 });
 /* Doppeltippen zoomt ins Bild (Ausschnitt dann mit dem Finger verschieben), nochmal doppeltippen = zurück */
+/* Großansicht: das Bild bekommt sofort seine endgültige Größe (aus dem Seitenverhältnis). Sonst erscheint erst das kleine
+   Vorschaubild in seiner eigenen Größe und springt groß, sobald das Original geladen ist. */
+function fitLb() {
+  const big = $("lbImg"), stage = big.parentElement;
+  big.style.width = big.style.height = "";
+  if (!lb.open || stage.classList.contains("zoomed")) return;
+  const p = state.lb[state.index], el = state.lbEls && state.lbEls[state.index];
+  const r = (p && ratioOf.get(p.src)) || (el && el.naturalWidth ? el.naturalWidth / el.naturalHeight : 0);
+  const W = stage.clientWidth, H = parseFloat(getComputedStyle(big).maxHeight);
+  if (!r || !W || !H) return;
+  const w = Math.min(W, H * r);
+  big.style.width = Math.round(w) + "px"; big.style.height = Math.round(w / r) + "px";
+}
+addEventListener("resize", fitLb);
 function setZoom(on, x, y) {
   const stage = $("lbImg").parentElement, big = $("lbImg");
-  if (!on) { stage.classList.remove("zoomed"); stage.scrollTo(0, 0); return; }
+  if (!on) { stage.classList.remove("zoomed"); stage.scrollTo(0, 0); fitLb(); return; }
   const r = big.getBoundingClientRect(), fx = (x - r.left) / r.width, fy = (y - r.top) / r.height;
+  big.style.width = big.style.height = "";
   stage.classList.add("zoomed");
   requestAnimationFrame(() => {
     stage.scrollLeft = fx * big.offsetWidth - stage.clientWidth / 2;
@@ -1561,8 +1578,10 @@ function renderKind(kind, pre) {
   if (!projLoaded) return;
   const items = kind === "bildstrecke" ? streckenItems() : projects.filter((p) => (p.kind || "projekt") === kind), sel = projSel[kind];
   const strecke = kind === "bildstrecke";
-  $(pre + "Hint").textContent = !items.length ? tr(strecke ? "Noch keine Bildstrecken." : "Noch keine Projekte.")
-    : sel === null ? tr(strecke ? "Wähle eine Bildstrecke." : "Wähle ein Projekt.") : "";
+  // Hinweis behält seinen Platz (nur unsichtbar), sonst rutscht die Liste beim ersten Antippen nach oben
+  const hint = $(pre + "Hint");
+  hint.textContent = !items.length ? tr(strecke ? "Noch keine Bildstrecken." : "Noch keine Projekte.") : tr(strecke ? "Wähle eine Bildstrecke." : "Wähle ein Projekt.");
+  hint.style.visibility = items.length && sel !== null ? "hidden" : "";
   const pub = (n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`;
   items.forEach((p, i) => {
     if (strecke && p.bereich !== "allgemein" && (i === 0 || items[i - 1].bereich === "allgemein")) {
@@ -1579,7 +1598,7 @@ function renderKind(kind, pre) {
   const imgs = strecke ? fotos.map((f) => f.src) : [p.image, ...(p.images || [])].filter(Boolean).map(pub);
   const open = (k) => {
     state.lb = strecke ? fotos : imgs.map((s2) => ({ src: s2, title: p.title, rows: [["Projekt", p.title], ["Info", text]], link: p.url }));
-    state.index = k; showLightbox(); lb.showModal();
+    state.index = k; showLightbox(); lb.showModal(); fitLb();
   };
   const box = document.createElement("article"); box.className = strecke ? "strecke" : "pbox";
   const head = document.createElement("div"); head.className = "strecke-head"; box.appendChild(head);   // Titel und Text
@@ -1824,11 +1843,11 @@ function slideCaption(k) {
     line.append(no, document.createTextNode(p.seagull ? tr("Titelbild") + " · Seagull 4A" : [p.title, p.location, p.film].filter(Boolean).join(" · ")));
     cap.appendChild(line);
     const sIdx = p.strecke ? streckenItems().findIndex((x) => x.id === p.strecke) : -1;
-    if (sIdx >= 0) {
-      const b = document.createElement("button"); b.type = "button"; b.className = "to"; b.textContent = tr("Zur Bildstrecke") + " →";
-      b.addEventListener("click", () => { projSel.bildstrecke = sIdx; renderCards(); location.hash = "#bildstrecken"; });
-      cap.appendChild(b);
-    }
+    // Knopf immer anlegen – beim Titelbild nur unsichtbar. Sonst ändert sich die Höhe und der Text darunter zuckt bei jedem Wechsel.
+    const b = document.createElement("button"); b.type = "button"; b.className = "to"; b.textContent = tr("Zur Bildstrecke") + " →";
+    if (sIdx >= 0) b.addEventListener("click", () => { projSel.bildstrecke = sIdx; renderCards(); location.hash = "#bildstrecken"; });
+    else { b.style.visibility = "hidden"; b.tabIndex = -1; b.setAttribute("aria-hidden", "true"); }
+    cap.appendChild(b);
   });
 }
 addEventListener("visibilitychange", () => { if (!document.hidden && slideState.list.length && !reduceMotion()) queueSlide(); });
