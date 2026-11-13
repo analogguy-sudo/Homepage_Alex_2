@@ -7,7 +7,7 @@
 <title>Admin – Analoge Welt</title>
 <style>
 :root{color-scheme:dark}body{margin:0;background:#0e0e0e;color:#ededeb;font:16px/1.5 system-ui,sans-serif}
-main{max-width:980px;margin:0 auto;padding:1.5rem}h1{font-weight:600;font-size:1.3rem}a{color:#a8a8a5}
+main{max-width:980px;margin:0 auto;padding:1.5rem}h1{font-weight:600;font-size:1.3rem}a{color:#a8a8a5}[hidden]{display:none!important}.back{display:inline-block;padding:.65rem 1rem;border:1px solid #444;border-radius:4px;text-decoration:none;color:#e8e8e5}
 input,select,button,textarea{font:inherit;background:#1b1b1b;color:inherit;border:1px solid #444;border-radius:4px;padding:.45rem .6rem;min-width:0}
 button{cursor:pointer;background:#ededeb;color:#0e0e0e;border:0;font-weight:600}button.s{background:#1b1b1b;color:#ededeb;border:1px solid #444}
 .box{background:#151515;border:1px solid #2a2a2a;border-radius:6px;padding:1rem;margin:1rem 0}
@@ -34,10 +34,11 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 .item.changed{border-color:#6b5a1e;background:#1d1a10}.order.dirty{background:#2a2410;border-color:#6b5a1e}button:disabled{opacity:.4;cursor:default}
 .th button{position:absolute;top:-7px;right:-7px;width:20px;height:20px;padding:0;border-radius:50%;line-height:1;font-size:.9rem}
 </style></head><body><main>
-<h1>Admin: Kontaktbogen</h1><p class="msg" id="msg" role="status"></p>
-<form id="login" class="box"><div class="row"><input id="em" type="email" placeholder="E-Mail" autocomplete="username" required><input id="pw" type="password" placeholder="Passwort" autocomplete="current-password" required><button>Anmelden</button></div></form>
+<h1>Admin – Analoge Welt</h1><p class="msg" id="msg" role="status"></p>
+<form id="login" class="box"><div class="row"><input id="em" type="email" placeholder="E-Mail" autocomplete="username" required><input id="pw" type="password" placeholder="Passwort" autocomplete="current-password" required><button>Anmelden</button></div><p style="margin:.8rem 0 0"><a href="./" class="back">← Zurück zur Seite</a></p></form>
 <div id="app" class="hide">
 <p><button class="s" id="out" type="button">Abmelden</button> &nbsp; <a href="index.html">zur Seite</a></p>
+<div class="box" id="cfixbox" hidden><b>Ladezeit</b><p class="hint" id="cfixinfo">Prüfe …</p><button type="button" id="cfix">Bilder schneller laden</button></div>
 <div class="tabs"><button type="button" id="t-edit" aria-pressed="true">Fotos bearbeiten</button><button type="button" id="t-sort" aria-pressed="false">Reihenfolge</button></div>
 <section id="sorter" class="box hide"><b>Reihenfolge im Kontaktbogen</b>
 <p class="hint">Zeige alle Bilder oder nur eine Rubrik. Ziehe ein Bild an die gewünschte Stelle oder verschiebe es mit ← →, dann „Reihenfolge speichern“. In einer Rubrik tauschen nur deren Bilder die Plätze, alle anderen bleiben, wo sie sind.</p>
@@ -71,8 +72,6 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 <div class="row"><textarea name="text_de" rows="3" placeholder="Text deutsch"></textarea><textarea name="text_en" rows="3" placeholder="Text englisch"></textarea></div>
 <button>Anlegen</button></form>
 <div id="plist"></div>
-<h1 style="margin-top:2.5rem">Ladezeit</h1>
-<div class="box"><p class="hint" id="cfixinfo" style="margin-top:0">Prüfe …</p><button type="button" id="cfix" hidden>Bilder schneller laden</button></div>
 <h1 style="margin-top:2.5rem">Kameras</h1>
 <p class="hint">Erscheinen auf „Über mich“ unter <b>Equipment</b>, mit Foto, Produktionsjahren und Beschreibung. Der <b>Name</b> muss genau so geschrieben sein wie im Feld „Kamera“ bei den Fotos, dann verlinkt die Großansicht eines Fotos auf die Kamera. Kamerafotos am besten im Querformat 4:3. Seriennummer und Baujahr sind für dich; das Baujahr erscheint als „Mein Exemplar: 1981“.</p>
 <form id="cf" class="box"><b>Neue Kamera</b>
@@ -134,7 +133,7 @@ addEventListener("beforeunload",e=>{if(pending().length){e.preventDefault();e.re
    Einmalig dieselbe Datei mit langer Speicherdauer neu ablegen (Inhalt und Name bleiben gleich). */
 async function cacheList(){const r=await(await api("/storage/v1/object/list/photos",{method:"POST",headers:J,body:JSON.stringify({prefix:"",limit:1000})})).json();
   return r.filter(o=>o.id&&!/max-age=31536000/.test((o.metadata||{}).cacheControl||""))}
-async function cacheCheck(){try{const l=await cacheList();$("cfixinfo").textContent=l.length?l.length+" Bilder werden bei jedem Aufruf neu vom Server geholt. Einmal tippen, dann bleiben sie im Browser gespeichert (Inhalt bleibt gleich).":"Alle Bilder sind auf schnelles Laden eingestellt.";$("cfix").hidden=!l.length}catch(x){$("cfixinfo").textContent=x.message}}
+async function cacheCheck(){try{const l=await cacheList();$("cfixinfo").textContent=l.length?l.length+" Bilder werden bei jedem Aufruf neu vom Server geholt. Einmal tippen, dann bleiben sie im Browser gespeichert (Inhalt bleibt gleich).":"Alle Bilder sind auf schnelles Laden eingestellt.";$("cfix").hidden=!l.length;if(l.length)$("cfixbox").hidden=false}catch(x){$("cfixinfo").textContent=x.message}}
 async function cacheFix(){const l=await cacheList();let ok=0,err="";$("cfix").disabled=true;
   for(const o of l){try{$("cfixinfo").textContent="Stelle um … "+(ok+1)+" von "+l.length;
     const r=await fetch(U+"/storage/v1/object/public/photos/"+enc(o.name)+"?fix="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("Download "+r.status);
