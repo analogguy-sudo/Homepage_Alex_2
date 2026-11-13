@@ -802,6 +802,10 @@
      ========================================================================== */
   .slides, .slide-cap { display: none; }
   .slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; cursor: zoom-in; }
+  /* Blende: sechs Lamellen über dem Bild, nur sichtbar während des Wechsels */
+  .iris { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; visibility: hidden; }
+  .iris-rot { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; will-change: transform; }
+  .blade { position: absolute; display: block; transform-origin: 50% 100%; will-change: transform; background: #0d0d0c; border-bottom: 1.5px solid rgba(255, 255, 255, .13); }
   .slide.on { opacity: 1; z-index: 1; }
   .slide-cap { font-family: var(--edge); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); line-height: 1.5; }
   .slide-cap .no { color: var(--amber); }
@@ -1740,24 +1744,44 @@ async function nextSlide() {
   if (!nxt.getAttribute("src")) nxt.src = nxt.dataset.src;
   try { await Promise.race([nxt.decode(), new Promise((r, j) => setTimeout(j, 4000))]); } catch (e) { slideState.i = k; slideState.busy = false; queueSlide(); return; }
   try { await iris(cur, nxt); }
-  catch (e) { cur.classList.remove("on"); nxt.classList.add("on"); nxt.style.clipPath = ""; }
+  catch (e) { cur.classList.remove("on"); nxt.classList.add("on"); const ir = box.querySelector(".iris"); if (ir) ir.style.visibility = "hidden"; }
   slideState.i = k; slideCaption(k); slideState.busy = false; sizeSlides();
   // das übernächste Bild schon vorladen
   const after = imgs[(k + 1) % imgs.length]; if (!after.getAttribute("src")) after.src = after.dataset.src;
   queueSlide();
 }
-/* Auslöser: sechseckige Blende schließt sich über dem Bild und öffnet sich mit dem nächsten */
-const hex = (r, rot) => "polygon(" + [0, 1, 2, 3, 4, 5].map((n) => { const a = (rot + n * 60) * Math.PI / 180; return (50 + r * Math.cos(a)).toFixed(2) + "% " + (50 + r * Math.sin(a)).toFixed(2) + "%"; }).join(", ") + ")";
+/* Auslöser: sechs Lamellen schließen sich über dem Bild und öffnen sich mit dem nächsten.
+   Die Lamellen werden nur verschoben und gedreht (transform) – das kann der Browser ohne Neuzeichnen,
+   deshalb läuft es auch auf dem iPhone flüssig. */
+const settle = (anim, ms) => Promise.race([anim.finished.catch(() => {}), new Promise((r) => setTimeout(r, ms))]);   // falls der Browser anhält: trotzdem weiter
+function irisEl(box) {
+  let ir = box.querySelector(".iris");
+  if (!ir) {
+    ir = document.createElement("div"); ir.className = "iris"; ir.setAttribute("aria-hidden", "true");
+    const rot = document.createElement("div"); rot.className = "iris-rot";
+    for (let n = 0; n < 6; n++) { const b = document.createElement("i"); b.className = "blade"; rot.appendChild(b); }
+    ir.appendChild(rot); box.appendChild(ir);
+  }
+  return ir;
+}
 async function iris(cur, nxt) {
-  const steps = (r0, r1, a0, a1) => Array.from({ length: 7 }, (_, n) => ({ clipPath: hex(r0 + (r1 - r0) * n / 6, a0 + (a1 - a0) * n / 6) }));
-  // falls der Browser die Animation anhält (Tab im Hintergrund), nach kurzer Zeit trotzdem weitermachen
-  const done = (anim, ms) => Promise.race([anim.finished.catch(() => {}), new Promise((r) => setTimeout(r, ms))]);
-  await done(cur.animate(steps(92, 0, 0, 50), { duration: 300, easing: "cubic-bezier(.5,0,.9,.5)", fill: "forwards" }), 1200);
-  cur.classList.remove("on"); cur.getAnimations().forEach((a) => a.cancel());
-  nxt.style.clipPath = hex(0, 50); nxt.classList.add("on");
-  await new Promise((r) => setTimeout(r, 90));   // ein kurzer Moment Dunkelheit, wie beim Auslösen
-  await done(nxt.animate(steps(0, 92, 50, 110), { duration: 480, easing: "cubic-bezier(.1,.6,.3,1)", fill: "forwards" }), 1500);
-  nxt.getAnimations().forEach((a) => a.cancel()); nxt.style.clipPath = "";
+  const box = cur.parentElement, ir = irisEl(box), rot = ir.firstChild, blades = [...rot.children];
+  const w = box.clientWidth, h = box.clientHeight, D = Math.hypot(w, h), S = Math.ceil(3 * D), open = Math.ceil(D / 2) + 4;
+  // jede Lamelle: großes Feld, dessen Unterkante um die Bildmitte kreist – sechs davon lassen eine sechseckige Öffnung frei
+  rot.style.width = w + "px"; rot.style.height = h + "px";
+  blades.forEach((b) => { b.style.width = b.style.height = S + "px"; b.style.left = (w / 2 - S / 2) + "px"; b.style.top = (h / 2 - S) + "px"; });
+  ir.style.visibility = "visible";
+  const run = (a0, a1, r0, r1, duration, easing) => Promise.all([
+    settle(rot.animate([{ transform: `rotate(${r0}deg)` }, { transform: `rotate(${r1}deg)` }], { duration, easing, fill: "forwards" }), duration + 900),
+    ...blades.map((b, n) => settle(b.animate([
+      { transform: `rotate(${n * 60}deg) translateY(${-a0}px)` },
+      { transform: `rotate(${n * 60}deg) translateY(${-a1}px)` }], { duration, easing, fill: "forwards" }), duration + 900))]);
+  await run(open, 0, 0, 30, 300, "cubic-bezier(.5,0,.8,.45)");         // schließen
+  cur.classList.remove("on"); nxt.classList.add("on");                 // hinter der geschlossenen Blende tauschen
+  await new Promise((r) => setTimeout(r, 70));                         // kurzer dunkler Moment, wie beim Auslösen
+  await run(0, open, 30, 60, 500, "cubic-bezier(.15,.65,.3,1)");       // öffnen
+  ir.style.visibility = "hidden";
+  [rot, ...blades].forEach((e) => e.getAnimations().forEach((an) => an.cancel()));
 }
 function slideCaption(k) {
   const p = slideState.list[k]; if (!p) return;
