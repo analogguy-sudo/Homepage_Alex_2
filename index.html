@@ -152,7 +152,7 @@
   }
   .mobile-hero-copy { display: none; }   /* eigene Textfassung fürs Hochformat, siehe unten */
 
-  /* ===== 5. Unterseiten (Kontaktbogen, Equipment, Projekte, Über mich, Kontakt) =====
+  /* ===== 5. Unterseiten (Leuchttisch, Bildstrecken, Projekte, Über mich mit Equipment und Kontakt) =====
      Der Seagull gehört nur aufs Titelblatt. Unterseiten haben einen ruhigen Hintergrund und normalen Seitenfluss:
      oben links der Titel mit Seitenzahl, darunter der Inhalt, so breit wie die Kopfzeile. Nichts ist fest
      verankert, längere Texte schieben die Seite einfach nach unten. Nur die Spaltenzahl wechselt mit der Breite. */
@@ -484,7 +484,7 @@
   .site-head, .chip, .lb-ctrl, .cta, .pager, h1, h2, h3, .filters-sub, .hint, footer { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   a, button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   .chip, .cta a, .pager a, .lb-ctrl button { transition: transform .12s ease, background-color .2s, color .2s; }
-  .chip:active, .cta a:active, .pager a:active, .lb-ctrl button:active, .teaser button:active { transform: scale(.97); }
+  .chip:active, .cta a:active, .pager a:active, .lb-ctrl button:active { transform: scale(.97); }
 
   /* Klickbare Rubriken sehen klickbar aus: Pfeil rechts; die gewählte trägt zusätzlich ein Häkchen (nicht nur Farbe) */
   .chip { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
@@ -494,7 +494,7 @@
 
 
   /* Titelblatt am Handy: klarer Einstieg statt leerer Fläche */
-  .cta, .teaser { display: none; }
+  .cta { display: none; }
   @media (max-width: 1100px) and (orientation: portrait) {
     body:not([data-view]) .cta { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.4rem; }
     .cta a {
@@ -502,15 +502,10 @@
       text-decoration: none; padding: .55rem 0; border-bottom: 1px solid var(--ink-soft);
     }
     .cta .cta-main { padding: .85rem 1.25rem; background: var(--ink); color: var(--paper); border: 0; }
-    body:not([data-view]) .teaser { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 1.75rem; }
-    .teaser:empty { display: none !important; }
-    .teaser button { padding: 0; border: 0; background: var(--paper-deep); aspect-ratio: 1; overflow: hidden; cursor: zoom-in; }
-    .teaser img { width: 100%; height: 100%; object-fit: cover; }
-    .hero .teaser-label { grid-column: 1 / -1; margin: 0 0 .1rem; max-width: none; text-shadow: none; font-family: var(--edge); font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
   }
 
   /* Bilder „entwickeln“ sich beim Laden: aus dem Dunkel ins Bild, statt ruckartig aufzuploppen */
-  .pimgs img, .teaser img, .cam img { opacity: 0; }
+  .pimgs img, .cam img { opacity: 0; }
   img.is-in { animation: imgIn .7s cubic-bezier(.2,.6,.3,1) forwards; }
   @keyframes imgIn { from { opacity: 0; filter: brightness(.3) blur(4px); } to { opacity: 1; filter: none; } }
   #lbImg { transition: opacity .25s ease; }
@@ -639,7 +634,7 @@
     .shot { opacity: 1; transform: none; transition: none; }
   }
 
-  /* Kontaktbogen/Auswahl: einspaltig, Umschalter als kleine Knöpfe über den Bildern */
+  /* Leuchttisch: einspaltig, Umschalter Alle/Schwarzweiß/Farbe als kleine Knöpfe über den Bildern */
   #leuchttisch .sheet { grid-template-columns: 1fr; gap: 1.1rem; }
   #filters { flex-direction: row; flex-wrap: wrap; gap: .45rem; position: static; }
   .seg {
@@ -769,19 +764,6 @@
     .cams { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.6rem 2.5rem; }
     .cam-text { max-width: none; }
   }
-  /* Titelblatt am Computer: Vorschau vom Leuchttisch links unter dem Titel (die Rubriken stehen rechts im Inhaltsverzeichnis) */
-  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
-    body:not([data-view]) .hero > div:first-child > .teaser-desk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2rem; max-width: min(260px, 26vh); }   /* bleibt auch auf niedrigen Bildschirmen über der Beschreibung */
-    .teaser-desk:empty { display: none !important; }
-    .teaser-desk button { padding: 0; border: 0; background: var(--paper-deep); aspect-ratio: 1; overflow: hidden; cursor: zoom-in; }
-    .teaser-desk img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
-    .teaser-desk button:hover img { transform: scale(1.04); }
-    /* niedrigere Bildschirme: vier kleine Bilder in einer Reihe, ganz niedrige ohne Vorschau – nie über der Beschreibung */
-    @media (max-height: 740px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 100%; margin-top: 1.6rem; } }
-    @media (max-height: 620px) { body:not([data-view]) .hero > div:first-child > .teaser-desk { display: none; } }
-    .hero .teaser-desk .teaser-label { grid-column: 1 / -1; margin: 0 0 .1rem; max-width: none; text-shadow: none; position: static; width: auto; padding: 0; border: 0;
-      font-family: var(--edge); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
-  }
   /* Titelblatt-Inhaltsverzeichnis: Nummer direkt vor der Rubrik, darunter eine kurze Unterzeile */
   @media (min-width: 1024px) and (min-height: 501px) and (orientation: landscape) and (hover: none),
          (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
@@ -858,7 +840,6 @@
     body:not([data-view]) .hero.has-slides::before { display: none; }
     body:not([data-view]) .hero.has-slides > .slides.ready { display: block; order: -1; position: relative; overflow: hidden; width: 100%; aspect-ratio: 1978 / 1315; background: #0b0b0b; }
     body:not([data-view]) .hero.has-slides .mobile-hero-copy > .slide-cap { display: block; margin: 0 0 .9rem; }
-    body:not([data-view]) .hero.has-slides #teaser { display: none !important; }
   }
 </style>
 </head>
@@ -902,7 +883,6 @@
       <nav class="cta" aria-label="Einstieg">
         <a href="#bildstrecken" class="cta-main" data-en="View photo series&nbsp;→">Bildstrecken ansehen&nbsp;→</a>
       </nav>
-      <div class="teaser" id="teaser"></div>
     </div>
 
     
@@ -1131,7 +1111,7 @@ function renderHero(p) {
   img.classList.add("develop");
 }
 
-/* Kontaktbogen = Auswahl der besten Bilder (Haken im Admin); Rubriken nur nach Film, die Motive stecken in den Bildstrecken */
+/* Leuchttisch = Auswahl der besten Bilder (Haken „Im Kontaktbogen“ im Admin); Umschalter nach Schwarzweiß/Farbe, die Motive stecken in den Bildstrecken */
 const CATS = ["Schwarzweiß", "Farbe"];
 const kbPhotos = () => state.all.filter((p) => p.kb);
 function renderFilters() {
@@ -1321,7 +1301,6 @@ function showLightbox() {
   }
   $("lbCount").textContent = (state.index + 1) + " / " + state.lb.length;
 }
-function openLightbox(i) { openViewer(state.shown, i, []); }
 /* Das angetippte Bild wächst fließend zur Vollansicht auf (und schrumpft beim Schließen zurück) */
 // Touch-Geräte (iPhone, Tablet): keine Seiten-Schnappschüsse (View Transitions) – die ruckeln dort. Stattdessen schlichtes Einblenden.
 const isTouch = () => matchMedia("(hover: none)").matches;
@@ -1428,7 +1407,6 @@ loadPhotos().then((photos) => {
   renderHero(photos[0]);
   renderFilters();
   renderGrid();
-  renderTeaser();
   const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1200));
   idle(() => state.all.filter((f) => f.strecke).forEach((f) => probeRatio(f.src)));
   if (document.body.dataset.view === "bildstrecken") warmStrecken();
@@ -1442,17 +1420,16 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
-  "Kontaktbogen": "Contact sheet", "Startseite": "Home", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
+  "Startseite": "Home", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series",
-  "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen der Pfalz": "Castle ruins of the Palatinate", "Burgruinen zwischen Pfalz und Elsass": "Castle ruins between the Palatinate and Alsace", "Öffnen": "Open",
+  "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen zwischen Pfalz und Elsass": "Castle ruins between the Palatinate and Alsace", "Öffnen": "Open",
   "Fotos werden geladen …": "Loading photos …",
   "Ich fotografiere seit über zehn Jahren auf Film, auf Kleinbild und im Mittelformat. Mich reizt, dass jede Aufnahme Zeit kostet: Man schaut länger hin, wartet aufs richtige Licht und sieht das Ergebnis erst Tage später.": "I have been shooting film for over ten years, on 35 mm and medium format. I love that every frame takes time: you look longer, wait for the right light and only see the result days later.",
   "Unterwegs bin ich meist mit einer Nikon FE, einer Canon AV-1 oder der Seagull 4A, einer zweiäugigen Mittelformatkamera. Im Gepäck sind Kodak Tri-X, Ilford HP5 oder Portra 400. Meine Schwarzweißfilme entwickle ich selbst.": "I usually carry a Nikon FE, a Canon AV-1 or the Seagull 4A, a twin-lens medium format camera, loaded with Kodak Tri-X, Ilford HP5 or Portra 400. I develop my black-and-white films myself.",
-  "Kameras": "Cameras", "Entwicklung": "Development",
+  "Kameras": "Cameras",
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
-  "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Zur Bildstrecke": "To the photo series", "Titelbild": "Cover", "Meine liebsten Bilder": "My favourite frames", "Fotos, die zusammengehören": "Photos that belong together", "Arbeiten rund um den Film": "Work around film", "Kameras und Kontakt": "Cameras and contact", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Zur Bildstrecke": "To the photo series", "Titelbild": "Cover", "Meine liebsten Bilder": "My favourite frames", "Fotos, die zusammengehören": "Photos that belong together", "Arbeiten rund um den Film": "Work around film", "Kameras und Kontakt": "Cameras and contact", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table",  "vergrößern": "enlarge"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1474,25 +1451,9 @@ function setLang(l) {
     n.nodeValue = l === "en" ? raw.replace(key, EN[key]) : raw;
   });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
-  renderCards(); renderPagers(); renderCameras(); if (state.all.length) { renderFilters(); renderGrid("swap"); renderTeaser(); }
+  renderCards(); renderPagers(); renderCameras(); if (state.all.length) { renderFilters(); renderGrid("swap"); }
 }
 
-/* ---------- Vorschau auf dem Titelblatt (Handy) ---------- */
-function renderTeaser() {   // Vorschau vom Leuchttisch: am Handy unter dem Titelbild, am Computer links unter dem Titel
-  const pics = kbPhotos().slice(0, 4);
-  document.querySelectorAll(".teaser").forEach((box) => {
-    box.innerHTML = "";
-    if (pics.length < 4) return;
-    const lab = document.createElement("p"); lab.className = "teaser-label"; lab.textContent = tr("Vom Leuchttisch"); box.appendChild(lab);
-    pics.forEach((p, i) => {
-      const b = document.createElement("button"), im = document.createElement("img");
-      b.type = "button"; b.setAttribute("aria-label", p.title + " vergrößern");
-      im.alt = ""; im.decoding = "async"; im.src = thumb(p.src, 300); fadeIn(im, p.src); b.appendChild(im);
-      b.addEventListener("click", () => openViewer(pics, i, [...box.querySelectorAll("img")]));
-      box.appendChild(b);
-    });
-  });
-}
 
 /* ---------- Weiterblättern am Ende jeder Unterseite ---------- */
 let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
