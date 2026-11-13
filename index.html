@@ -1396,7 +1396,7 @@ const EN = {
   "Datenschutz": "Privacy", "Impressum": "Legal notice", "Equipment": "Equipment",
   "Noch keine Projekte.": "No projects yet.", "Projekt": "Project", "Noch keine Bildstrecken.": "No photo series yet.", "Bildstrecke": "Photo series", "Info": "Info", "Bilder": "images", "Kamera": "Camera", "Ort": "Place", "Jahr": "Year", "Brennweite": "Focal length", "Zeit": "Shutter speed", "Blende": "Aperture", "Zurück": "Back", "Weiter": "Next", "Schließen": "Close",
   "Wähle eine Kategorie.": "Choose a category.",
-  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Bilder mit dieser Kamera": "photos taken with this camera", "Bild mit dieser Kamera": "photo taken with this camera", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
+  "Meine liebsten Bilder. Nach Film filtern:": "My favourite frames. Filter by film:", "Seite": "Page", "Bilder mit dieser Kamera": "Photos taken with this camera", "Mein Exemplar": "My copy", "Zurück zum Bild": "Back to the photo", "Alle": "All", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Antippen zum Vergrößern.": "My favourite frames, laid out to choose from. Tap to enlarge.", "Meine liebsten Bilder, ausgelegt zum Aussuchen. Mit der Lupe darüberfahren, klicken zum Vergrößern.": "My favourite frames, laid out to choose from. Hover with the loupe, click to enlarge.", "Leuchttisch": "Light table", "Vom Leuchttisch": "From the light table",  "vergrößern": "enlarge", "Aus dem Kontaktbogen": "From the contact sheet"
 };
 let lang = "de";
 try { const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
@@ -1691,7 +1691,7 @@ function renderCameras() {
     const pics = photosWith(c);
     if (pics.length) {
       const b = document.createElement("button"); b.type = "button"; b.className = "cam-link";
-      b.textContent = pics.length + " " + tr(pics.length === 1 ? "Bild mit dieser Kamera" : "Bilder mit dieser Kamera") + " ▸";
+      b.textContent = tr("Bilder mit dieser Kamera") + " ▸";
       b.addEventListener("click", () => openViewer(pics, 0, []));
       li.appendChild(b);
     }
