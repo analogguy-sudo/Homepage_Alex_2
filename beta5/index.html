@@ -988,6 +988,30 @@ const thumb = (src, w = 600) => src.includes("/storage/v1/object/public/")
 /* BETA 3: Bild in passender Breite vom Server (Seitenverhältnis bleibt, Höhe ist nur Obergrenze) */
 const sized = (src, w, q = 75) => src.includes("/storage/v1/object/public/")
   ? src.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + `?width=${w}&height=${w * 3}&resize=contain&quality=${q}` : src;
+/* Bildstrecken schneller: Seitenverhältnisse aller Fotos vorab messen (je ~1 KB), damit beim Öffnen sofort das Layout steht
+   und die großen Bilder ohne Umweg laden. Am Handy höchstens ~2-fache Schärfe (1080 px statt 1600 px, halbe Dateigröße). */
+const ratioOf = new Map();
+function probeRatio(src) {
+  if (ratioOf.has(src)) return Promise.resolve(ratioOf.get(src));
+  return new Promise((res) => {
+    const i = new Image();
+    i.onload = () => { const r = i.naturalWidth / i.naturalHeight || 1.5; ratioOf.set(src, r); res(r); };
+    i.onerror = () => res(1.5);
+    i.src = sized(src, 24, 40);
+  });
+}
+const storySrcset = (src) => innerWidth < 700
+  ? `${sized(src, 640)} 640w, ${sized(src, 1080)} 1080w`
+  : `${sized(src, 1080)} 1080w, ${sized(src, 1600)} 1600w`;
+let streckenWarm = false;
+function warmStrecken() {   // beim Öffnen der Seite „Bildstrecken“: Aufmacher jeder Strecke leise vorladen
+  if (streckenWarm || !state.all.length) return; streckenWarm = true;
+  const seen = new Set();
+  state.all.forEach((f) => {
+    if (!f.strecke || seen.has(f.strecke)) return; seen.add(f.strecke);
+    const i = new Image(); i.fetchPriority = "low"; i.src = sized(f.src, innerWidth < 700 ? 1080 : 1600);
+  });
+}
 /* BETA 3: Hoch- und quadratische Formate paarweise nebeneinander; wer keinen Partner hat, steht allein und größer */
 function pairUp(story) {
   const shots = [...story.children];
@@ -1317,6 +1341,9 @@ loadPhotos().then((photos) => {
   renderFilters();
   renderGrid();
   renderTeaser();
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1200));
+  idle(() => state.all.filter((f) => f.strecke).forEach((f) => probeRatio(f.src)));
+  if (document.body.dataset.view === "bildstrecken") warmStrecken();
   renderCards();   // Bildstrecken brauchen die Fotos
 }).catch((err) => {
   console.error(err);
@@ -1483,22 +1510,20 @@ function renderKind(kind, pre) {
       const b = document.createElement("button"), im = document.createElement("img");
       b.type = "button"; b.setAttribute("aria-label", f.title + " " + tr("vergrößern"));
       b.style.setProperty("--lqip", `url("${sized(f.src, 24, 40)}")`);
-      im.alt = f.title + (f.location ? ", " + f.location : ""); im.decoding = "async"; if (k > 1) im.loading = "lazy";
-      // Mini-Bild (wenige Hundert Byte) verrät das Seitenverhältnis, bevor das große Bild da ist – so springt nichts
-      const probe = new Image();
-      probe.onload = () => {
-        const r = probe.naturalWidth / probe.naturalHeight;
-        b.style.aspectRatio = probe.naturalWidth + " / " + probe.naturalHeight;
+      im.alt = f.title + (f.location ? ", " + f.location : ""); im.decoding = "async"; if (k > 3) im.loading = "lazy";
+      // Form (Hoch/Quer) aus dem vorab gemessenen Seitenverhältnis; das große Bild lädt sofort, ohne auf etwas zu warten
+      const shape = (r) => {
+        b.style.aspectRatio = String(r);
         fig.style.setProperty("--r", r.toFixed(4));   // für die Höhenbegrenzung
         fig.classList.add(r >= 1.15 ? "wide" : r <= .87 ? "tall" : "even");
         const full = k === 0 || r >= 1.15;
         im.sizes = full ? "(min-width: 1200px) 1100px, 100vw" : "(min-width: 1200px) 550px, 50vw";
-        im.srcset = `${sized(f.src, 640)} 640w, ${sized(f.src, 1080)} 1080w, ${sized(f.src, 1600)} 1600w`;
-        im.src = sized(f.src, 1080); fadeIn(im, f.src);
+        if (!im.getAttribute("src")) { im.srcset = storySrcset(f.src); im.src = sized(f.src, innerWidth < 700 ? 640 : 1080); fadeIn(im, f.src); }
         settled();
       };
-      probe.onerror = () => { im.src = f.src; fadeIn(im); settled(); };
-      probe.src = sized(f.src, 24, 40);
+      const known = ratioOf.get(f.src);
+      if (known) shape(known);
+      else probeRatio(f.src).then(shape);
       els.push(im); b.appendChild(im);
       b.addEventListener("click", () => openViewer(fotos, k, els));
       const cap = document.createElement("figcaption");
@@ -1563,7 +1588,8 @@ function applyRoute() {
   document.querySelectorAll("#mainNav a").forEach((a) => {   // aktuelle Seite im Menü markieren
     if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });
-  if (v === "kontaktbogen") prepTable();   // aufgelegt wird nach dem Seitenwechsel (siehe route)
+  if (v === "kontaktbogen") prepTable();
+  if (v === "bildstrecken") warmStrecken();   // aufgelegt wird nach dem Seitenwechsel (siehe route)
   if (v === "ueber-mich") { const im = $("heroImg"); im.classList.remove("develop"); void im.offsetWidth; im.classList.add("develop"); }
   let t = null;
   // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
