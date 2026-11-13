@@ -799,9 +799,8 @@
   .leuchttisch.prep .strip35 { opacity: 0; animation: none; }
   /* Seite nie seitlich verschiebbar (iOS: Wert am <html> gilt fürs ganze Fenster, Sticky-Kopfzeile bleibt intakt) */
   html { overflow-x: hidden; overscroll-behavior-x: none; }
-  /* Umschalten Alle/Schwarzweiß/Farbe: kurz überblenden statt den Tisch neu aufzulegen */
-  .leuchttisch.swap .strip35.laid { animation: swapIn .22s ease both; }
-  @keyframes swapIn { from { opacity: 0; } }
+  /* Umschalten Alle/Schwarzweiß/Farbe: sofort wechseln, ohne Überblenden (das Abdunkeln wirkte auf dem iPhone wie Flackern) */
+  .leuchttisch.swap .strip35.laid { animation: none; }
 </style>
 </head>
 
