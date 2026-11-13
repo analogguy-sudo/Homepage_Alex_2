@@ -24,12 +24,13 @@ button:disabled{opacity:.5}
 </head>
 <body>
 <h1 id="title">Passwort festlegen</h1>
-<p class="note" id="who"></p>
 
 <form id="set" hidden>
-  <input type="email" id="user" autocomplete="username" hidden>
+  <!-- Sichtbares Konto-Feld: Safari ordnet das neue Passwort nur damit dem richtigen Login im Schlüsselbund zu. -->
+  <label for="user" id="lu">Konto</label>
+  <input type="email" id="user" name="username" autocomplete="username" readonly>
   <label for="pw1" id="l1">Neues Passwort</label>
-  <input id="pw1" type="password" autocomplete="new-password" minlength="8" required>
+  <input id="pw1" name="password" type="password" autocomplete="new-password" minlength="8" required>
   <label for="pw2" id="l2">Neues Passwort wiederholen</label>
   <input id="pw2" type="password" autocomplete="new-password" minlength="8" required>
   <button type="submit" id="save">Passwort speichern</button>
@@ -54,13 +55,13 @@ const SB_URL="https://owbbsnujnkhyyqvagtai.supabase.co";
 const SB_KEY="sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga";
 const $=id=>document.getElementById(id);
 const es=(navigator.language||"").startsWith("es");
-const T=es?{title:"Elegir contraseña",l1:"Nueva contraseña",l2:"Repite la contraseña",save:"Guardar contraseña",
+const T=es?{lu:"Cuenta",title:"Elegir contraseña",l1:"Nueva contraseña",l2:"Repite la contraseña",save:"Guardar contraseña",
   askText:"El enlace ha caducado o ya se usó. Aquí recibes uno nuevo.",send:"Enviar enlace nuevo",
-  mismatch:"Las contraseñas no coinciden.",saved:"Contraseña guardada. Ya puedes entrar con ella.",sent:"Enlace enviado. Revisa tu correo.",expired:"Este enlace ya no es válido.",who:e=>"Cuenta: "+e}
- :{title:"Passwort festlegen",l1:"Neues Passwort",l2:"Neues Passwort wiederholen",save:"Passwort speichern",
+  mismatch:"Las contraseñas no coinciden.",saved:"Contraseña guardada. Ya puedes entrar con ella.",sent:"Enlace enviado. Revisa tu correo.",expired:"Este enlace ya no es válido."}
+ :{lu:"Konto",title:"Passwort festlegen",l1:"Neues Passwort",l2:"Neues Passwort wiederholen",save:"Passwort speichern",
   askText:"Der Link ist abgelaufen oder wurde schon benutzt. Hier bekommst du einen neuen.",send:"Neuen Link senden",
-  mismatch:"Die Passwörter stimmen nicht überein.",saved:"Passwort gespeichert. Du kannst dich jetzt damit anmelden.",sent:"Link verschickt. Schau in dein Postfach.",expired:"Dieser Link gilt nicht mehr.",who:e=>"Konto: "+e};
-for(const k of ["title","l1","l2","save","askText","send"])$(k).textContent=T[k];
+  mismatch:"Die Passwörter stimmen nicht überein.",saved:"Passwort gespeichert. Du kannst dich jetzt damit anmelden.",sent:"Link verschickt. Schau in dein Postfach.",expired:"Dieser Link gilt nicht mehr."};
+for(const k of ["lu","title","l1","l2","save","askText","send"])$(k).textContent=T[k];
 if(es)document.documentElement.lang="es";
 
 const msg=(text,err)=>{$("msg").textContent=text;$("msg").className="msg"+(err?" err":"");$("msg").hidden=false};
@@ -68,9 +69,13 @@ const hashError=new URLSearchParams(location.hash.slice(1)).has("error_code");
 const db=window.supabase.createClient(SB_URL,SB_KEY);
 
 async function start(){
+  if(new URLSearchParams(location.search).has("gespeichert")){
+    msg(T.saved);
+    $("done").hidden=false;
+    return history.replaceState(null,"",location.pathname);
+  }
   const {data:{session}}=await db.auth.getSession();
   if(session){
-    $("who").textContent=T.who(session.user.email);
     $("user").value=session.user.email;
     $("set").hidden=false;
   }else{
@@ -88,10 +93,9 @@ $("set").addEventListener("submit",async e=>{
   const {error}=await db.auth.updateUser({password:$("pw1").value});
   $("save").disabled=false;
   if(error)return msg(error.message,true);
-  $("set").hidden=true;
-  msg(T.saved);
-  $("done").hidden=false;
   await db.auth.signOut();
+  // Neu laden statt nur ausblenden: erst der Seitenwechsel lässt Safari anbieten, das Passwort zu sichern.
+  location.replace(location.pathname+"?gespeichert");
 });
 
 $("ask").addEventListener("submit",async e=>{
