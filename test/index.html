@@ -795,36 +795,30 @@
   }
 
   /* ==========================================================================
-     14. Wechselnde Titelfotos – Seagull zuerst, dann die Lieblingsbilder vom Leuchttisch.
-     Computer: die Blende schließt und öffnet sich („Auslöser“). Handy: sanftes Überblenden.
+     14. Titelblatt am Computer: wechselnde Fotos vom Leuchttisch links unter dem Titel.
+     Das Seagull bleibt groß in der Mitte. Wechsel mit einer sich schließenden und öffnenden Blende („Auslöser“).
      ========================================================================== */
   .slides, .slide-cap { display: none; }
   .slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; cursor: zoom-in; }
   .slide.on { opacity: 1; z-index: 1; }
-  .slide.seagull { cursor: default; }
-  .slides::after { content: ""; position: absolute; inset: 0; z-index: 2; background: var(--veil); pointer-events: none; }
-  .slide-cap { font-family: var(--edge); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+  .slide-cap { font-family: var(--edge); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); line-height: 1.5; }
   .slide-cap .no { color: var(--amber); }
+  .slide-cap > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* Filmrand-Zeile immer einzeilig */
   .slide-cap .to { display: inline-block; margin-top: .45rem; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--ink-soft); cursor: pointer; background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; }
-  /* Handy/Tablet hoch: Bilderfolge an der Stelle des Seagull-Fotos, Überblenden */
-  @media (max-width: 1100px) and (orientation: portrait) {
-    body:not([data-view]) .hero.has-slides::before { display: none; }
-    body:not([data-view]) .hero.has-slides > .slides { display: block; order: -1; position: relative; width: 100%; aspect-ratio: 1978 / 1315; overflow: hidden; background: var(--paper-deep); }
-    .slide { transition: opacity .9s ease; }
-    body:not([data-view]) .hero.has-slides .slide-cap-m { display: block; margin: 0 0 .9rem; }
-    body:not([data-view]) .hero.has-slides .teaser { display: none !important; }   /* die Bilder laufen jetzt oben */
-  }
-  /* Computer/Tablet quer: genau dort, wo sonst das Seagull steht */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
-    body:not([data-view]) .hero.has-slides > .slides {
-      display: block; position: fixed; z-index: 1; overflow: hidden; background: #0b0b0b;
-      left: var(--imgl); width: var(--imgw); height: calc(var(--imgw) / .989); top: calc((100vh - var(--imgw) / .989) / 2);
+    body:not([data-view]) .hero > div:first-child > .slides.ready {
+      display: block; position: relative; overflow: hidden; margin-top: 2rem; background: #0b0b0b;
+      width: min(260px, 28vh, 100%); aspect-ratio: 1;
     }
-    body:not([data-view]) .hero.has-slides ~ * .bgfix, body:not([data-view]) .bgfix { background-image: none; }
-    body:not([data-view]) .hero.has-slides .slide-cap-d { display: block; margin-top: 2.2rem; padding-top: .9rem; border-top: 1px solid var(--rule); max-width: 100%; }
-    body:not([data-view]) .hero.has-slides .teaser-desk { display: none !important; }
+    body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { display: block; margin-top: .7rem; max-width: min(260px, 100%); }
   }
-  @media (prefers-reduced-motion: reduce) { .slide { transition: none; } }
+  /* niedrige Bildschirme: kleiner, ganz niedrige ohne Bilderfolge – nie über der Beschreibung */
+  @media (min-width: 821px) and (orientation: landscape) and (max-height: 800px) {
+    body:not([data-view]) .hero > div:first-child > .slides.ready { width: min(150px, 19vh, 100%); margin-top: 1.2rem; }
+  }
+  @media (min-width: 821px) and (orientation: landscape) and (max-height: 620px) {
+    body:not([data-view]) .hero > div:first-child > .slides.ready, body:not([data-view]) .hero > div:first-child > .slides.ready + .slide-cap { display: none; }
+  }
 </style>
 </head>
 
@@ -858,11 +852,10 @@
     <div>
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
       <p data-en="Analogue photography<br>on 35 mm and medium format.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.</p>
-      <div class="teaser teaser-desk"></div>
+      <div class="slides" id="slides" aria-roledescription="Bilderfolge" aria-label="Vom Leuchttisch"></div>
       <div class="slide-cap slide-cap-d" aria-live="polite"></div>
     </div>
     <div class="mobile-hero-copy">
-      <div class="slide-cap slide-cap-m" aria-live="polite"></div>
       <h1 data-en="Light on film,<br>developed by hand">Licht auf Film,<br>von Hand entwickelt</h1>
       <p data-en="Analogue photography on 35 mm and medium format.">Analoge Fotografie auf 35&nbsp;mm und Mittelformat.</p>
       <nav class="cta" aria-label="Einstieg">
@@ -870,7 +863,6 @@
       </nav>
       <div class="teaser" id="teaser"></div>
     </div>
-    <div class="slides" id="slides" aria-roledescription="Bilderfolge" aria-label="Wechselnde Titelfotos"></div>
 
     
   </div>
@@ -1660,37 +1652,35 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
 }
 /* ---------- Wechselnde Titelfotos ---------- */
 const slideState = { list: [], i: 0, timer: null, busy: false, hover: false };
-const irisMode = () => matchMedia("(min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px)").matches;
 function setupSlides() {
-  const box = $("slides"); if (!box || !CONFIG.bgImage) return;
+  const box = $("slides"); if (!box) return;
   const pics = kbPhotos().slice(0, 12);
   if (pics.length < 2) return;
-  const seagullSrc = getComputedStyle(document.documentElement).getPropertyValue("--bg").replace(/^\s*url\(["']?|["']?\)\s*$/g, "");
-  slideState.list = [{ seagull: true, src: seagullSrc, title: "Seagull 4A" }, ...pics];
+  slideState.list = pics;
   box.innerHTML = "";
-  slideState.list.forEach((p, k) => {
-    const im = document.createElement("img"); im.className = "slide" + (k === 0 ? " seagull on" : ""); im.alt = p.seagull ? "Seagull 4A" : p.title; im.decoding = "async";
-    im.dataset.src = p.seagull ? p.src : sized(p.src, irisMode() ? 1600 : 1080);
-    if (p.seagull) { im.src = im.dataset.src; im.style.objectPosition = "center 19%"; }
-    else im.addEventListener("click", () => openViewer(pics, k - 1, []));
+  pics.forEach((p, k) => {
+    const im = document.createElement("img"); im.className = "slide" + (k === 0 ? " on" : ""); im.alt = p.title; im.decoding = "async";
+    im.dataset.src = sized(p.src, 640);
+    if (k === 0) im.src = im.dataset.src;
+    im.addEventListener("click", () => openViewer(pics, k, []));
     box.appendChild(im);
   });
-  box.closest(".hero").classList.add("has-slides");
+  box.classList.add("ready");
   box.addEventListener("pointerenter", () => { slideState.hover = true; });
   box.addEventListener("pointerleave", () => { slideState.hover = false; });
   slideCaption(0);
   if (!reduceMotion()) queueSlide();
 }
-function queueSlide() { clearTimeout(slideState.timer); slideState.timer = setTimeout(nextSlide, 6500); }
+function queueSlide() { clearTimeout(slideState.timer); slideState.timer = setTimeout(nextSlide, 3500); }
 async function nextSlide() {
   const box = $("slides");
   // nur auf dem Titelblatt, im sichtbaren Tab und nicht unter der Maus weiterschalten
-  if (document.hidden || document.body.dataset.view || slideState.hover || slideState.busy || lb.open) { queueSlide(); return; }
+  if (document.hidden || document.body.dataset.view || slideState.hover || slideState.busy || lb.open || !box.offsetParent) { queueSlide(); return; }
   slideState.busy = true;
   const imgs = [...box.querySelectorAll(".slide")], cur = imgs[slideState.i], k = (slideState.i + 1) % imgs.length, nxt = imgs[k];
   if (!nxt.getAttribute("src")) nxt.src = nxt.dataset.src;
   try { await Promise.race([nxt.decode(), new Promise((r, j) => setTimeout(j, 4000))]); } catch (e) { slideState.i = k; slideState.busy = false; queueSlide(); return; }
-  try { if (irisMode()) await iris(cur, nxt); else { nxt.classList.add("on"); cur.classList.remove("on"); await new Promise((r) => setTimeout(r, 900)); } }
+  try { await iris(cur, nxt); }
   catch (e) { cur.classList.remove("on"); nxt.classList.add("on"); nxt.style.clipPath = ""; }
   slideState.i = k; slideCaption(k); slideState.busy = false;
   // das übernächste Bild schon vorladen
@@ -1715,7 +1705,7 @@ function slideCaption(k) {
   document.querySelectorAll(".slide-cap").forEach((cap) => {
     cap.innerHTML = "";
     const line = document.createElement("div");
-    const no = document.createElement("span"); no.className = "no"; no.textContent = p.seagull ? "▸ " : "▸ " + k + "A  ";
+    const no = document.createElement("span"); no.className = "no"; no.textContent = "▸ " + (k + 1) + "A  ";
     line.append(no, document.createTextNode([p.title, p.location, p.film].filter(Boolean).join(" · ")));
     cap.appendChild(line);
     const sIdx = p.strecke ? streckenItems().findIndex((x) => x.id === p.strecke) : -1;
