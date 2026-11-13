@@ -771,9 +771,11 @@
     /* Inhaltsverzeichnis: Nummern in einer eigenen Spalte direkt vor den Rubriken – alle Nummern senkrecht
        untereinander, Rubriken linksbündig daneben, der ganze Block rechts. Die Zeilen teilen sich die Spalten (subgrid). */
     body:not([data-view]) .site-head nav { display: grid; grid-template-columns: 1fr auto minmax(0, max-content); }
-    /* direkt unter der Linie der Kopfzeile beginnen – die ist schon die obere Linie, sonst entsteht eine leere Zeile */
-    body:not([data-view]) .site-head nav { top: var(--headb, 7rem); }
-    body:not([data-view]) .site-head nav::before { display: none; }
+    /* auf Höhe der Linie unter dem Titel links beginnen (--toct, vom Skript gemessen), mit eigener feiner Linie darüber.
+       Steht die Beschreibung woanders (Tablet), direkt unter der Linie der Kopfzeile – dann ohne eigene Linie (sonst doppelt). */
+    body:not([data-view]) .site-head nav { top: var(--toct, var(--headb, 7rem)); }
+    body:not([data-view]) .site-head nav::before { grid-column: 1 / -1; }
+    html.toc-at-head body:not([data-view]) .site-head nav::before { display: none; }
     body:not([data-view]) .site-head nav a {
       grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; column-gap: .9rem; align-items: baseline; text-align: left;
     }
@@ -1688,6 +1690,7 @@ function applyRoute() {
   // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
   try { if (h && h !== "top" && (!v || ALIAS[h])) t = document.querySelector("#" + h); } catch (e) {}
   if (t) t.scrollIntoView({ behavior: "instant" }); else window.scrollTo({ top: 0, behavior: "instant" });
+  setTocTop();   // Startseite wieder aufgebaut: Inhaltsverzeichnis neu ausrichten
 }
 addEventListener("hashchange", route);
 /* Höhe der Kopfzeile für die Sprungziele: am Handy steht sie fest oben, also Abstand = Höhe + etwas Luft */
@@ -1696,7 +1699,16 @@ const setHeadH = () => {
   const pinned = getComputedStyle(head).position === "sticky";
   document.documentElement.style.setProperty("--headh", (pinned ? head.offsetHeight + 16 : 16) + "px");
   document.documentElement.style.setProperty("--headb", Math.round(head.getBoundingClientRect().bottom + scrollY) + "px");   // Unterkante der Kopfzeile (Inhaltsverzeichnis darunter)
+  setTocTop();
 };
+// Inhaltsverzeichnis rechts auf Höhe der Linie unter dem Titel links (nur wenn die Beschreibung dort im Fluss steht)
+function setTocTop() {
+  const p = document.querySelector(".hero > div:first-child > p"), root = document.documentElement;
+  const ok = p && p.offsetParent && getComputedStyle(p).position === "static" && !document.body.dataset.view;
+  if (ok) root.style.setProperty("--toct", Math.round(p.getBoundingClientRect().top + scrollY) + "px"); else root.style.removeProperty("--toct");
+  root.classList.toggle("toc-at-head", !ok);
+}
+if (document.fonts) document.fonts.ready.then(setTocTop);
 setHeadH();
 if (window.ResizeObserver) new ResizeObserver(setHeadH).observe(document.querySelector(".site-head"));
 addEventListener("resize", setHeadH);
@@ -1763,9 +1775,10 @@ function sizeSlides() {
   const footH = foot.parentElement.offsetHeight;   // ganze Fußzeile inklusive Innenabstand
   const top = box.getBoundingClientRect().top + scrollY;
   const avail = Math.floor(innerHeight - footH - padB - top - cap.offsetHeight - 12);
-  const w = Math.min(col.clientWidth, avail);
+  const w = Math.min(Math.round(col.clientWidth * .72), avail);   // etwas kleiner als die Spalte, das Seagull bleibt der Blickfang
   if (w < 120) { box.style.display = "none"; cap.style.display = "none"; return; }   // zu wenig Platz: lieber gar nicht
   box.style.width = w + "px"; cap.style.maxWidth = w + "px";
+  setTocTop();   // mit Bilderfolge steht die Beschreibung unter dem Titel – Inhaltsverzeichnis daran ausrichten
 }
 addEventListener("resize", () => requestAnimationFrame(sizeSlides));
 if (document.fonts) document.fonts.ready.then(() => requestAnimationFrame(sizeSlides));
