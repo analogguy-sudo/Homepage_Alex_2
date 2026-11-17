@@ -9,11 +9,11 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Icons (aktuelles Logo): Browser-Tab, Google-Suche (Vielfache von 48 px), Home-Bildschirm -->
-<link rel="icon" href="favicon.ico?v=20261118" sizes="16x16 32x32 48x48">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png?v=20261118">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20261118">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261118">
-<link rel="manifest" href="manifest.webmanifest?v=20261118">
+<link rel="icon" href="favicon.ico?v=20261120" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png?v=20261120">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20261120">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261120">
+<link rel="manifest" href="manifest.webmanifest?v=20261120">
 <meta name="theme-color" content="#0E0E0E">
 <meta name="apple-mobile-web-app-title" content="Analoge Welt">
 <title>Analoge Welt – Analoge Fotografie von A.T. Fichter</title>
@@ -117,7 +117,8 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   }
   .brand { font-family: var(--display); font-size: 2.2rem; letter-spacing: .05em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
   /* Logo (Blende mit aTF, ohne Filmring; logo/atf-bildmarke.svg): als Maske, Farbe folgt dem Hell/Dunkel-Schalter über --ink */
-  .logo { display: block; aspect-ratio: 1; background-color: var(--ink); -webkit-mask: url(logo/atf-bildmarke.svg?v=20261118) center / contain no-repeat; mask: url(logo/atf-bildmarke.svg?v=20261118) center / contain no-repeat; }
+  .logo { display: block; aspect-ratio: 1; background-color: var(--ink); -webkit-mask: url(logo/atf-bildmarke.svg?v=20261120) center / contain no-repeat; mask: url(logo/atf-bildmarke.svg?v=20261120) center / contain no-repeat; }
+  :root[data-theme="dark"] .logo { -webkit-mask-image: url(logo/atf-bildmarke-dunkel.svg?v=20261120); mask-image: url(logo/atf-bildmarke-dunkel.svg?v=20261120); }
   .home-link { display: inline-flex; align-items: center; gap: .8rem; color: inherit; text-decoration: none; }
   .logo-head { width: var(--logo, 52px); flex: none; }
   .head-right { display: flex; align-items: center; gap: 1.75rem; }
