@@ -9,11 +9,11 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Icons (aktuelles Logo): Browser-Tab, Google-Suche (Vielfache von 48 px), Home-Bildschirm -->
-<link rel="icon" href="favicon.ico?v=20261113" sizes="16x16 32x32 48x48">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png?v=20261113">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20261113">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261113">
-<link rel="manifest" href="manifest.webmanifest?v=20261113">
+<link rel="icon" href="favicon.ico?v=20261117" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png?v=20261117">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20261117">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261117">
+<link rel="manifest" href="manifest.webmanifest?v=20261117">
 <meta name="theme-color" content="#0E0E0E">
 <meta name="apple-mobile-web-app-title" content="Analoge Welt">
 <title>Analoge Welt – Analoge Fotografie von A.T. Fichter</title>
@@ -117,7 +117,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   }
   .brand { font-family: var(--display); font-size: 2.2rem; letter-spacing: .05em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
   /* Logo (Blende mit aTF, ohne Filmring; logo/atf-bildmarke.svg): als Maske, Farbe folgt dem Hell/Dunkel-Schalter über --ink */
-  .logo { display: block; aspect-ratio: 1; background-color: var(--ink); -webkit-mask: url(logo/atf-bildmarke.svg?v=20261111) center / contain no-repeat; mask: url(logo/atf-bildmarke.svg?v=20261111) center / contain no-repeat; }
+  .logo { display: block; aspect-ratio: 1; background-color: var(--ink); -webkit-mask: url(logo/atf-bildmarke.svg?v=20261117) center / contain no-repeat; mask: url(logo/atf-bildmarke.svg?v=20261117) center / contain no-repeat; }
   .home-link { display: inline-flex; align-items: center; gap: .8rem; color: inherit; text-decoration: none; }
   .logo-head { width: var(--logo, 52px); flex: none; }
   .head-right { display: flex; align-items: center; gap: 1.75rem; }
@@ -277,7 +277,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     .wrap.site-head { flex-wrap: nowrap; position: relative; padding-block: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--rule); }
     .brand { font-size: 2rem; letter-spacing: .03em; }
     .home-link { gap: .55rem; }
-    .logo-head { width: 38px; }
+    .logo-head { width: 44px; }
     .wrap.site-head { column-gap: 1rem; }
     .home-link .brand { font-size: clamp(1.15rem, (100vw - 280px) / 4.5, 2rem); }   /* Logo + Schriftzug passen neben die Schalter */
     .head-right { gap: .5rem; }
