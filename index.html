@@ -871,11 +871,11 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     }
   }
   /* Sucher: beim Öffnen einmal kurz unscharf, dann scharfgestellt wie mit dem Fokusrad (nur mit Maus, nicht bei „Bewegung reduzieren“) */
-  @keyframes fokus { from { filter: blur(7px) contrast(.94); } 70% { filter: blur(.2px) contrast(.94); } to { filter: blur(.35px) contrast(.94); } }
+  @keyframes fokus { from { filter: blur(8px) contrast(.94); } 75% { filter: blur(.2px) contrast(.94); } to { filter: blur(.35px) contrast(.94); } }
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (hover: hover) and (prefers-reduced-motion: no-preference),
          (min-width: 1101px) and (min-height: 501px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
-    html.vorfokus body:not([data-view]) .bgfix { filter: blur(7px) contrast(.94); }
-    html.fokus body:not([data-view]) .bgfix { animation: fokus 1.2s cubic-bezier(.3,.6,.2,1) both; }
+    html.vorfokus body:not([data-view]) .bgfix { filter: blur(8px) contrast(.94); }
+    html.fokus body:not([data-view]) .bgfix { animation: fokus 2.6s cubic-bezier(.45,.05,.4,1) both; }
   }
   /* Breite Bildschirme mit Maus: das Seagull sitzt in einem schmaleren Rahmen (Ausschnitt statt ganzes Bild) */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
@@ -1783,10 +1783,11 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
   const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
   document.documentElement.style.setProperty("--bg", `url("${u}")`);
   // Sucher scharfstellen, sobald das Seagull geladen ist (CSS entscheidet, ob die Bewegung überhaupt gezeigt wird)
-  const root = document.documentElement, fokus = () => { root.classList.remove("vorfokus"); root.classList.add("fokus"); setTimeout(() => root.classList.remove("fokus"), 1500); };
+  const root = document.documentElement; let fokussiert = false;
+  const fokus = () => { if (fokussiert) return; fokussiert = true; root.classList.remove("vorfokus"); root.classList.add("fokus"); setTimeout(() => root.classList.remove("fokus"), 3000); };
   root.classList.add("vorfokus");
-  try { const pre = new Image(); pre.src = u; pre.decode().then(fokus, fokus); } catch (e) { fokus(); }
-  setTimeout(() => root.classList.remove("vorfokus"), 6000);   // Sicherheitsnetz, falls das Bild nie ankommt
+  try { const pre = new Image(); pre.onload = fokus; pre.onerror = fokus; pre.src = u; if (pre.complete && pre.naturalWidth) fokus(); } catch (e) { fokus(); }
+  setTimeout(fokus, 8000);   // Sicherheitsnetz: spätestens dann trotzdem ruhig scharfstellen
 }
 /* ---------- Wechselnde Titelfotos ---------- */
 const slideState = { list: [], i: 0, timer: null, busy: false, hover: false };
