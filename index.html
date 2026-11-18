@@ -849,10 +849,18 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     body:not([data-view]) .bgfix {
       inset: auto; left: var(--imgl); width: var(--imgw); top: calc(50% - var(--imgw) / 2); height: var(--imgw);
       transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-size: cover; background-position: 50% 45%;
+      /* Kante der Mattscheibe: feiner schwarzer Rand, Ecken ganz leicht gerundet */
+      border-radius: 5px; box-shadow: 0 0 0 1px rgba(0,0,0,.85), 0 0 0 2px rgba(255,255,255,.04);
     }
+    body:not([data-view]) .bgfix::after { border-radius: inherit; }
     body:not([data-view]) .bgfix::before {
-      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
       background:
+        /* Schatten der Lichtschacht-Wand oben, schwächer an den Seiten */
+        linear-gradient(to bottom, rgba(0,0,0,.42), rgba(0,0,0,.12) 4%, transparent 9%),
+        linear-gradient(to right, rgba(0,0,0,.22), transparent 4%, transparent 96%, rgba(0,0,0,.22)),
+        /* Fresnel-Linse: hauchfeine Ringe um die Mitte */
+        repeating-radial-gradient(circle at 50% 50%, transparent 0 5px, rgba(255,255,255,.028) 5px 6px, transparent 6px 7px, rgba(0,0,0,.03) 7px 8px),
         radial-gradient(circle at 50% 50%, transparent 6.6%, rgba(0,0,0,.4) 6.75%, transparent 6.95%),
         linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 33.333% 0 / 1px 100% no-repeat,
         linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 66.666% 0 / 1px 100% no-repeat,
@@ -861,6 +869,13 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
         radial-gradient(ellipse 72% 72% at 50% 50%, transparent 45%, rgba(0,0,0,.28) 78%, rgba(0,0,0,.62) 100%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.2' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
     }
+  }
+  /* Sucher: beim Öffnen einmal kurz unscharf, dann scharfgestellt wie mit dem Fokusrad (nur mit Maus, nicht bei „Bewegung reduzieren“) */
+  @keyframes fokus { from { filter: blur(7px) contrast(.94); } 70% { filter: blur(.2px) contrast(.94); } to { filter: blur(.35px) contrast(.94); } }
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (hover: hover) and (prefers-reduced-motion: no-preference),
+         (min-width: 1101px) and (min-height: 501px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+    html.vorfokus body:not([data-view]) .bgfix { filter: blur(7px) contrast(.94); }
+    html.fokus body:not([data-view]) .bgfix { animation: fokus 1.2s cubic-bezier(.3,.6,.2,1) both; }
   }
   /* Breite Bildschirme mit Maus: das Seagull sitzt in einem schmaleren Rahmen (Ausschnitt statt ganzes Bild) */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
@@ -1767,6 +1782,11 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
   const b = CONFIG.bgImage;
   const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
   document.documentElement.style.setProperty("--bg", `url("${u}")`);
+  // Sucher scharfstellen, sobald das Seagull geladen ist (CSS entscheidet, ob die Bewegung überhaupt gezeigt wird)
+  const root = document.documentElement, fokus = () => { root.classList.remove("vorfokus"); root.classList.add("fokus"); setTimeout(() => root.classList.remove("fokus"), 1500); };
+  root.classList.add("vorfokus");
+  try { const pre = new Image(); pre.src = u; pre.decode().then(fokus, fokus); } catch (e) { fokus(); }
+  setTimeout(() => root.classList.remove("vorfokus"), 6000);   // Sicherheitsnetz, falls das Bild nie ankommt
 }
 /* ---------- Wechselnde Titelfotos ---------- */
 const slideState = { list: [], i: 0, timer: null, busy: false, hover: false };
