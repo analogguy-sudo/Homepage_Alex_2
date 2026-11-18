@@ -850,6 +850,22 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
       background-size: cover; background-position: 50% 50%;
     }
   }
+  /* Sucher: das Seagull als Blick auf die 6×6-Mattscheibe – quadratisch, seitenverkehrt, Gitter, Körnung, dunklere Ecken */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+    :root { --ar: 1; --imgpad: clamp(2.5rem, 8vh, 6rem); }   /* kleiner, mit Luft oben und unten */
+    body:not([data-view]) .bgfix { transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-position: 50% 45%; }
+    body:not([data-view]) .bgfix::before {
+      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 6.6%, rgba(0,0,0,.4) 6.75%, transparent 6.95%),
+        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 33.333% 0 / 1px 100% no-repeat,
+        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 66.666% 0 / 1px 100% no-repeat,
+        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 0 33.333% / 100% 1px no-repeat,
+        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 0 66.666% / 100% 1px no-repeat,
+        radial-gradient(ellipse 72% 72% at 50% 50%, transparent 45%, rgba(0,0,0,.28) 78%, rgba(0,0,0,.62) 100%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.2' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+    }
+  }
   /* Handy und Tablet hoch: das Titelbild selbst wechselt (an der Stelle des Seagull), Filmrand-Zeile darunter */
   @media (max-width: 1100px) and (orientation: portrait) {
     body:not([data-view]) .hero.has-slides::before { display: none; }
