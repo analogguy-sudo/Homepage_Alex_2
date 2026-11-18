@@ -1782,6 +1782,7 @@ function buildSlides() {
 /* Computer: so groß wie möglich – bis knapp über die Fußzeile, höchstens so breit wie die Spalte */
 function sizeSlides() {
   const box = $("slides"), cap = document.querySelector(".slide-cap-d");
+  box.style.marginTop = "";   // erst ohne Zusatzabstand messen
   if (mqPortrait.matches || !box.classList.contains("ready")) { box.style.width = ""; box.style.display = ""; cap.style.display = ""; return; }
   const col = box.parentElement, foot = document.querySelector("footer .wrap");
   box.style.display = ""; cap.style.display = "";
@@ -1794,6 +1795,9 @@ function sizeSlides() {
   const w = Math.min(Math.round(col.clientWidth * .72), avail);   // etwas kleiner als die Spalte, das Seagull bleibt der Blickfang
   if (w < 120) { box.style.display = "none"; cap.style.display = "none"; return; }   // zu wenig Platz: lieber gar nicht
   box.style.width = w + "px"; cap.style.maxWidth = w + "px";
+  // übriger Platz kommt über das Bild: die Bilderfolge sitzt unten, knapp über der Fußzeile, statt am Text zu kleben
+  const extra = avail - w;
+  if (extra > 0) box.style.marginTop = (parseFloat(getComputedStyle(box).marginTop) || 0) + extra + "px";
   setTocTop();   // mit Bilderfolge steht die Beschreibung unter dem Titel – Inhaltsverzeichnis daran ausrichten
 }
 addEventListener("resize", () => requestAnimationFrame(sizeSlides));
