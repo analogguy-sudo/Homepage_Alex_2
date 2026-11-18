@@ -842,17 +842,14 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     body:not([data-view]) .hero.has-slides { padding-bottom: .5rem; padding-top: clamp(1rem, 3vh, 3rem); }
     body:not([data-view]) .hero.has-slides > div:first-child > .slides.ready { margin-top: 1.6rem; }
   }
-  /* Breite Bildschirme mit Maus: das Seagull sitzt in einem schmaleren Rahmen (Ausschnitt statt ganzes Bild) */
-  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+  /* Sucher auch auf Tablet quer und schmaleren Computern: das Seagull quadratisch und seitenverkehrt wie auf der 6×6-Mattscheibe
+     (breite Bildschirme mit Maus: eigener Rahmen weiter unten) */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
+    :root { --minbottom: clamp(4.5rem, 8vh, 6rem); }   /* kleiner, mit Luft oben und unten */
     body:not([data-view]) .bgfix {
-      inset: auto; left: var(--imgl); width: var(--imgw); top: var(--imgpad); height: calc(100vh - 2 * var(--imgpad));
-      background-size: cover; background-position: 50% 50%;
+      inset: auto; left: var(--imgl); width: var(--imgw); top: calc(50% - var(--imgw) / 2); height: var(--imgw);
+      transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-size: cover; background-position: 50% 45%;
     }
-  }
-  /* Sucher: das Seagull als Blick auf die 6×6-Mattscheibe – quadratisch, seitenverkehrt, Gitter, Körnung, dunklere Ecken */
-  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
-    :root { --ar: 1; --imgpad: clamp(2.5rem, 8vh, 6rem); }   /* kleiner, mit Luft oben und unten */
-    body:not([data-view]) .bgfix { transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-position: 50% 45%; }
     body:not([data-view]) .bgfix::before {
       content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
       background:
@@ -864,6 +861,18 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
         radial-gradient(ellipse 72% 72% at 50% 50%, transparent 45%, rgba(0,0,0,.28) 78%, rgba(0,0,0,.62) 100%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.2' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
     }
+  }
+  /* Breite Bildschirme mit Maus: das Seagull sitzt in einem schmaleren Rahmen (Ausschnitt statt ganzes Bild) */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+    body:not([data-view]) .bgfix {
+      inset: auto; left: var(--imgl); width: var(--imgw); top: var(--imgpad); height: calc(100vh - 2 * var(--imgpad));
+      background-size: cover; background-position: 50% 50%;
+    }
+  }
+  /* Sucher: das Seagull als Blick auf die 6×6-Mattscheibe – quadratisch, seitenverkehrt, Gitter, Körnung, dunklere Ecken */
+  @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
+    :root { --ar: 1; --imgpad: clamp(2.5rem, 8vh, 6rem); }   /* kleiner, mit Luft oben und unten */
+    body:not([data-view]) .bgfix { transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-position: 50% 45%; }
   }
   /* Handy und Tablet hoch: das Titelbild selbst wechselt (an der Stelle des Seagull), Filmrand-Zeile darunter */
   @media (max-width: 1100px) and (orientation: portrait) {
@@ -1719,6 +1728,7 @@ function applyRoute() {
   // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
   try { if (h && h !== "top" && (!v || ALIAS[h])) t = document.querySelector("#" + h); } catch (e) {}
   if (t) t.scrollIntoView({ behavior: "instant" }); else window.scrollTo({ top: 0, behavior: "instant" });
+  if (!v) { try { sizeSlides(); } catch (e) {} }   // Startseite: Bilderfolge sofort an ihren Platz, bevor sie zu sehen ist
   setTocTop();   // Startseite wieder aufgebaut: Inhaltsverzeichnis neu ausrichten
 }
 addEventListener("hashchange", route);
@@ -1797,6 +1807,7 @@ function buildSlides() {
 /* Computer: so groß wie möglich – bis knapp über die Fußzeile, höchstens so breit wie die Spalte */
 function sizeSlides() {
   const box = $("slides"), cap = document.querySelector(".slide-cap-d");
+  if (!box || !cap || document.body.dataset.view) return;   // Unterseite offen: nichts anfassen, sonst springt die Bilderfolge beim Zurückkehren
   box.style.marginTop = "";   // erst ohne Zusatzabstand messen
   if (mqPortrait.matches || !box.classList.contains("ready")) { box.style.width = ""; box.style.display = ""; cap.style.display = ""; return; }
   const col = box.parentElement, foot = document.querySelector("footer .wrap");
@@ -1806,7 +1817,9 @@ function sizeSlides() {
   const hero = box.closest(".hero"), padB = parseFloat(getComputedStyle(hero).paddingBottom) || 0;
   const footH = foot.parentElement.offsetHeight;   // ganze Fußzeile inklusive Innenabstand
   const top = box.getBoundingClientRect().top + scrollY;
-  const avail = Math.floor(innerHeight - footH - padB - top - cap.offsetHeight - 12);
+  // feste Fensterhöhe (ohne die ein- und ausfahrende Safari-Leiste am iPad/iPhone), sonst wandert die Bilderfolge beim Scrollen
+  const vh = Math.min(innerHeight, document.documentElement.clientHeight || innerHeight);
+  const avail = Math.floor(vh - footH - padB - top - cap.offsetHeight - 12);
   const w = Math.min(Math.round(col.clientWidth * .72), avail);   // etwas kleiner als die Spalte, das Seagull bleibt der Blickfang
   if (w < 120) { box.style.display = "none"; cap.style.display = "none"; return; }   // zu wenig Platz: lieber gar nicht
   box.style.width = w + "px"; cap.style.maxWidth = w + "px";
