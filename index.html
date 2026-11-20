@@ -401,13 +401,15 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     .cams { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem 2rem; }
 
     /* Detailansicht: Angaben oben rechts, Bedienknöpfe fest unten rechts */
-    /* Angaben oben, Bedienung unten in der rechten Spalte – nie über dem Bild; Schließen oben rechts */
+    /* Angaben und Bedienung in der rechten Spalte – nie über dem Bild; Schließen oben rechts */
     .lb-inner { align-items: stretch; }
     .lb-side { align-self: stretch; min-height: 0; margin-top: 3.5rem; }
     .lb-info { padding: 1rem 1.2rem; max-height: calc(100vh - 20rem); max-height: calc(100dvh - 20rem); overflow: auto; }
     .lb-info dt { margin-top: .6rem; }
     .lb-info dd { font-size: 1.02rem; }
-    .lb-ctrl { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+    /* Reihenfolge: Angaben, gleich darunter Zurück/Weiter, dann Detailbilder; Bildstrecke wechseln ganz unten */
+    .lb-info { order: 1; } .lb-ctrl { order: 2; } .lb-thumbs { order: 3; } .lb-serie { order: 4; margin-top: auto; }
+    .lb-ctrl { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
     .lb-ctrl #lbCount { grid-column: 1 / -1; margin: 0 0 .2rem; font-family: var(--edge); letter-spacing: .12em; font-size: .8rem; color: #8C8C88; }
     .lb-ctrl #lbPrev, .lb-ctrl #lbNext { padding: .55rem .8rem; border-width: 1px; border-color: #5a5a57; white-space: nowrap; }
     .lb-ctrl #lbPrev:hover, .lb-ctrl #lbNext:hover { border-color: #EDEDEB; }
