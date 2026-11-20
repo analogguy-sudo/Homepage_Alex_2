@@ -262,6 +262,16 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     border: 1.5px solid #EDEDEB; border-radius: 2px; padding: .4rem .9rem; cursor: pointer;
   }
   .lb-ctrl button:hover { background: #EDEDEB; color: #0E0E0E; }
+  .lb-ctrl button { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; }
+  .lb-ctrl .pf { font-size: .9em; opacity: .75; }
+  /* Vorige / nächste Bildstrecke (nur wenn man eine Bildstrecke ansieht) */
+  .lb-serie { display: none; }
+  .lb-serie.on { display: grid; grid-template-columns: 1fr; gap: .5rem; }
+  .lb-serie button { min-width: 0; text-align: left; background: none; border: 1px solid #2c2c2c; color: #EDEDEB; padding: .6rem .75rem; font: inherit; cursor: pointer; transition: border-color .2s; }
+  .lb-serie button.next { text-align: right; }
+  .lb-serie button:hover { border-color: #8C8C88; }
+  .lb-serie small { display: block; font-family: var(--edge); text-transform: uppercase; letter-spacing: .12em; font-size: .66rem; color: #8C8C88; margin-bottom: .25rem; }
+  .lb-serie b { display: block; font-weight: 400; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .lb-ctrl button:focus:not(:focus-visible) { outline: none; }
 
 
@@ -307,6 +317,9 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     .lb-info dd:nth-child(odd) { grid-column: 1 / -1; }
     .lb-ctrl { position: sticky; bottom: 0; margin-top: auto; background: #060606; padding: .6rem 0 max(.75rem, env(safe-area-inset-bottom)); }
     .lb-ctrl button { font-size: .9rem; padding: .35rem .7rem; }
+    .lb-ctrl .pf { display: none; }   /* am Handy ohne Pfeile, damit alles in eine Zeile passt */
+    .lb-serie button { padding: .45rem .65rem; }
+    .lb-serie b { font-size: .9rem; }
   }
 
   /* ===== B. Tablet hoch (iPad): Aufbau wie am Handy, Überschriften größer ===== */
@@ -387,14 +400,19 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     .cams { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem 2rem; }
 
     /* Detailansicht: Angaben oben rechts, Bedienknöpfe fest unten rechts */
+    /* Angaben oben, Bedienung unten in der rechten Spalte – nie über dem Bild; Schließen oben rechts */
     .lb-inner { align-items: stretch; }
-    .lb-side { align-self: start; margin-top: 3rem; }
-    .lb-info { padding: 1rem 1.2rem; max-height: calc(100vh - 11rem); max-height: calc(100dvh - 11rem); overflow: auto; }
+    .lb-side { align-self: stretch; min-height: 0; margin-top: 3.5rem; }
+    .lb-info { padding: 1rem 1.2rem; max-height: calc(100vh - 20rem); max-height: calc(100dvh - 20rem); overflow: auto; }
     .lb-info dt { margin-top: .6rem; }
     .lb-info dd { font-size: 1.02rem; }
-    .lb-ctrl { position: fixed; right: 2rem; bottom: 1.5rem; flex-wrap: nowrap; }
-    .lb-ctrl span { margin-right: .75rem; }
-    .lb-ctrl button { width: 7rem; text-align: center; white-space: nowrap; }
+    .lb-ctrl { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+    .lb-ctrl #lbCount { grid-column: 1 / -1; margin: 0 0 .2rem; font-family: var(--edge); letter-spacing: .12em; font-size: .8rem; color: #8C8C88; }
+    .lb-ctrl #lbPrev, .lb-ctrl #lbNext { padding: .55rem .8rem; border-width: 1px; border-color: #5a5a57; white-space: nowrap; }
+    .lb-ctrl #lbPrev:hover, .lb-ctrl #lbNext:hover { border-color: #EDEDEB; }
+    .lb-ctrl #lbClose { position: fixed; top: 1.1rem; right: 2rem; border: 0; padding: .4rem 0; background: none; color: #A8A8A5;
+      font-family: var(--edge); text-transform: uppercase; letter-spacing: .14em; font-size: .8rem; }
+    .lb-ctrl #lbClose:hover { background: none; color: #EDEDEB; }
   }
 
   /* ===== D. Touch-Tablets quer (iPad, Android-Tablets) ===== */
@@ -1032,11 +1050,12 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     <aside class="lb-side">
       <dl class="lb-info" id="lbInfo"></dl>
       <div class="lb-thumbs" id="lbThumbs"></div>
+      <nav class="lb-serie" id="lbSerie" aria-label="Bildstrecken"></nav>
       <div class="lb-ctrl">
         <span id="lbCount"></span>
-        <button type="button" id="lbPrev">Zurück</button>
-        <button type="button" id="lbNext">Weiter</button>
-        <button type="button" id="lbClose">Schließen</button>
+        <button type="button" id="lbPrev"><span class="pf" aria-hidden="true">←</span><span>Zurück</span></button>
+        <button type="button" id="lbNext"><span>Weiter</span><span class="pf" aria-hidden="true">→</span></button>
+        <button type="button" id="lbClose"><span>Schließen</span><span class="pf" aria-hidden="true">✕</span></button>
       </div>
     </aside>
   </div>
@@ -1354,6 +1373,25 @@ function showLightbox() {
     });
   }
   $("lbCount").textContent = (state.index + 1) + " / " + state.lb.length;
+  // Beim Ansehen einer Bildstrecke: direkt zur vorigen oder nächsten Bildstrecke springen
+  const sn = $("lbSerie"); sn.innerHTML = ""; sn.classList.remove("on");
+  if (p.strecke && document.body.dataset.view === "bildstrecken") {
+    const items = streckenItems().filter((s) => state.all.some((f) => f.strecke === s.id)), k = items.findIndex((s) => s.id === p.strecke);
+    const mk = (s, cls, label) => {
+      const b = document.createElement("button"), sm = document.createElement("small"), t = document.createElement("b");
+      b.type = "button"; b.className = cls; sm.textContent = tr(label); t.textContent = (cls === "prev" ? "← " : "") + tr(s.title) + (cls === "next" ? " →" : "");
+      b.append(sm, t); b.addEventListener("click", () => switchSerie(s)); sn.appendChild(b);
+    };
+    if (k > 0) mk(items[k - 1], "prev", "Vorige Bildstrecke");
+    if (k >= 0 && k < items.length - 1) mk(items[k + 1], "next", "Nächste Bildstrecke");
+    if (sn.children.length) sn.classList.add("on");
+  }
+}
+function switchSerie(s) {   // Seite dahinter mitwechseln, damit man beim Schließen in der neuen Bildstrecke steht
+  projSel.bildstrecke = streckenItems().findIndex((x) => x.id === s.id); renderCards();
+  const fotos = state.all.filter((f) => f.strecke === s.id), els = [...document.querySelectorAll("#strkDetail .shot img")];
+  state.lb = fotos; state.index = 0; state.lbEls = els.length === fotos.length ? els : [];
+  showLightbox(); fitLb();
 }
 /* Das angetippte Bild wächst fließend zur Vollansicht auf (und schrumpft beim Schließen zurück) */
 // Touch-Geräte (iPhone, Tablet): keine Seiten-Schnappschüsse (View Transitions) – die ruckeln dort. Stattdessen schlichtes Einblenden.
@@ -1475,7 +1513,7 @@ loadPhotos().then((photos) => {
 /* ---------- Sprache ---------- */
 const EN = {
   "Startseite": "Home", "Inhalt": "Contents", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
-  "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series",
+  "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series", "Vorige Bildstrecke": "Previous series", "Nächste Bildstrecke": "Next series",
   "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen zwischen Pfalz und Elsass": "Castle ruins between the Palatinate and Alsace", "Öffnen": "Open",
   "Fotos werden geladen …": "Loading photos …",
   "Ich fotografiere seit über zehn Jahren auf Film, auf Kleinbild und im Mittelformat. Mich reizt, dass jede Aufnahme Zeit kostet: Man schaut länger hin, wartet aufs richtige Licht und sieht das Ergebnis erst Tage später.": "I have been shooting film for over ten years, on 35 mm and medium format. I love that every frame takes time: you look longer, wait for the right light and only see the result days later.",
