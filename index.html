@@ -404,7 +404,8 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     /* Angaben und Bedienung in der rechten Spalte – nie über dem Bild; Schließen oben rechts */
     .lb-inner { align-items: stretch; }
     .lb-side { align-self: stretch; min-height: 0; margin-top: 3.5rem; }
-    .lb-info { padding: 1rem 1.2rem; max-height: calc(100vh - 20rem); max-height: calc(100dvh - 20rem); overflow: auto; }
+    /* Kasten immer gleich hoch, damit Zurück/Weiter darunter beim Blättern nicht springen */
+    .lb-info { padding: 1rem 1.2rem; flex: none; box-sizing: border-box; height: min(30rem, calc(100vh - 20rem)); height: min(30rem, calc(100dvh - 20rem)); overflow: auto; }
     .lb-info dt { margin-top: .6rem; }
     .lb-info dd { font-size: 1.02rem; }
     /* Reihenfolge: Angaben, gleich darunter Zurück/Weiter, dann Detailbilder; Bildstrecke wechseln ganz unten */
