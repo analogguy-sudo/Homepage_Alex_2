@@ -913,8 +913,14 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   }
   /* Sucher: das Seagull als Blick auf die 6×6-Mattscheibe – quadratisch, seitenverkehrt, Gitter, Körnung, dunklere Ecken */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
-    :root { --ar: 1; --imgpad: clamp(3.5rem, 11vh, 8rem); }   /* kleiner, mit Luft oben und unten */
-    body:not([data-view]) .bgfix { transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-position: 50% 45%; }
+    :root { --ar: 1; --imgpad: clamp(4.5rem, 15vh, 10rem);   /* kleiner, mit Luft oben und unten */
+      /* links mindestens 27rem für Logo und Text, rechts 20rem fürs Menü: auf Laptops rückt der Sucher nach rechts
+         und wird nur so weit kleiner wie nötig; auf großen Bildschirmen bleibt er mittig */
+      --imgw: min(100vw, 100vh - 2 * var(--imgpad), 100vw - 27rem - 20rem);
+      --imgl: max((100vw - var(--imgw)) / 2, 27rem); }
+    body:not([data-view]) .hero.has-slides > div:first-child > p { max-width: none; }   /* Unterzeile darf die ganze Textspalte nutzen */
+    body:not([data-view]) .bgfix { transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-position: 50% 45%;
+      top: calc(50% - var(--imgw) / 2); height: var(--imgw); }   /* immer quadratisch, senkrecht mittig */
   }
   /* Handy und Tablet hoch: das Titelbild selbst wechselt (an der Stelle des Seagull), Filmrand-Zeile darunter */
   @media (max-width: 1100px) and (orientation: portrait) {
