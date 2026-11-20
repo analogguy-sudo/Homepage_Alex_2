@@ -202,11 +202,12 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   #ueber-mich .about > .strip { width: min(100%, 320px); margin: 1rem 0 0; justify-self: start; }
   .frame { aspect-ratio: 5 / 4; overflow: hidden; }
   .frame img { width: 100%; height: 100%; object-fit: cover; }
-  .frame img.develop { animation: develop 2.8s cubic-bezier(.2, .6, .3, 1) both; }   /* Porträt „entwickelt“ sich beim Öffnen */
+  .frame { background: #15130f; }
+  .frame img.wait { opacity: 0; }
+  .frame img.develop { animation: develop 1.6s cubic-bezier(.33, .1, .25, 1) both; will-change: opacity, transform; }   /* Porträt taucht beim Öffnen weich aus dem Dunkel auf */
   @keyframes develop {
-    from { filter: brightness(.2) contrast(1.4) blur(6px); }
-    60%  { filter: brightness(.8) contrast(1.15) blur(1px); }
-    to   { filter: none; }
+    from { opacity: 0; transform: scale(1.025); }
+    to   { opacity: 1; transform: none; }
   }
 
   /* Equipment: Kameras als Raster. Mit Foto (data-img am Eintrag) erscheint das Bild über dem Namen,
@@ -496,6 +497,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     html { scroll-behavior: auto; }
     body::after { animation: none; }
     .frame img.develop { animation: none; }
+    .frame img.wait { opacity: 1; }
   }
 
   /* ==========================================================================
@@ -889,11 +891,9 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     }
   }
   /* Sucher: beim Öffnen der Startseite (auch beim Zurückkehren) erst unscharf, dann langsam scharfgestellt wie mit dem Fokusrad
-     – kurz über den Punkt hinaus und zurück, wie von Hand; nicht bei „Bewegung reduzieren“ */
+     – in einem Zug, ohne Nachziehen; nicht bei „Bewegung reduzieren“ */
   @keyframes fokus {
     0% { filter: blur(7px) contrast(.94); }
-    70% { filter: blur(0) contrast(.94); }
-    84% { filter: blur(.8px) contrast(.94); }
     100% { filter: blur(.35px) contrast(.94); }
   }
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (prefers-reduced-motion: no-preference),
@@ -1187,7 +1187,18 @@ function renderHero(p) {
     $("edgeRight").textContent = (p.film || "").toUpperCase();
   }
   img.style.objectPosition = CONFIG.heroPosition || "50% 50%";
-  img.classList.add("develop");
+  heroEntwickeln();
+}
+/* Porträt erst einblenden, wenn es fertig geladen und dekodiert ist, sonst ruckelt es */
+let heroN = 0;
+function heroEntwickeln() {
+  const im = $("heroImg"), n = ++heroN;
+  im.classList.remove("develop"); im.classList.add("wait");
+  const go = () => { if (n !== heroN) return; im.classList.remove("wait"); void im.offsetWidth; im.classList.add("develop"); };
+  const geladen = (im.complete && im.naturalWidth) ? Promise.resolve()
+    : new Promise((r) => { im.addEventListener("load", r, { once: true }); im.addEventListener("error", r, { once: true }); });
+  geladen.then(() => Promise.race([im.decode ? im.decode().catch(() => {}) : 0, new Promise((r) => setTimeout(r, 300))])).then(go);
+  setTimeout(go, 6000);   // Sicherheitsnetz: nie dauerhaft unsichtbar
 }
 
 /* Leuchttisch = Auswahl der besten Bilder (Haken „Im Kontaktbogen“ im Admin); Umschalter nach Schwarzweiß/Farbe, die Motive stecken in den Bildstrecken */
@@ -1782,7 +1793,7 @@ function applyRoute() {
   });
   if (v === "leuchttisch") replayTable();   // auflegen beginnt sofort, während die Seite einblendet
   if (v === "bildstrecken") warmStrecken();   // aufgelegt wird nach dem Seitenwechsel (siehe route)
-  if (v === "ueber-mich") { const im = $("heroImg"); im.classList.remove("develop"); void im.offsetWidth; im.classList.add("develop"); }
+  if (v === "ueber-mich") heroEntwickeln();
   let t = null;
   // Titelblatt (#top, z. B. Logo): ganz nach oben, sonst verdeckt die Kopfzeile den oberen Bildrand
   try { if (h && h !== "top" && (!v || ALIAS[h])) t = document.querySelector("#" + h); } catch (e) {}
