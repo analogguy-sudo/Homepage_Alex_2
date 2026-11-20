@@ -1161,7 +1161,7 @@ async function loadPhotos() {
   if (!res.ok) throw new Error("Supabase antwortete mit Status " + res.status);
   const rows = await res.json();
   return rows.filter((r) => r.storage_path).map((r) => ({
-    strecke: r.strecke_id, kb: r.im_kontaktbogen !== false,
+    strecke: r.strecke_id, kb: r.im_kontaktbogen !== false, start: r.auf_startseite === true,
     title: r.title || "Ohne Titel", film: r.film, camera: r.camera, format: r.format, categories: (r.cat || "").split(",").map((c) => c.trim()).filter(Boolean), year: r.year, location: r.location, focal: r.focal, shutter: r.shutter, aperture: r.aperture,
     src: `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${r.storage_path.split("/").map(encodeURIComponent).join("/")}`,
     details: (r.details || []).map((n) => `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${n.split("/").map(encodeURIComponent).join("/")}`)
@@ -1846,7 +1846,9 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
 const slideState = { list: [], i: 0, timer: null, busy: false, hover: false };
 function setupSlides() {
   const box = $("slides"); if (!box) return;
-  const pics = kbPhotos().slice(0, 12);
+  // im Admin mit „Startseite“ markierte Fotos; gibt es (noch) keine, die ersten 12 aus dem Kontaktbogen
+  const marked = state.all.filter((p) => p.start);
+  const pics = marked.length >= 2 ? marked.slice(0, 24) : kbPhotos().slice(0, 12);
   if (pics.length < 2) return;
   slideState.pics = pics;
   box.closest(".hero").classList.add("has-slides");

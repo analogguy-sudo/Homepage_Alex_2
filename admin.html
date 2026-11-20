@@ -49,12 +49,13 @@ label.kb{display:flex;align-items:center;gap:.4rem;color:#c9c9c5;font-size:.92re
 <div id="editor">
 <form id="up" class="box"><b>Neues Foto</b>
 <div class="row"><input id="f" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic" required></div>
-<div class="row"><input name="title" placeholder="Titel" required><input name="film" placeholder="Film"><input name="camera" placeholder="Kamera"><input name="format" placeholder="Format (35 mm)"><input name="year" type="number" placeholder="Jahr"><input name="location" placeholder="Ort"><input name="focal" placeholder="Brennweite (50 mm)"><input name="shutter" placeholder="Zeit (1/125)"><input name="aperture" placeholder="Blende (f/8)"><select name="kfilm" id="up-kfilm" required><option value="">Film wählen</option></select><select name="strecke" id="up-strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" name="kb" checked> Im Kontaktbogen</label></div>
+<div class="row"><input name="title" placeholder="Titel" required><input name="film" placeholder="Film"><input name="camera" placeholder="Kamera"><input name="format" placeholder="Format (35 mm)"><input name="year" type="number" placeholder="Jahr"><input name="location" placeholder="Ort"><input name="focal" placeholder="Brennweite (50 mm)"><input name="shutter" placeholder="Zeit (1/125)"><input name="aperture" placeholder="Blende (f/8)"><select name="kfilm" id="up-kfilm" required><option value="">Film wählen</option></select><select name="strecke" id="up-strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" name="kb" checked> Im Kontaktbogen</label><label class="kb"><input type="checkbox" name="st"> Startseite</label></div>
 <details class="rules" open><summary>So wird eingeordnet</summary>
 <p>Jedes Foto bekommt einen <b>Film</b> (Schwarzweiß oder Farbe) und gehört zu genau einer <b>Bildstrecke</b>.</p>
 <ul><li><b>Allgemeine Themen:</b> Menschen &amp; Porträts, Stadtbild, Landschaft &amp; Natur (mit Tieren)</li>
 <li><b>Reisen &amp; Touren:</b> zum Beispiel Andalusien oder Burgruinen zwischen Pfalz und Elsass. Gehört ein Bild dazu, kommt es dorthin und nicht ins allgemeine Thema.</li>
-<li><b>Im Kontaktbogen:</b> nur für deine besten Bilder anhaken. Der Kontaktbogen ist die Auswahl, die Bildstrecken zeigen alles.</li></ul>
+<li><b>Im Kontaktbogen:</b> nur für deine besten Bilder anhaken. Der Kontaktbogen ist die Auswahl, die Bildstrecken zeigen alles.</li>
+<li><b>Startseite:</b> diese Fotos laufen in der Bilderfolge unter „Licht auf Film“, in der Reihenfolge von „Reihenfolge im Kontaktbogen“ (dort Filter „Auf der Startseite“). Am besten 6 bis 12 Bilder.</li></ul>
 <p>Ort, Kamera, Film und Format stehen in den Feldern oben. Neue Bildstrecken legst du unten unter „Bildstrecken und Projekte“ an.</p></details>
 <button>Hochladen</button></form>
 <form id="bulk" class="box"><b>Mehrere Fotos auf einmal</b>
@@ -147,12 +148,12 @@ async function cacheFix(){const l=await cacheList();let ok=0,bad=0,last="",i=0;$
 $("cfix").onclick=cacheFix;
 async function load(){try{await keep();cacheCheck();rows=await(await api("/rest/v1/photos?select=*&storage_path=not.is.null&order=sort.asc,created_at.desc")).json();await loadP();await loadC();draw();sortInit();show(true)}catch(x){say(x.message)}}
 function draw(){const L=$("list");L.innerHTML="";fillListFilter();rows.forEach(r=>{const d=document.createElement("div");d.className="box item";d.dataset.id=r.id;
-  d.innerHTML='<img alt="" loading="lazy"><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" data-k="kb"> Im Kontaktbogen</label></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
-  {fillSel(d.querySelector('[data-k="kfilm"]'),KFILM,filmOf(r.cat));fillStrecke(d.querySelector('[data-k="strecke"]'),r.strecke_id);d.querySelector('[data-k="kb"]').checked=r.im_kontaktbogen!==false}
+  d.innerHTML='<img alt="" loading="lazy"><div><div class="row">'+F.map(k=>'<input data-k="'+k+'" type="'+(k==="year"?"number":"text")+'" placeholder="'+(PH[k]||k)+'">').join("")+'<select data-k="kfilm"><option value="">Film wählen</option></select><select data-k="strecke"><option value="">Bildstrecke: keine</option></select><label class="kb"><input type="checkbox" data-k="kb"> Im Kontaktbogen</label><label class="kb" title="läuft in der Bilderfolge auf der Startseite"><input type="checkbox" data-k="st"> Startseite</label></div><button type="button" class="sv">Speichern</button> <button type="button" class="s dl">Löschen</button></div>';
+  {fillSel(d.querySelector('[data-k="kfilm"]'),KFILM,filmOf(r.cat));fillStrecke(d.querySelector('[data-k="strecke"]'),r.strecke_id);d.querySelector('[data-k="kb"]').checked=r.im_kontaktbogen!==false;d.querySelector('[data-k="st"]').checked=r.auf_startseite===true}
   d.querySelector("img").src=thumb(r.storage_path);
   d.querySelectorAll("input").forEach(i=>i.value=r[i.dataset.k]??"");
   {const sh=document.createElement("div");sh.className="strip";d.children[1].appendChild(sh);strip(sh,r,"photos","details",null,"detail_")}
-  d._save=async()=>{const o=body(k=>d.querySelector('[data-k="'+k+'"]').value.trim());o.im_kontaktbogen=d.querySelector('[data-k="kb"]').checked;
+  d._save=async()=>{const o=body(k=>d.querySelector('[data-k="'+k+'"]').value.trim());o.im_kontaktbogen=d.querySelector('[data-k="kb"]').checked;o.auf_startseite=d.querySelector('[data-k="st"]').checked;
     await api("/rest/v1/photos?id=eq."+r.id,{method:"PATCH",headers:J,body:JSON.stringify(o)});Object.assign(r,o)};
   track(d);
   d.querySelector(".dl").onclick=()=>delPhoto(r);
@@ -166,17 +167,17 @@ async function delPhoto(r){if(!confirm("„"+(r.title||"Ohne Titel")+"“ lösch
   say("Gelöscht.");await load()}catch(x){say(x.message)}}
 /* Fotoliste nach Bildstrecke filtern (gleiche Auswahl wie im Bereich „Reihenfolge“) */
 function filterList(){const v=$("lfilter").value;[...$("list").children].forEach(d=>{const r=rows.find(x=>x.id===d.dataset.id);
-  d.classList.toggle("hide",!!v&&!(v==="kb"?r.im_kontaktbogen!==false:v==="none"?!r.strecke_id:v.startsWith("f:")?catsOf(r).includes(v.slice(2)):r.strecke_id===v.slice(2)))})}
+  d.classList.toggle("hide",!!v&&!(v==="kb"?r.im_kontaktbogen!==false:v==="st"?r.auf_startseite===true:v==="none"?!r.strecke_id:v.startsWith("f:")?catsOf(r).includes(v.slice(2)):r.strecke_id===v.slice(2)))})}
 function fillListFilter(){const sel=$("lfilter"),cur=sel.value;sel.innerHTML="";sfList().concat([["none","Ohne Bildstrecke"]]).forEach(([k,l])=>sel.add(new Option(k?l:"Alle Fotos",k)));sel.value=cur;if(sel.selectedIndex<0)sel.value=""}
 /* Bereich „Reihenfolge“: Raster mit Ziehen (Maus) und ← → (Handy). Eine Rubrik zeigt nur ihre Bilder;
    diese tauschen untereinander die Plätze, die übrigen Fotos behalten ihre Position. Gespeichert wird alles auf einmal. */
 let ord=[],sf="",dragId=null;
 // Filter im Bereich „Reihenfolge“: alle, nur Kontaktbogen, nach Film oder nach Bildstrecke
-const sfList=()=>[["","Alle"],["kb","Im Kontaktbogen"]].concat(KFILM.map(k=>["f:"+k,k]),strecken().map(p=>["s:"+p.id,p.title]));
+const sfList=()=>[["","Alle"],["kb","Im Kontaktbogen"],["st","Auf der Startseite"]].concat(KFILM.map(k=>["f:"+k,k]),strecken().map(p=>["s:"+p.id,p.title]));
 const catsOf=r=>(r.cat||"").split(",").map(x=>x.trim());
 function sortInit(){ord=rows.map(r=>r.id);sortDraw();dirty(false)}
 function dirty(on){$("sbar").classList.toggle("dirty",on);$("osave").disabled=$("oreset").disabled=!on;$("sstate").textContent=on?"Reihenfolge geändert.":"Keine Änderungen."}
-function visible(){return ord.filter(id=>{const r=rows.find(x=>x.id===id);return !sf||(sf==="kb"?r.im_kontaktbogen!==false:sf.startsWith("f:")?catsOf(r).includes(sf.slice(2)):r.strecke_id===sf.slice(2))})}
+function visible(){return ord.filter(id=>{const r=rows.find(x=>x.id===id);return !sf||(sf==="kb"?r.im_kontaktbogen!==false:sf==="st"?r.auf_startseite===true:sf.startsWith("f:")?catsOf(r).includes(sf.slice(2)):r.strecke_id===sf.slice(2))})}
 function place(ids){const slots=ord.map((id,i)=>ids.includes(id)?i:-1).filter(i=>i>=0);slots.forEach((slot,k)=>ord[slot]=ids[k])}   // Teilfolge in ihre bisherigen Plätze zurückschreiben
 function move(id,to){const v=visible().filter(x=>x!==id);v.splice(Math.max(0,Math.min(to,v.length)),0,id);place(v);sortDraw();dirty(true)}
 function sortDraw(){const F2=$("sfilter");F2.innerHTML="";sfList().forEach(([k,l])=>{const b=document.createElement("button");b.type="button";b.textContent=l;b.setAttribute("aria-pressed",String(k===sf));b.onclick=()=>{sf=k;sortDraw()};F2.appendChild(b)});
@@ -223,7 +224,7 @@ $("up").onsubmit=async e=>{e.preventDefault();say("Lade hoch …");
   const slug=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\.[^.]+$/,"").replace(/[^\w-]+/g,"_");
   const name=Date.now()+"_"+slug+".jpg";
   await api("/storage/v1/object/photos/"+name,{method:"POST",headers:{"Content-Type":"image/jpeg"},body:blob});
-  const o=body(k=>e.target.elements[k].value.trim());o.im_kontaktbogen=e.target.elements.kb.checked;o.sort=o.position=Math.max(0,...rows.map(r=>r.position||0))+1;
+  const o=body(k=>e.target.elements[k].value.trim());o.im_kontaktbogen=e.target.elements.kb.checked;o.auf_startseite=e.target.elements.st.checked;o.sort=o.position=Math.max(0,...rows.map(r=>r.position||0))+1;
   o.title=o.title||"Ohne Titel";o.storage_path=name;o.image_path=name;
   await api("/rest/v1/photos",{method:"POST",headers:J,body:JSON.stringify(o)});
   e.target.reset();say("Hochgeladen.");load()}catch(x){say(x.message)}};
