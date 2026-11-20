@@ -6,6 +6,7 @@
 // Supabase schickt „Passwort vergessen“- und Einladungslinks an diese Startseite (Site URL des Projekts) – weiter zur Passwort-Seite.
 if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))location.replace("/passwort.html"+location.hash);
 </script>
+<script>try{if(matchMedia("(min-width: 1101px) and (min-height: 501px) and (hover: hover)").matches)document.documentElement.classList.add("kino")}catch(e){}</script>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Icons (aktuelles Logo): Browser-Tab, Google-Suche (Vielfache von 48 px), Home-Bildschirm -->
@@ -782,6 +783,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     .strecke.lead-split > .story { display: contents; }
     .strecke.lead-split > .strecke-head { grid-column: 2; grid-row: 1; align-self: center; padding: 0 0 0 .5rem; }
     .strecke.lead-split > .story > .shot.lead { grid-column: 1; grid-row: 1; justify-self: end; }
+    .strecke.lead-split.lead-quer { grid-template-columns: 1.55fr 1fr; }
     /* Aufmacher so hoch, dass er samt Bildunterschrift unter der Kopfzeile auf den Bildschirm passt */
     .strecke.lead-split .shot.lead button, .strecke.lead-split .shot.lead figcaption { width: min(100%, calc(72vh * var(--r, .75))); }
     .strecke.lead-split .strecke-head h3 { font-size: clamp(2.4rem, 4vw, 3.8rem); }
@@ -928,6 +930,110 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     body:not([data-view]) .hero.has-slides > .slides.ready { display: block; order: -1; position: relative; overflow: hidden; width: 100%; aspect-ratio: 1978 / 1315; background: #0b0b0b; }
     body:not([data-view]) .hero.has-slides .mobile-hero-copy > .slide-cap { display: block; margin: 0 0 .9rem; }
   }
+
+  /* ===== Startseite „Kino“ (Computer mit Maus): deine Fotos bildschirmfüllend, Wechsel mit einer Irisblende,
+     darunter die Rubriken zum Hineinscrollen. Die Klasse „kino“ setzt schon das Skript im Kopf – so gibt es kein Umspringen. ===== */
+  .kino-buehne { display: none; }
+  @media (min-width: 1101px) and (min-height: 501px) and (hover: hover) {
+    html.kino body:not([data-view]) .bgfix,
+    html.kino body:not([data-view]) .hero > div:first-child > .slides,
+    html.kino body:not([data-view]) .hero > div:first-child > .slide-cap { display: none !important; }
+    html.kino body:not([data-view]) .kino-buehne { display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; background: #070707; }
+    /* über dem dunklen Bild immer helle Schrift – auch im hellen Modus */
+    html.kino body:not([data-view]) .site-head, html.kino body:not([data-view]) .hero {
+      --ink: #F2F0EB; --ink-soft: rgba(242,240,235,.72); --rule: rgba(242,240,235,.24); --paper: #0b0b0b; color: var(--ink); }
+    html.kino body:not([data-view]) .hero { min-height: calc(100vh - var(--headb, 7rem)); box-sizing: border-box; }
+    /* Menü rechts wie gewohnt als Inhaltsverzeichnis, etwas größer, damit es auf dem Foto nicht untergeht */
+    html.kino body:not([data-view]) .site-head nav { position: absolute; left: auto; right: 0; width: min(21rem, 26vw); top: calc(50vh - 5rem) !important; }   /* feste Höhe – springt beim Zurückkehren nicht */
+    html.kino body:not([data-view]) .site-head nav a { font-size: 1.2rem; padding-block: .65rem; }
+    html.kino body:not([data-view]) .site-head nav .nav-sub { font-size: .9em; color: rgba(242,240,235,.78); }
+    html.kino body:not([data-view]) .kino-mehr { display: block; }
+    html.kino body:not([data-view]) .kino-tipp { display: block; }
+    .kino-tipp:hover { color: #fff; }
+    /* Titel und Satz unten links wie bei einem Filmplakat; Bildzeile dezent ganz unten rechts */
+    html.kino body:not([data-view]) .hero > div:first-child { align-self: end; padding-bottom: 4.5rem; }
+    html.kino body:not([data-view]) .hero { align-items: end; }
+    /* Lesbarkeit: links hinter Titel, rechts hinter dem Inhaltsverzeichnis abdunkeln */
+    html.kino .kino-buehne::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      background: linear-gradient(90deg, rgba(8,8,8,.88) 0, rgba(8,8,8,.72) 22%, rgba(8,8,8,.3) 38%, rgba(8,8,8,0) 50%, rgba(8,8,8,0) 60%, rgba(8,8,8,.45) 72%, rgba(8,8,8,.85) 86%, rgba(8,8,8,.9) 100%),
+                  linear-gradient(180deg, rgba(8,8,8,.82) 0, rgba(8,8,8,.6) 10%, rgba(8,8,8,0) 24%, rgba(8,8,8,0) 75%, rgba(8,8,8,.6) 100%); }   /* Logo und Schriftzug oben links immer auf dunklem Grund */
+    html.kino body:not([data-view]) .site-head, html.kino body:not([data-view]) .hero { text-shadow: 0 1px 2px rgba(0,0,0,.5), 0 2px 22px rgba(0,0,0,.55); }
+    html.kino body:not([data-view]) .logo-head { filter: drop-shadow(0 2px 10px rgba(0,0,0,.5)); }
+  }
+
+  /* Kino: Fotos bildschirmfüllend, Wechsel mit einer Blende, die sich aus der Mitte öffnet */
+  .kslide { position: absolute; inset: 0; opacity: 0; }
+  .kslide.on { opacity: 1; z-index: 1; }
+  .kslide.on .kfg { animation: heran 8.5s linear both; transform-origin: 50% 50%; will-change: transform; }
+  html.unten .kslide.on .kfg { animation-play-state: paused; }   /* sehr langsam ein Stück heran */
+  @keyframes heran { from { transform: scale(1); } to { transform: scale(1.06); } }
+  .kblende { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+  .kslide { overflow: hidden; background: #070707; }
+  .kfg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; max-width: none; }
+  .kino-tipp { display: none; position: absolute; z-index: 6; left: 50%; top: calc(100vh - 8.6rem); transform: translateX(-50%); padding: .6rem 1.2rem;
+    font-family: var(--edge); font-size: .85rem; letter-spacing: .28em; text-transform: uppercase; color: #F2F0EB; background: none; border: 0; cursor: pointer;
+    text-shadow: 0 1px 12px rgba(0,0,0,.6); opacity: 0; transition: opacity 1s ease; }
+  .kino-tipp.da { opacity: 1; }
+  .kino-tipp i { display: block; width: 14px; height: 14px; margin: .7rem auto 0; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); animation: tipp 2s ease-in-out infinite; }
+  .kino-tipp:hover span { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+  @keyframes tipp { 0%,100% { transform: translateY(0) rotate(45deg); opacity: .55; } 50% { transform: translateY(7px) rotate(45deg); opacity: 1; } }
+  .kino-mehr { display: none; max-width: 1320px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .km { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(16rem, 22rem) 1fr; gap: 3.5rem; align-items: start; padding: 7rem 0; border-top: 1px solid var(--rule); opacity: 0; transform: translateY(14px); transition: opacity 1.4s cubic-bezier(.2,.6,.2,1), transform 1.4s cubic-bezier(.2,.6,.2,1); }
+  /* große, ganz blasse Bildnummer im Hintergrund, wie am Filmrand */
+  .km::before { content: attr(data-no); position: absolute; z-index: -1; left: -1.2rem; bottom: .5rem; font-family: var(--display); font-size: clamp(14rem, 24vw, 24rem); line-height: .8; color: var(--ink); opacity: .045; pointer-events: none; }
+  .km > * { position: relative; }
+  .km-tisch { position: relative; overflow: hidden; cursor: none; padding: 3.2rem 2.4rem; border-radius: 6px;
+    background: radial-gradient(ellipse at 50% 45%, #fffdf7 0%, #f4efe2 55%, #e4dccb 100%);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 0 60px rgba(255,244,214,.35), 0 30px 60px rgba(0,0,0,.25); }
+  .km-streifen { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 20px 10px; background: #15120e;
+    transform: rotate(var(--dreh, 0deg)) translateX(var(--ver, 0)); box-shadow: 0 6px 14px rgba(0,0,0,.28); }
+  .km-streifen + .km-streifen { margin-top: 2.2rem; }
+  .tlupe { position: absolute; z-index: 5; width: 220px; height: 220px; border-radius: 50%; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity .2s;
+    background: radial-gradient(ellipse at 50% 45%, #fffdf7 0%, #f4efe2 60%, #e4dccb 100%);
+    box-shadow: 0 0 0 5px #1d1b18, 0 0 0 7px #6d655a, 0 18px 40px rgba(0,0,0,.45), inset 0 0 30px rgba(0,0,0,.25); }
+  .tlupe.an { opacity: 1; }
+  .tlupe::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.35), transparent 40%); }
+  .tlupe-inhalt { position: absolute; left: 0; top: 0; transform-origin: 0 0; box-sizing: border-box; }
+  .tlupe-inhalt .km-streifen button { cursor: none; }
+  .km-streifen::before, .km-streifen::after { content: ""; position: absolute; left: 6px; right: 6px; height: 8px;
+    background: repeating-linear-gradient(90deg, #f4efe2 0 9px, transparent 9px 19px); border-radius: 1px; }
+  .km-streifen { position: relative; }
+  .km-streifen::before { top: 6px; } .km-streifen::after { bottom: 6px; }
+  .km-streifen button { position: relative; padding: 0; border: 0; background: #000; aspect-ratio: 1; overflow: hidden; cursor: zoom-in; }
+  .km-streifen button::after { content: attr(data-no); position: absolute; left: 4px; bottom: -17px; font-family: var(--edge); font-size: .55rem; letter-spacing: .12em; color: #d38a2a; }
+  .km-streifen img, .km-strecken img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(var(--trim, 1)); transition: transform .6s ease; }
+  .km-streifen button:hover img, .km-strecken button:hover img { transform: scale(calc(var(--trim, 1) * 1.05)); }
+  .km.sichtbar { opacity: 1; transform: none; }
+  .km-kopf .no { font-family: var(--edge); letter-spacing: .14em; color: var(--amber); font-size: .85rem; }
+  .km-kopf h2 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: clamp(2.6rem, 4vw, 3.8rem); line-height: .95; margin: .5rem 0 .7rem; }
+  .km-kopf h2::before { content: none; }
+  .km-kopf p { font-style: italic; color: var(--ink-soft); margin: 0 0 1.6rem; font-size: 1.1rem; max-width: 30ch; }
+  /* klarer Knopf: Rahmen, beim Überfahren gefüllt – man sieht sofort, dass man hier weiterkommt */
+  /* ohne Kasten: feine Linie darunter, die beim Überfahren kräftig wird und von links durchläuft */
+  /* Link als Zeile mit einem feinen Strich davor, der beim Überfahren länger wird – kein Kasten, kein Pfeil */
+  .km-kopf a { display: inline-flex; align-items: center; gap: 1rem; padding: .4rem 0; color: var(--ink); text-decoration: none;
+    font-family: var(--edge); font-size: .9rem; letter-spacing: .18em; text-transform: uppercase; }
+  /* Strich von Anfang an deutlich; er wird nur länger, wenn die Maus wirklich auf dem Link ist (nicht beim Scrollen über den Abschnitt) */
+  .km-kopf a::before { content: ""; width: 3rem; height: 1px; background: currentColor; transition: width .35s cubic-bezier(.3,.6,.2,1); }
+  .km-kopf a:hover::before, .km-kopf a:focus-visible::before { width: 4.4rem; }
+  .km-raster { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .km-raster button { padding: 0; border: 0; background: #111; cursor: zoom-in; aspect-ratio: 1; overflow: hidden; }
+  .km-raster img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
+  .km-raster button:hover img { transform: scale(1.04); }
+  .km-strecken { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
+  .km-strecken button { padding: 0; border: 0; background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+  .km-strecken .bild { aspect-ratio: 4 / 5; overflow: hidden; background: #111; }
+  .km-strecken img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
+  .km-strecken button:hover img { transform: scale(1.04); }
+  .km-strecken b { display: block; margin-top: .9rem; font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 1.35rem; letter-spacing: .03em; }
+  .km-strecken small { display: block; margin-top: .2rem; font-family: var(--edge); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+  .km-ich { display: grid; grid-template-columns: minmax(0, 20rem) 1fr; gap: 2.5rem; align-items: start; }
+  .km-ich img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; filter: grayscale(1); display: block; }
+  .km-ich p { font-size: 1.15rem; line-height: 1.65; max-width: 52ch; margin: 0 0 1rem; }
+  @media (prefers-reduced-motion: reduce) { .km { opacity: 1; transform: none; transition: none; } .kino-tipp::after { animation: none; } }
+  .kino-bild.neu { clip-path: circle(0% at 50% 50%); }
+  .kino-zeile { position: absolute; z-index: 4; right: 2rem; bottom: 1.4rem; font-family: var(--edge); font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.55); text-align: right; }
+
 </style>
 </head>
 
@@ -937,14 +1043,15 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   <p data-en="Please turn your phone<br>to portrait">Bitte das Handy<br>ins Hochformat drehen</p>
 </div>
 <div class="bgfix" aria-hidden="true"></div>
+<div class="kino-buehne" aria-hidden="true"></div>
 
 <header class="wrap site-head">
   <a class="home-link" href="#top" aria-label="Analoge Welt – Startseite"><span class="logo logo-head" aria-hidden="true"></span><span class="brand">Analoge Welt</span></a>
   <div class="head-right">
     <nav id="mainNav" aria-label="Hauptnavigation">
       <a href="#top" class="nav-home">Startseite</a>
-      <a href="#leuchttisch"><span class="nav-t">Leuchttisch</span><span class="nav-sub">Meine liebsten Bilder</span></a>
       <a href="#bildstrecken"><span class="nav-t">Bildstrecken</span><span class="nav-sub">Fotos, die zusammengehören</span></a>
+      <a href="#leuchttisch"><span class="nav-t">Leuchttisch</span><span class="nav-sub">Meine liebsten Bilder</span></a>
       <a href="#projekte" class="nav-proj" hidden><span class="nav-t">Projekte</span><span class="nav-sub">Arbeiten rund um den Film</span></a>
       <a href="#ueber-mich"><span class="nav-t">Über mich</span><span class="nav-sub">Kameras und Kontakt</span></a>
     </nav>
@@ -1575,7 +1682,7 @@ function setLang(l) {
 
 /* ---------- Weiterblättern am Ende jeder Unterseite ---------- */
 let hasProjects = false;   // Projekte erscheinen erst im Menü, wenn es eins gibt
-const pageList = () => ["top", "leuchttisch", "bildstrecken", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
+const pageList = () => ["top", "bildstrecken", "leuchttisch", ...(hasProjects ? ["projekte"] : []), "ueber-mich"];
 const PAGE_NAMES = { top: "Startseite", leuchttisch: "Leuchttisch", bildstrecken: "Bildstrecken", projekte: "Projekte", equipment: "Equipment", "ueber-mich": "Über mich", kontakt: "Kontakt" };
 function renderPagers() {
   const PAGES = pageList();
@@ -1720,7 +1827,8 @@ function renderKind(kind, pre) {
       im.alt = f.title + (f.location ? ", " + f.location : ""); im.decoding = "async"; if (k > 3) im.loading = "lazy";
       // Form (Hoch/Quer) aus dem vorab gemessenen Seitenverhältnis; das große Bild lädt sofort, ohne auf etwas zu warten
       const shape = (r) => {
-        if (k === 0 && r <= .87) box.classList.add("lead-split");   // Hochformat-Aufmacher: am Computer Titel und Text daneben
+        // Aufmacher immer links, Titel und Text rechts daneben – bei allen Strecken gleich; Querformat bekommt die breitere Spalte
+        if (k === 0) { box.classList.add("lead-split"); box.classList.toggle("lead-quer", r > .87); }
         b.style.aspectRatio = String(r);
         fig.style.setProperty("--r", r.toFixed(4));   // für die Höhenbegrenzung
         fig.classList.add(r >= 1.15 ? "wide" : r <= .87 ? "tall" : "even");
@@ -1875,6 +1983,229 @@ function setupSlides() {
   box.addEventListener("pointerenter", () => { slideState.hover = true; });
   box.addEventListener("pointerleave", () => { slideState.hover = false; });
   buildSlides(); mqPortrait.addEventListener("change", buildSlides);
+  kinoStart(pics);
+}
+/* ===== Startseite „Kino“ (Computer mit Maus) ===== */
+const mqKino = matchMedia("(min-width: 1101px) and (min-height: 501px) and (hover: hover)");
+let kinoGebaut = false;
+function kinoStart(pics) {
+  const root = document.documentElement, buehne = document.querySelector(".kino-buehne");
+  const bauen = () => {
+    root.classList.toggle("kino", mqKino.matches);
+    if (!mqKino.matches || kinoGebaut || !buehne) return;
+    kinoGebaut = true;
+    const zeileVon = (p) => [p.title, p.location, p.film].filter(Boolean).join(" · ");
+    kinoFormate(pics).then((quer) => kinoLauf(buehne, quer, zeileVon, (p) => sized(p.src, 2400), false, pics));
+  };
+  mqKino.addEventListener("change", bauen); bauen();
+}
+// ohne Startseiten-Fotos (Laden gescheitert): lieber die bisherige Startseite als eine dunkle Fläche
+setTimeout(() => { if (!kinoGebaut) document.documentElement.classList.remove("kino"); }, 9000);
+/* weißen Rand (Passepartout) eines Fotos finden: Anteil innen als {x, y, w, h} (0…1) */
+async function innenRahmen(src) {
+  try {
+    const im = new Image(); im.crossOrigin = "anonymous";
+    await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = sized(src, 300); setTimeout(no, 6000); });
+    const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, W, H).data;
+    const hell = (x, y) => { const k = (y * W + x) * 4; return (d[k] + d[k + 1] + d[k + 2]) / 3; };
+    const zeileHell = (y) => { let n = 0; for (let x = 0; x < W; x += 2) if (hell(x, y) > 228) n++; return n / (W / 2) > .9; };
+    const spalteHell = (x) => { let n = 0; for (let y = 0; y < H; y += 2) if (hell(x, y) > 228) n++; return n / (H / 2) > .9; };
+    let t = 0, b = H - 1, l = 0, rr = W - 1;
+    while (t < H * .25 && zeileHell(t)) t++;
+    while (b > H * .75 && zeileHell(b)) b--;
+    while (l < W * .25 && spalteHell(l)) l++;
+    while (rr > W * .75 && spalteHell(rr)) rr--;
+    // ein Passepartout ist ringsum etwa gleich breit; einseitig helle Flächen (Himmel, Fassade) gehören zum Bild
+    if (Math.abs(l - (W - 1 - rr)) > W * .03 || Math.abs(t - (H - 1 - b)) > H * .03) return null;
+    if (t + (H - 1 - b) + l + (W - 1 - rr) === 0) return null;
+    const m = 0.012;   // etwas mehr wegnehmen, damit keine helle Kante bleibt
+    return { x: l / W + m, y: t / H + m, w: (rr - l + 1) / W - 2 * m, h: (b - t + 1) / H - 2 * m };
+  } catch (e) { return null; }
+}
+/* fürs Kino nur Quer- und Quadratformate – Hochformate verlören auf dem breiten Schirm zu viel */
+async function kinoFormate(pics) {
+  const mass = await Promise.all(pics.map((p) => new Promise((ok) => {
+    const im = new Image(); im.onload = () => ok(im.naturalWidth / im.naturalHeight); im.onerror = () => ok(0); im.src = sized(p.src, 200); setTimeout(() => ok(0), 6000);
+  })));
+  const quer = pics.filter((p, k) => mass[k] >= .95);
+  return quer.length >= 2 ? quer : pics;
+}
+/* weich scrollen: langsam anfahren, gleiten, sanft auslaufen */
+function gleiten(ziel, ms) {
+  const y0 = scrollY, d = ziel - y0, t0 = performance.now();
+  if (reduceMotion()) return scrollTo(0, ziel);
+  const e = (u) => (u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+  const s = (t) => { const u = Math.min(1, (t - t0) / ms); scrollTo(0, y0 + d * e(u)); if (u < 1) requestAnimationFrame(s); };
+  requestAnimationFrame(s);
+}
+/* Irisblende über den ganzen Schirm, auf einer Zeichenfläche gemalt: neun Lamellen um eine Öffnung,
+   die kleiner und wieder größer wird. Nur eine Fläche pro Bild – das bleibt auch im Vollbild flüssig. */
+function kinoBlende(buehne) {
+  const el = document.createElement("canvas"); el.className = "kblende"; el.setAttribute("aria-hidden", "true");
+  const g = el.getContext("2d"); let W = 0, H = 0, dpr = 1;
+  const groesse = () => { dpr = Math.min(devicePixelRatio || 1, 2); W = buehne.clientWidth; H = buehne.clientHeight; el.width = W * dpr; el.height = H * dpr; };
+  groesse(); addEventListener("resize", groesse);
+  const N = 9;
+  const male = (auf, dreh) => {   // auf: 0 = zu, 1 = ganz offen
+    const R = Math.hypot(W, H) / 2 + 4, r = auf * R;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    if (auf >= 1) return;
+    const cx = W / 2, cy = H / 2, ecken = [];
+    for (let n = 0; n < N; n++) { const a = dreh + n * 2 * Math.PI / N; ecken.push([cx + r * Math.cos(a), cy + r * Math.sin(a), a]); }
+    // dunkle Lamellen: ganze Fläche minus Öffnung
+    g.beginPath(); g.rect(0, 0, W, H);
+    ecken.forEach(([x, y], n) => (n ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath();
+    g.fillStyle = "#0d0d0c"; g.fill("evenodd");
+    // Kanten der Lamellen: von jeder Ecke schräg nach außen
+    g.strokeStyle = "rgba(255,255,255,.09)"; g.lineWidth = 1;
+    ecken.forEach(([x, y, a]) => { const t = a + Math.PI / 2 + .35; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(t) * R * 2.2, y + Math.sin(t) * R * 2.2); g.stroke(); });
+  };
+  const lauf = (von, bis, ms, ease) => new Promise((fertig) => {
+    const t0 = performance.now(), d0 = von < bis ? .25 : 0;
+    const schritt = (t) => {
+      const u = Math.min(1, (t - t0) / ms), e = ease(u), auf = von + (bis - von) * e;
+      male(auf, d0 + (1 - auf) * .6);
+      if (u < 1) requestAnimationFrame(schritt); else fertig();
+    };
+    requestAnimationFrame(schritt);
+    setTimeout(() => { male(bis, 0); fertig(); }, ms + 600);   // falls der Browser die Bilder anhält
+  });
+  const rein = (u) => u * u * (3 - 2 * u) * u, raus = (u) => 1 - Math.pow(1 - u, 2.4);   // weicher als ein echter Verschluss
+  male(0, .6);   // anfangs geschlossen
+  return { el, schliessen: (ms) => lauf(1, 0, ms, rein), oeffnen: (ms) => lauf(0, 1, ms, raus) };
+}
+function kinoLauf(buehne, pics, zeileVon, gross, still, alle) {
+  // bildschirmfüllend; ein weißer Rand im Scan wird vorher erkannt und weggeschnitten
+  const dia = (p) => { const d = document.createElement("div"); d.className = "kslide"; d.innerHTML = '<img class="kfg" alt="">'; d._p = p; return d; };
+  const lege = (d) => {
+    const im = d.querySelector(".kfg"), q = d._rahmen; if (!q || !im.naturalWidth) return;
+    const W = buehne.clientWidth, H = buehne.clientHeight, nw = im.naturalWidth, nh = im.naturalHeight;
+    const s = Math.max(W / (nw * q.w), H / (nh * q.h));
+    im.style.objectFit = "fill"; im.style.width = nw * s + "px"; im.style.height = nh * s + "px";
+    im.style.left = (W / 2 - (q.x + q.w / 2) * nw * s) + "px"; im.style.top = (H / 2 - (q.y + q.h / 2) * nh * s) + "px";
+  };
+  addEventListener("resize", () => buehne.querySelectorAll(".kslide").forEach(lege));
+  const laden = async (d) => {
+    const u = gross(d._p), im = d.querySelector(".kfg");
+    const rahmen = innenRahmen(d._p.src); im.src = u;
+    await Promise.race([new Promise((r) => { if (im.complete && im.naturalWidth) r(); im.onload = r; im.onerror = r; }), new Promise((r) => setTimeout(r, 6000))]);
+    d._rahmen = await rahmen; lege(d);
+  };
+  const z = document.createElement("div"); z.className = "kino-zeile";
+  const blende = kinoBlende(buehne);
+  const erstes = dia(pics[0]); buehne.append(erstes, blende.el, z);
+  z.textContent = zeileVon(pics[0]);
+  // beim Öffnen der Seite: Verschluss geht einmal auf
+  laden(erstes).then(() => { erstes.classList.add("on"); blende.oeffnen(reduceMotion() ? 1 : 900); });
+  if (still) return;
+  const tipp = document.createElement("button"); tipp.type = "button"; tipp.className = "kino-tipp"; tipp.innerHTML = '<span>Entdecken</span><i aria-hidden="true"></i>';
+  tipp.addEventListener("click", () => { const z = document.querySelector(".kino-mehr"); if (z) gleiten(z.getBoundingClientRect().top + scrollY, 1300); });
+  document.body.appendChild(tipp);   // über dem Inhalt, sonst kommt der Klick nicht an
+  setTimeout(() => tipp.classList.add("da"), 2200);
+  let unten = false;
+  addEventListener("scroll", () => { const u = scrollY > innerHeight * .9; if (u !== unten) { unten = u; document.documentElement.classList.toggle("unten", u); } }, { passive: true });
+  let i = 0, cur = erstes, naechstes = null;
+  // das nächste Foto lange vorher laden und zuschneiden – beim Wechsel ist alles fertig
+  const vorbereiten = () => { const k = (i + 1) % pics.length, d = dia(pics[k]); d._k = k; d._fertig = laden(d); buehne.insertBefore(d, blende.el); naechstes = d; };
+  vorbereiten();
+  const weiter = async () => {
+    if (document.hidden || document.body.dataset.view || lb.open || scrollY > innerHeight * .6 || !document.documentElement.classList.contains("kino")) return setTimeout(weiter, 1500);
+    const nxt = naechstes; await nxt._fertig;
+    if (reduceMotion()) { cur.classList.remove("on"); nxt.classList.add("on"); }
+    else { await blende.schliessen(620); cur.classList.remove("on"); nxt.classList.add("on"); await new Promise((r) => setTimeout(r, 140)); await blende.oeffnen(1050); }
+    cur.remove(); cur = nxt; i = nxt._k; z.textContent = zeileVon(pics[i]);
+    vorbereiten();
+    setTimeout(weiter, 5600);
+  };
+  setTimeout(weiter, 6200);
+  kinoMehr(alle || pics);
+}
+/* Vorschaubild ohne weißen Rand: Bild so weit vergrößern, dass der Rand aus dem Rahmen fällt */
+function ohneRand(img, p) {
+  innenRahmen(p.src).then((q) => { if (q) img.style.setProperty("--trim", (1 / Math.min(q.w, q.h)).toFixed(3)); });
+}
+/* Lupe auf dem Leuchttisch: folgt der Maus, zeigt den Streifen darunter vergrößert */
+function tischLupe(tisch) {
+  const lupe = document.createElement("div"); lupe.className = "tlupe"; lupe.setAttribute("aria-hidden", "true");
+  tisch.appendChild(lupe);
+  const S = 2.4, R = 110;
+  let kopie = null;
+  const baue = () => { kopie && kopie.remove(); kopie = document.createElement("div"); kopie.className = "tlupe-inhalt";
+    [...tisch.querySelectorAll(".km-streifen")].forEach((st) => kopie.appendChild(st.cloneNode(true)));
+    kopie.style.width = tisch.clientWidth + "px"; kopie.style.padding = getComputedStyle(tisch).padding; lupe.appendChild(kopie); };
+  tisch.addEventListener("pointerenter", () => { baue(); lupe.classList.add("an"); });
+  tisch.addEventListener("pointerleave", () => lupe.classList.remove("an"));
+  tisch.addEventListener("pointermove", (e) => {
+    const r = tisch.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    lupe.style.left = x - R + "px"; lupe.style.top = y - R + "px";
+    if (kopie) kopie.style.transform = `translate(${R - x * S}px, ${R - y * S}px) scale(${S})`;
+  });
+  addEventListener("resize", () => { if (kopie) baue(); });
+}
+/* unter dem Kino: die drei Rubriken als eigene Abschnitte zum Hineinscrollen */
+function kinoMehr(pics) {
+  const main = document.getElementById("top"), hero = document.querySelector(".hero");
+  const mehr = document.createElement("div"); mehr.className = "kino-mehr";
+  const kopf = (no, t, u, href, link) => `<div class="km-kopf"><span class="no">${no}</span><h2>${tr(t)}</h2><p>${tr(u)}</p><a href="${href}">${tr(link)}</a></div>`;
+  // 01 Leuchttisch
+  const lt = document.createElement("section"); lt.className = "km";
+  lt.innerHTML = kopf("02", "Leuchttisch", "Meine liebsten Bilder", "#leuchttisch", "Zum Leuchttisch");
+  // echter Leuchttisch: leuchtende Fläche, darauf zwei Filmstreifen, leicht schief wie von Hand hingelegt
+  const tisch = document.createElement("div"); tisch.className = "km-tisch";
+  const lieb = kbPhotos().slice(0, 10);
+  [lieb.slice(0, 5), lieb.slice(5, 10)].forEach((reihe, r) => {
+    if (!reihe.length) return;
+    const streifen = document.createElement("div"); streifen.className = "km-streifen"; streifen.style.setProperty("--dreh", r ? ".8deg" : "-1.1deg"); streifen.style.setProperty("--ver", r ? "-1.5rem" : "1rem");
+    reihe.forEach((p, n) => {
+      const k = r * 5 + n, b = document.createElement("button"); b.type = "button"; b.dataset.no = (k + 1) + "A";
+      b.innerHTML = `<img loading="lazy" alt="" src="${sized(p.src, 600)}">`; ohneRand(b.firstChild, p);
+      b.addEventListener("click", () => openViewer(lieb, k, [])); streifen.appendChild(b);
+    });
+    tisch.appendChild(streifen);
+  });
+  lt.appendChild(tisch);
+  tischLupe(tisch);
+  // 02 Bildstrecken
+  const bs = document.createElement("section"); bs.className = "km";
+  bs.innerHTML = kopf("01", "Bildstrecken", "Fotos, die zusammengehören", "#bildstrecken", "Alle Bildstrecken");
+  const strecken = document.createElement("div"); strecken.className = "km-strecken"; bs.appendChild(strecken);
+  const fuelle = () => {
+    if (!projLoaded) return setTimeout(fuelle, 300);
+    const items = streckenItems();
+    // Reisen zuerst (Andalusien, Burgruinen …), danach die übrigen
+    const zeigen = [...items.filter((x) => x.bereich !== "allgemein"), ...items.filter((x) => x.bereich === "allgemein")].slice(0, 3);
+    zeigen.forEach((it) => { const k = items.indexOf(it);
+      const lead = state.all.find((f) => f.strecke === it.id); if (!lead) return;
+      const n = state.all.filter((f) => f.strecke === it.id).length;
+      const b = document.createElement("button"); b.type = "button";
+      b.innerHTML = `<div class="bild"><img loading="lazy" alt="" src="${sized(lead.src, 800)}"></div><b></b><small>${n} ${tr("Fotos")}</small>`;
+      b.querySelector("b").textContent = (lang === "en" && it.title_en) || it.title || it.title_de || "";
+      ohneRand(b.querySelector("img"), lead);
+      b.addEventListener("click", () => { projSel.bildstrecke = k; renderCards(); location.hash = "#bildstrecken"; });
+      strecken.appendChild(b);
+    });
+  };
+  fuelle();
+  // 03 Über mich
+  const um = document.createElement("section"); um.className = "km";
+  um.innerHTML = kopf("03", "Über mich", "Kameras und Kontakt", "#ueber-mich", "Mehr über mich");
+  const ich = document.createElement("div"); ich.className = "km-ich";
+  const portrait = document.getElementById("heroImg");
+  const satz = document.querySelector("#ueber-mich .about-text p");
+  ich.innerHTML = `<img loading="lazy" alt="Porträt" src="${portrait && portrait.getAttribute("src") || ""}"><div><p></p></div>`;
+  ich.querySelector("p").textContent = satz ? satz.textContent : "";
+  um.appendChild(ich);
+  bs.dataset.no = "01"; lt.dataset.no = "02"; um.dataset.no = "03";
+  mehr.append(bs, lt, um);
+  hero.after(mehr);
+  // ruhig einblenden, sobald ein Abschnitt ins Bild kommt
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("sichtbar"); io.unobserve(e.target); } }), { threshold: 0, rootMargin: "0px 0px -8% 0px" });
+  mehr.querySelectorAll(".km").forEach((el) => io.observe(el));
+  // Bilder unten schon nach dem Start laden, damit beim Scrollen nichts nachploppt
+  setTimeout(() => mehr.querySelectorAll("img[loading=lazy]").forEach((im) => { im.loading = "eager"; }), 2500);
+  // Porträt nachtragen, falls es erst später gesetzt wird
+  setTimeout(() => { const im = ich.querySelector("img"); if (!im.getAttribute("src") && portrait) im.src = portrait.src; }, 2500);
 }
 /* Handy/Tablet hoch: das Titelbild selbst wechselt (Seagull zuerst), Filmrand-Zeile darunter.
    Computer: Seagull bleibt groß, die Bilderfolge läuft links unter dem Titel. */
