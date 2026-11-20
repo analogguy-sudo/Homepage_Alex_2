@@ -6,7 +6,7 @@
 // Supabase schickt „Passwort vergessen“- und Einladungslinks an diese Startseite (Site URL des Projekts) – weiter zur Passwort-Seite.
 if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))location.replace("/passwort.html"+location.hash);
 </script>
-<script>try{if(matchMedia("(min-width: 1101px) and (min-height: 501px) and (hover: hover)").matches)document.documentElement.classList.add("kino")}catch(e){}</script>
+<script>try{if(matchMedia("(orientation: portrait), (min-height: 501px)").matches)document.documentElement.classList.add("kino")}catch(e){}</script>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Icons (aktuelles Logo): Browser-Tab, Google-Suche (Vielfache von 48 px), Home-Bildschirm -->
@@ -785,7 +785,10 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     .strecke.lead-split > .story > .shot.lead { grid-column: 1; grid-row: 1; justify-self: end; }
     .strecke.lead-split.lead-quer { grid-template-columns: 1.55fr 1fr; }
     /* Aufmacher so hoch, dass er samt Bildunterschrift unter der Kopfzeile auf den Bildschirm passt */
-    .strecke.lead-split .shot.lead button, .strecke.lead-split .shot.lead figcaption { width: min(100%, calc(72vh * var(--r, .75))); }
+    /* Aufmacher samt Bildunterschrift ganz auf dem Bildschirm, auch bei kleinen Fenstern (Kopfzeile + Titel ≈ 15,5rem) */
+    .strecke.lead-split .shot.lead button, .strecke.lead-split .shot.lead figcaption { width: min(100%, calc(72vh * var(--r, .75)), calc((100vh - 15.5rem) * var(--r, .75))); }
+    /* ist eine Strecke gewählt, braucht es den Hinweis „Wähle eine Bildstrecke.“ nicht – der Aufmacher rückt nach oben */
+    #bildstrecken .wrap:has(.strecke) > .hint { display: none; }
     .strecke.lead-split .strecke-head h3 { font-size: clamp(2.4rem, 4vw, 3.8rem); }
     /* einzelne Hoch- und Quadratformate mittig statt links mit Leerraum daneben */
     .shot.solo button, .shot.solo figcaption { margin-inline: auto; }
@@ -934,7 +937,67 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   /* ===== Startseite „Kino“ (Computer mit Maus): deine Fotos bildschirmfüllend, Wechsel mit einer Irisblende,
      darunter die Rubriken zum Hineinscrollen. Die Klasse „kino“ setzt schon das Skript im Kopf – so gibt es kein Umspringen. ===== */
   .kino-buehne { display: none; }
-  @media (min-width: 1101px) and (min-height: 501px) and (hover: hover) {
+  /* nie seitlich verschiebbar (iPhone): was über den Rand ragt, wird abgeschnitten */
+  html.kino, html.kino body { overflow-x: clip; }
+  /* Touch-Geräte: kein langsames Heranzoomen, keine weichen Riesenschatten – das ruckelt sonst beim Scrollen */
+  @media (hover: none) {
+    html.kino .kslide.on .kfg { animation: none; will-change: auto; }
+    html.kino body:not([data-view]) .site-head, html.kino body:not([data-view]) .hero { text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+    html.kino .km { transform: none; transition: opacity .8s ease; }
+  }
+
+  /* Kino auf Querformat-Schirmen, für die es das Inhaltsverzeichnis-Raster sonst nicht gibt (schmaler als 3:2 mit Maus, kleine Tablets):
+     dieselbe Liste rechts – Nummer, Rubrik, Unterzeile */
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (max-aspect-ratio: 3/2) and (hover: hover),
+         (min-width: 821px) and (max-width: 1023px) and (orientation: landscape) and (min-height: 501px) and (hover: none) {
+    html.kino body:not([data-view]) .site-head nav { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 0; }
+    html.kino body:not([data-view]) .site-head nav .nav-home { display: none; }
+    html.kino body:not([data-view]) .site-head nav a { display: block; text-align: left; padding: .6rem 0; border-bottom: 1px solid var(--rule); }
+    html.kino body:not([data-view]) .site-head nav a::before { content: attr(data-no); margin-right: .9rem; font-family: var(--edge); font-size: .78em; letter-spacing: .14em; color: var(--amber); }
+    html.kino body:not([data-view]) .site-head nav .nav-sub { display: block; margin: .2rem 0 0 2.2rem; font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0; font-size: .82em; }
+  }
+
+  /* Kino auf Handy und Tablet hoch: Foto über den ganzen Schirm (feste Höhe, die Safari-Leiste lässt es nicht springen),
+     Titel unten, die Abschnitte darunter zum Wischen */
+  @media (max-width: 1100px) and (orientation: portrait) {
+    html.kino body:not([data-view]) .kino-buehne { display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100vh; height: 100svh; z-index: -1; overflow: hidden; background: #070707; }
+    html.kino .kino-buehne::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      background: linear-gradient(180deg, rgba(8,8,8,.85) 0, rgba(8,8,8,.7) 15%, rgba(8,8,8,.2) 26%, rgba(8,8,8,0) 34%, rgba(8,8,8,0) 46%, rgba(8,8,8,.55) 68%, rgba(8,8,8,.9) 100%); }
+    html.kino body:not([data-view]) .hero::before,
+    html.kino body:not([data-view]) .hero > .slides,
+    html.kino body:not([data-view]) .slide-cap,
+    html.kino body:not([data-view]) .mobile-hero-copy .cta { display: none !important; }
+    /* Kopfzeile liegt oben durchsichtig auf dem Foto; erst beim Weiterscrollen bekommt sie wieder ihren normalen Grund */
+    html.kino:not(.weg) body:not([data-view]) .site-head, html.kino body:not([data-view]) .hero {
+      --ink: #F2F0EB; --ink-soft: rgba(242,240,235,.75); --rule: rgba(242,240,235,.25); --paper: #0b0b0b; color: var(--ink);
+      text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+    html.kino:not(.weg) body:not([data-view]) .site-head { background: transparent; }
+    html.kino:not(.weg) body:not([data-view]) .site-head::before { opacity: 0; }   /* Grundfläche der Kopfzeile oben ausblenden */
+    html.kino body:not([data-view]) .site-head::before { transition: opacity .35s ease; }
+    /* Höhe einmal fest: Bildschirmhöhe ohne Safari-Leiste minus Kopfzeile – ändert sich beim Scrollen nicht */
+    html.kino body:not([data-view]) .hero { min-height: calc(100vh - var(--kopfh, 7.6rem)); min-height: calc(100svh - var(--kopfh, 7.6rem)); justify-content: flex-end; padding-bottom: 7rem; box-sizing: border-box; }
+    html.kino body:not([data-view]) .hero > .mobile-hero-copy { padding-top: 0; }
+    html.kino body:not([data-view]) .kino-mehr { display: block; padding: 0 1.25rem 3rem; }
+    html.kino body:not([data-view]) .kino-tipp { display: block; top: calc(100vh - 5.6rem); top: calc(100svh - 5.6rem); font-size: .75rem; }
+    html.kino .kino-zeile { right: 1.25rem; bottom: 1rem; max-width: 60%; font-size: .58rem; }
+    html.kino .km { grid-template-columns: 1fr; gap: 1.8rem; padding: 4rem 0 4.5rem; }
+    html.kino .km::before { font-size: 9rem; left: -.3rem; bottom: .3rem; }
+    html.kino .km-kopf h2 { font-size: 2.6rem; }
+    /* wie im Magazin: die erste Strecke groß über die ganze Breite, darunter zwei kleiner nebeneinander – kein Wischen */
+    html.kino .km-strecken { grid-template-columns: 1fr 1fr; gap: 1.6rem .9rem; }
+    html.kino .km-strecken button:first-child { grid-column: 1 / -1; }
+    html.kino .km-strecken button:first-child .bild { aspect-ratio: 4 / 5; }
+    html.kino .km-strecken button:not(:first-child) .bild { aspect-ratio: 1; }
+    html.kino .km-strecken button:not(:first-child) b { font-size: 1.05rem; line-height: 1.15; }
+    html.kino .km-strecken button:first-child b { font-size: 1.6rem; }
+    html.kino .km-tisch { overflow: hidden; cursor: auto; padding: 1.6rem 1.1rem; }
+    html.kino .km-streifen { min-width: 0; padding: 16px 8px; gap: 5px; }
+    html.kino .km-streifen + .km-streifen { margin-top: 1.4rem; }
+    html.kino .km-ich { grid-template-columns: 1fr; gap: 1.4rem; }
+    html.kino .km-ich img { max-width: 22rem; }
+  }
+
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
     html.kino body:not([data-view]) .bgfix,
     html.kino body:not([data-view]) .hero > div:first-child > .slides,
     html.kino body:not([data-view]) .hero > div:first-child > .slide-cap { display: none !important; }
@@ -1021,7 +1084,8 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   .km-raster img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
   .km-raster button:hover img { transform: scale(1.04); }
   .km-strecken { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
-  .km-strecken button { padding: 0; border: 0; background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+  .km-strecken button { padding: 0; border: 0; background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit;
+    display: flex; flex-direction: column; justify-content: flex-start; align-self: start; }   /* Bilder oben bündig, auch wenn ein Titel zweizeilig ist */
   .km-strecken .bild { aspect-ratio: 4 / 5; overflow: hidden; background: #111; }
   .km-strecken img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
   .km-strecken button:hover img { transform: scale(1.04); }
@@ -1986,16 +2050,22 @@ function setupSlides() {
   kinoStart(pics);
 }
 /* ===== Startseite „Kino“ (Computer mit Maus) ===== */
-const mqKino = matchMedia("(min-width: 1101px) and (min-height: 501px) and (hover: hover)");
+const mqKino = matchMedia("(orientation: portrait), (min-height: 501px)");
 let kinoGebaut = false;
 function kinoStart(pics) {
   const root = document.documentElement, buehne = document.querySelector(".kino-buehne");
+  // Höhe der Kopfzeile nur messen, wenn sich die Breite ändert (Drehen) – nicht bei der ein- und ausfahrenden Safari-Leiste
+  let breiteVorher = 0;
+  const kopf = () => { if (innerWidth === breiteVorher) return; breiteVorher = innerWidth; const h = document.querySelector(".site-head"); if (h) root.style.setProperty("--kopfh", h.offsetHeight + "px"); };
+  kopf(); addEventListener("resize", kopf); if (document.fonts) document.fonts.ready.then(() => { breiteVorher = 0; kopf(); });
   const bauen = () => {
     root.classList.toggle("kino", mqKino.matches);
     if (!mqKino.matches || kinoGebaut || !buehne) return;
     kinoGebaut = true;
     const zeileVon = (p) => [p.title, p.location, p.film].filter(Boolean).join(" · ");
-    kinoFormate(pics).then((quer) => kinoLauf(buehne, quer, zeileVon, (p) => sized(p.src, 2400), false, pics));
+    // Bildgröße nach Bildschirm: Handy und Tablet bekommen kleinere Dateien – das schont Speicher und läuft flüssiger
+    const breite = matchMedia("(hover: none)").matches ? Math.min(1400, Math.round(Math.max(innerWidth, innerHeight) * Math.min(devicePixelRatio || 1, 2))) : 2400;
+    kinoFormate(pics).then((quer) => kinoLauf(buehne, quer, zeileVon, (p) => sized(p.src, breite), false, pics));
   };
   mqKino.addEventListener("change", bauen); bauen();
 }
@@ -2025,18 +2095,22 @@ async function innenRahmen(src) {
 }
 /* fürs Kino nur Quer- und Quadratformate – Hochformate verlören auf dem breiten Schirm zu viel */
 async function kinoFormate(pics) {
+  const hochkant = innerHeight > innerWidth;   // Handy/Tablet hoch: Hochformate und Quadrate, sonst Quer und Quadrat
   const mass = await Promise.all(pics.map((p) => new Promise((ok) => {
     const im = new Image(); im.onload = () => ok(im.naturalWidth / im.naturalHeight); im.onerror = () => ok(0); im.src = sized(p.src, 200); setTimeout(() => ok(0), 6000);
   })));
-  const quer = pics.filter((p, k) => mass[k] >= .95);
+  // am Handy möglichst echte Hochformate – ein Quadrat verliert dort mehr als die Hälfte
+  let quer = pics.filter((p, k) => mass[k] && (hochkant ? mass[k] <= .9 : mass[k] >= .95));
+  if (hochkant && quer.length < 2) quer = pics.filter((p, k) => mass[k] && mass[k] <= 1.05);
   return quer.length >= 2 ? quer : pics;
 }
 /* weich scrollen: langsam anfahren, gleiten, sanft auslaufen */
 function gleiten(ziel, ms) {
   const y0 = scrollY, d = ziel - y0, t0 = performance.now();
-  if (reduceMotion()) return scrollTo(0, ziel);
+  if (reduceMotion()) return scrollTo({ top: ziel, behavior: "instant" });
   const e = (u) => (u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
-  const s = (t) => { const u = Math.min(1, (t - t0) / ms); scrollTo(0, y0 + d * e(u)); if (u < 1) requestAnimationFrame(s); };
+  // „instant“: sonst startet die Seite (scroll-behavior: smooth) bei jedem Schritt ein eigenes Gleiten – das ruckelt
+  const s = (t) => { const u = Math.min(1, (t - t0) / ms); scrollTo({ top: y0 + d * e(u), behavior: "instant" }); if (u < 1) requestAnimationFrame(s); };
   requestAnimationFrame(s);
 }
 /* Irisblende über den ganzen Schirm, auf einer Zeichenfläche gemalt: neun Lamellen um eine Öffnung,
@@ -2044,7 +2118,9 @@ function gleiten(ziel, ms) {
 function kinoBlende(buehne) {
   const el = document.createElement("canvas"); el.className = "kblende"; el.setAttribute("aria-hidden", "true");
   const g = el.getContext("2d"); let W = 0, H = 0, dpr = 1;
-  const groesse = () => { dpr = Math.min(devicePixelRatio || 1, 2); W = buehne.clientWidth; H = buehne.clientHeight; el.width = W * dpr; el.height = H * dpr; };
+  const groesse = () => {
+    const w = buehne.clientWidth, h = buehne.clientHeight; if (w === W && h === H) return;   // Safari-Leiste: nichts neu anlegen
+    dpr = matchMedia("(hover: none)").matches ? 1 : Math.min(devicePixelRatio || 1, 2); W = w; H = h; el.width = W * dpr; el.height = H * dpr; };
   groesse(); addEventListener("resize", groesse);
   const N = 9;
   const male = (auf, dreh) => {   // auf: 0 = zu, 1 = ganz offen
@@ -2085,7 +2161,8 @@ function kinoLauf(buehne, pics, zeileVon, gross, still, alle) {
     im.style.objectFit = "fill"; im.style.width = nw * s + "px"; im.style.height = nh * s + "px";
     im.style.left = (W / 2 - (q.x + q.w / 2) * nw * s) + "px"; im.style.top = (H / 2 - (q.y + q.h / 2) * nh * s) + "px";
   };
-  addEventListener("resize", () => buehne.querySelectorAll(".kslide").forEach(lege));
+  let bw = 0, bh = 0;
+  addEventListener("resize", () => { if (buehne.clientWidth === bw && buehne.clientHeight === bh) return; bw = buehne.clientWidth; bh = buehne.clientHeight; buehne.querySelectorAll(".kslide").forEach(lege); });
   const laden = async (d) => {
     const u = gross(d._p), im = d.querySelector(".kfg");
     const rahmen = innenRahmen(d._p.src); im.src = u;
@@ -2104,7 +2181,11 @@ function kinoLauf(buehne, pics, zeileVon, gross, still, alle) {
   document.body.appendChild(tipp);   // über dem Inhalt, sonst kommt der Klick nicht an
   setTimeout(() => tipp.classList.add("da"), 2200);
   let unten = false;
-  addEventListener("scroll", () => { const u = scrollY > innerHeight * .9; if (u !== unten) { unten = u; document.documentElement.classList.toggle("unten", u); } }, { passive: true });
+  let weg = false;
+  addEventListener("scroll", () => {
+    const u = scrollY > innerHeight * .9; if (u !== unten) { unten = u; document.documentElement.classList.toggle("unten", u); }
+    const w = scrollY > 12; if (w !== weg) { weg = w; document.documentElement.classList.toggle("weg", w); }   // Kopfzeile bekommt ihren Grund, sobald man scrollt
+  }, { passive: true });
   let i = 0, cur = erstes, naechstes = null;
   // das nächste Foto lange vorher laden und zuschneiden – beim Wechsel ist alles fertig
   const vorbereiten = () => { const k = (i + 1) % pics.length, d = dia(pics[k]); d._k = k; d._fertig = laden(d); buehne.insertBefore(d, blende.el); naechstes = d; };
@@ -2113,7 +2194,7 @@ function kinoLauf(buehne, pics, zeileVon, gross, still, alle) {
     if (document.hidden || document.body.dataset.view || lb.open || scrollY > innerHeight * .6 || !document.documentElement.classList.contains("kino")) return setTimeout(weiter, 1500);
     const nxt = naechstes; await nxt._fertig;
     if (reduceMotion()) { cur.classList.remove("on"); nxt.classList.add("on"); }
-    else { await blende.schliessen(620); cur.classList.remove("on"); nxt.classList.add("on"); await new Promise((r) => setTimeout(r, 140)); await blende.oeffnen(1050); }
+    else { await blende.schliessen(620); cur.classList.remove("on"); nxt.classList.add("on"); z.textContent = zeileVon(pics[nxt._k]); await new Promise((r) => setTimeout(r, 140)); await blende.oeffnen(1050); }
     cur.remove(); cur = nxt; i = nxt._k; z.textContent = zeileVon(pics[i]);
     vorbereiten();
     setTimeout(weiter, 5600);
@@ -2127,6 +2208,7 @@ function ohneRand(img, p) {
 }
 /* Lupe auf dem Leuchttisch: folgt der Maus, zeigt den Streifen darunter vergrößert */
 function tischLupe(tisch) {
+  if (!matchMedia("(hover: hover)").matches) return;   // Touch: Tippen öffnet das Foto direkt
   const lupe = document.createElement("div"); lupe.className = "tlupe"; lupe.setAttribute("aria-hidden", "true");
   tisch.appendChild(lupe);
   const S = 2.4, R = 110;
@@ -2153,12 +2235,16 @@ function kinoMehr(pics) {
   lt.innerHTML = kopf("02", "Leuchttisch", "Meine liebsten Bilder", "#leuchttisch", "Zum Leuchttisch");
   // echter Leuchttisch: leuchtende Fläche, darauf zwei Filmstreifen, leicht schief wie von Hand hingelegt
   const tisch = document.createElement("div"); tisch.className = "km-tisch";
-  const lieb = kbPhotos().slice(0, 10);
-  [lieb.slice(0, 5), lieb.slice(5, 10)].forEach((reihe, r) => {
+  // Computer/Tablet quer: zwei Streifen à fünf Bilder; Handy und Tablet hoch: drei Streifen à drei – passt ohne seitliches Schieben
+  const schmal = matchMedia("(max-width: 1100px) and (orientation: portrait)").matches, proStreifen = schmal ? 3 : 5, streifenZahl = schmal ? 3 : 2;
+  const lieb = kbPhotos().slice(0, proStreifen * streifenZahl);
+  const dreh = ["-1.1deg", ".8deg", "-.6deg"], ver = ["1rem", "-1.5rem", ".6rem"];
+  Array.from({ length: streifenZahl }, (_, r) => lieb.slice(r * proStreifen, (r + 1) * proStreifen)).forEach((reihe, r) => {
     if (!reihe.length) return;
-    const streifen = document.createElement("div"); streifen.className = "km-streifen"; streifen.style.setProperty("--dreh", r ? ".8deg" : "-1.1deg"); streifen.style.setProperty("--ver", r ? "-1.5rem" : "1rem");
+    const streifen = document.createElement("div"); streifen.className = "km-streifen"; streifen.style.setProperty("--dreh", dreh[r]); streifen.style.setProperty("--ver", schmal ? "0px" : ver[r]);
+    streifen.style.gridTemplateColumns = `repeat(${proStreifen}, 1fr)`;
     reihe.forEach((p, n) => {
-      const k = r * 5 + n, b = document.createElement("button"); b.type = "button"; b.dataset.no = (k + 1) + "A";
+      const k = r * proStreifen + n, b = document.createElement("button"); b.type = "button"; b.dataset.no = (k + 1) + "A";
       b.innerHTML = `<img loading="lazy" alt="" src="${sized(p.src, 600)}">`; ohneRand(b.firstChild, p);
       b.addEventListener("click", () => openViewer(lieb, k, [])); streifen.appendChild(b);
     });
