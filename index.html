@@ -891,15 +891,15 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   /* Sucher: beim Öffnen der Startseite (auch beim Zurückkehren) erst unscharf, dann langsam scharfgestellt wie mit dem Fokusrad
      – kurz über den Punkt hinaus und zurück, wie von Hand; nicht bei „Bewegung reduzieren“ */
   @keyframes fokus {
-    0%, 12% { filter: blur(12px) contrast(.94); }
-    78% { filter: blur(0) contrast(.94); }
-    88% { filter: blur(1.2px) contrast(.94); }
+    0% { filter: blur(7px) contrast(.94); }
+    70% { filter: blur(0) contrast(.94); }
+    84% { filter: blur(.8px) contrast(.94); }
     100% { filter: blur(.35px) contrast(.94); }
   }
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (prefers-reduced-motion: no-preference),
          (min-width: 1101px) and (min-height: 501px) and (prefers-reduced-motion: no-preference) {
-    html.vorfokus body:not([data-view]) .bgfix { filter: blur(12px) contrast(.94); }
-    html.fokus body:not([data-view]) .bgfix { animation: fokus 4.2s cubic-bezier(.35,.15,.35,1) both; }
+    html.vorfokus body:not([data-view]) .bgfix { filter: blur(7px) contrast(.94); }
+    html.fokus body:not([data-view]) .bgfix { animation: fokus 2s cubic-bezier(.3,.55,.35,1) both; }
   }
   /* Breite Bildschirme mit Maus: das Seagull sitzt in einem schmaleren Rahmen (Ausschnitt statt ganzes Bild) */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
@@ -1828,7 +1828,7 @@ let fokusT = null;
 function sucherFokus() {
   const root = document.documentElement;
   root.classList.remove("fokus", "vorfokus"); void root.offsetWidth; root.classList.add("fokus");
-  clearTimeout(fokusT); fokusT = setTimeout(() => root.classList.remove("fokus"), 4500);
+  clearTimeout(fokusT); fokusT = setTimeout(() => root.classList.remove("fokus"), 2300);
 }
 if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://… oder ./datei.jpg)
   const b = CONFIG.bgImage;
