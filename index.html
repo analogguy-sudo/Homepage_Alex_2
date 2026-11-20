@@ -1879,7 +1879,6 @@ function setupSlides() {
 /* Handy/Tablet hoch: das Titelbild selbst wechselt (Seagull zuerst), Filmrand-Zeile darunter.
    Computer: Seagull bleibt groß, die Bilderfolge läuft links unter dem Titel. */
 const mqPortrait = matchMedia("(max-width: 1100px) and (orientation: portrait)");
-const mqMacSucher = matchMedia("(min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover)");
 function buildSlides() {
   const box = $("slides"), cap = document.querySelector(".slide-cap-d"), hero = box.closest(".hero"), pics = slideState.pics;
   const mobile = mqPortrait.matches;
@@ -1916,16 +1915,8 @@ function sizeSlides() {
   const top = box.getBoundingClientRect().top + scrollY;
   // feste Fensterhöhe (ohne die ein- und ausfahrende Safari-Leiste am iPad/iPhone), sonst wandert die Bilderfolge beim Scrollen
   const vh = Math.min(innerHeight, document.documentElement.clientHeight || innerHeight);
-  let avail = Math.floor(vh - footH - padB - top - cap.offsetHeight - 12);
-  let anteil = .72;   // etwas kleiner als die Spalte, das Seagull bleibt der Blickfang
-  // Mac (Sucher mit Luft oben und unten): Unterkante der Bilderfolge auf die Unterkante des Suchers, etwas größer –
-  // so gehören Titel, Satz und Bilder sichtbar zusammen und nichts hängt verloren in der Ecke
-  const sucher = document.querySelector(".bgfix");
-  if (mqMacSucher.matches && sucher) {
-    const unten = Math.floor(sucher.getBoundingClientRect().bottom + scrollY - top);
-    if (unten > 120) { avail = Math.min(avail, unten); anteil = .85; }
-  }
-  const w = Math.min(Math.round(col.clientWidth * anteil), avail);
+  const avail = Math.floor(vh - footH - padB - top - cap.offsetHeight - 12);
+  const w = Math.min(Math.round(col.clientWidth * .72), avail);   // etwas kleiner als die Spalte, das Seagull bleibt der Blickfang
   if (w < 120) { box.style.display = "none"; cap.style.display = "none"; return; }   // zu wenig Platz: lieber gar nicht
   box.style.width = w + "px"; cap.style.maxWidth = w + "px";
   // übriger Platz kommt über das Bild: die Bilderfolge sitzt unten, knapp über der Fußzeile, statt am Text zu kleben
