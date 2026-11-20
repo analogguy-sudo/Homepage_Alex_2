@@ -786,7 +786,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     .strecke.lead-split.lead-quer { grid-template-columns: 1.55fr 1fr; }
     /* Aufmacher so hoch, dass er samt Bildunterschrift unter der Kopfzeile auf den Bildschirm passt */
     /* Aufmacher samt Bildunterschrift ganz auf dem Bildschirm, auch bei kleinen Fenstern (Kopfzeile + Titel ≈ 15,5rem) */
-    .strecke.lead-split .shot.lead button, .strecke.lead-split .shot.lead figcaption { width: min(100%, calc(72vh * var(--r, .75)), calc((100vh - 15.5rem) * var(--r, .75))); }
+    .strecke.lead-split .shot.lead button, .strecke.lead-split .shot.lead figcaption { width: min(100%, calc(72vh * var(--r, .75)), calc(var(--platz, calc(100vh - 15.5rem)) * var(--r, .75))); }
     /* ist eine Strecke gewählt, braucht es den Hinweis „Wähle eine Bildstrecke.“ nicht – der Aufmacher rückt nach oben */
     #bildstrecken .wrap:has(.strecke) > .hint { display: none; }
     .strecke.lead-split .strecke-head h3 { font-size: clamp(2.4rem, 4vw, 3.8rem); }
@@ -1309,6 +1309,14 @@ function warmStrecken() {   // beim Öffnen der Seite „Bildstrecken“: Aufmac
     const i = new Image(); i.fetchPriority = "low"; i.src = sized(f.src, innerWidth < 700 ? 1080 : 1600);
   });
 }
+/* Aufmacher: so hoch, wie unter Kopfzeile und Überschrift Platz ist – gemessen, nicht geschätzt (Kopfzeile ist je nach Fenster verschieden hoch) */
+function aufmacherPlatz(fig) {
+  const b = fig && fig.querySelector("button"); if (!b || !fig.isConnected) return;
+  const oben = b.getBoundingClientRect().top + scrollY;
+  const unterzeile = 2.6 * parseFloat(getComputedStyle(document.documentElement).fontSize);   // Bildzeile darunter
+  fig.style.setProperty("--platz", Math.max(260, innerHeight - oben - unterzeile) + "px");
+}
+addEventListener("resize", () => document.querySelectorAll(".strecke.lead-split .shot.lead").forEach(aufmacherPlatz));
 /* Hoch- und quadratische Formate paarweise nebeneinander; wer keinen Partner hat, steht allein und größer */
 function pairUp(story) {
   const shots = [...story.querySelectorAll(":scope > .shot")];
@@ -1892,7 +1900,7 @@ function renderKind(kind, pre) {
       // Form (Hoch/Quer) aus dem vorab gemessenen Seitenverhältnis; das große Bild lädt sofort, ohne auf etwas zu warten
       const shape = (r) => {
         // Aufmacher immer links, Titel und Text rechts daneben – bei allen Strecken gleich; Querformat bekommt die breitere Spalte
-        if (k === 0) { box.classList.add("lead-split"); box.classList.toggle("lead-quer", r > .87); }
+        if (k === 0) { box.classList.add("lead-split"); box.classList.toggle("lead-quer", r > .87); requestAnimationFrame(() => aufmacherPlatz(fig)); }
         b.style.aspectRatio = String(r);
         fig.style.setProperty("--r", r.toFixed(4));   // für die Höhenbegrenzung
         fig.classList.add(r >= 1.15 ? "wide" : r <= .87 ? "tall" : "even");
