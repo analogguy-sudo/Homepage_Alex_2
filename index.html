@@ -863,7 +863,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   /* Sucher auch auf Tablet quer und schmaleren Computern: das Seagull quadratisch und seitenverkehrt wie auf der 6×6-Mattscheibe
      (breite Bildschirme mit Maus: eigener Rahmen weiter unten) */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px), (min-width: 1101px) and (min-height: 501px) {
-    :root { --minbottom: clamp(4.5rem, 8vh, 6rem); }   /* kleiner, mit Luft oben und unten */
+    :root { --minbottom: clamp(5.5rem, 11vh, 8rem); }   /* kleiner, mit Luft oben und unten */
     body:not([data-view]) .bgfix {
       inset: auto; left: var(--imgl); width: var(--imgw); top: calc(50% - var(--imgw) / 2); height: var(--imgw);
       transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-size: cover; background-position: 50% 45%;
@@ -875,25 +875,31 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
       content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
       background:
         /* Schatten der Lichtschacht-Wand oben, schwächer an den Seiten */
-        linear-gradient(to bottom, rgba(0,0,0,.42), rgba(0,0,0,.12) 4%, transparent 9%),
-        linear-gradient(to right, rgba(0,0,0,.22), transparent 4%, transparent 96%, rgba(0,0,0,.22)),
+        linear-gradient(to bottom, rgba(0,0,0,.6), rgba(0,0,0,.2) 5%, transparent 12%),
+        linear-gradient(to right, rgba(0,0,0,.35), transparent 5%, transparent 95%, rgba(0,0,0,.35)),
         /* Fresnel-Linse: hauchfeine Ringe um die Mitte */
-        repeating-radial-gradient(circle at 50% 50%, transparent 0 5px, rgba(255,255,255,.028) 5px 6px, transparent 6px 7px, rgba(0,0,0,.03) 7px 8px),
-        radial-gradient(circle at 50% 50%, transparent 6.6%, rgba(0,0,0,.4) 6.75%, transparent 6.95%),
-        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 33.333% 0 / 1px 100% no-repeat,
-        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 66.666% 0 / 1px 100% no-repeat,
-        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 0 33.333% / 100% 1px no-repeat,
-        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) 0 66.666% / 100% 1px no-repeat,
-        radial-gradient(ellipse 72% 72% at 50% 50%, transparent 45%, rgba(0,0,0,.28) 78%, rgba(0,0,0,.62) 100%),
+        repeating-radial-gradient(circle at 50% 50%, transparent 0 5px, rgba(255,255,255,.045) 5px 6px, transparent 6px 7px, rgba(0,0,0,.05) 7px 8px),
+        radial-gradient(circle at 50% 50%, transparent 6.55%, rgba(0,0,0,.55) 6.75%, transparent 6.95%),
+        linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)) 33.333% 0 / 1px 100% no-repeat,
+        linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)) 66.666% 0 / 1px 100% no-repeat,
+        linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)) 0 33.333% / 100% 1px no-repeat,
+        linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)) 0 66.666% / 100% 1px no-repeat,
+        radial-gradient(ellipse 72% 72% at 50% 50%, transparent 42%, rgba(0,0,0,.34) 76%, rgba(0,0,0,.72) 100%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.2' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
     }
   }
-  /* Sucher: beim Öffnen einmal kurz unscharf, dann scharfgestellt wie mit dem Fokusrad (nur mit Maus, nicht bei „Bewegung reduzieren“) */
-  @keyframes fokus { from { filter: blur(8px) contrast(.94); } 75% { filter: blur(.2px) contrast(.94); } to { filter: blur(.35px) contrast(.94); } }
-  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (hover: hover) and (prefers-reduced-motion: no-preference),
-         (min-width: 1101px) and (min-height: 501px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
-    html.vorfokus body:not([data-view]) .bgfix { filter: blur(8px) contrast(.94); }
-    html.fokus body:not([data-view]) .bgfix { animation: fokus 2.6s cubic-bezier(.45,.05,.4,1) both; }
+  /* Sucher: beim Öffnen der Startseite (auch beim Zurückkehren) erst unscharf, dann langsam scharfgestellt wie mit dem Fokusrad
+     – kurz über den Punkt hinaus und zurück, wie von Hand; nicht bei „Bewegung reduzieren“ */
+  @keyframes fokus {
+    0%, 12% { filter: blur(12px) contrast(.94); }
+    78% { filter: blur(0) contrast(.94); }
+    88% { filter: blur(1.2px) contrast(.94); }
+    100% { filter: blur(.35px) contrast(.94); }
+  }
+  @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (prefers-reduced-motion: no-preference),
+         (min-width: 1101px) and (min-height: 501px) and (prefers-reduced-motion: no-preference) {
+    html.vorfokus body:not([data-view]) .bgfix { filter: blur(12px) contrast(.94); }
+    html.fokus body:not([data-view]) .bgfix { animation: fokus 4.2s cubic-bezier(.35,.15,.35,1) both; }
   }
   /* Breite Bildschirme mit Maus: das Seagull sitzt in einem schmaleren Rahmen (Ausschnitt statt ganzes Bild) */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
@@ -904,7 +910,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   }
   /* Sucher: das Seagull als Blick auf die 6×6-Mattscheibe – quadratisch, seitenverkehrt, Gitter, Körnung, dunklere Ecken */
   @media (min-width: 1101px) and (min-height: 501px) and (min-aspect-ratio: 3/2) and (hover: hover) {
-    :root { --ar: 1; --imgpad: clamp(2.5rem, 8vh, 6rem); }   /* kleiner, mit Luft oben und unten */
+    :root { --ar: 1; --imgpad: clamp(3.5rem, 11vh, 8rem); }   /* kleiner, mit Luft oben und unten */
     body:not([data-view]) .bgfix { transform: scaleX(-1); filter: blur(.35px) contrast(.94); background-position: 50% 45%; }
   }
   /* Handy und Tablet hoch: das Titelbild selbst wechselt (an der Stelle des Seagull), Filmrand-Zeile darunter */
@@ -1782,6 +1788,7 @@ function applyRoute() {
   try { if (h && h !== "top" && (!v || ALIAS[h])) t = document.querySelector("#" + h); } catch (e) {}
   if (t) t.scrollIntoView({ behavior: "instant" }); else window.scrollTo({ top: 0, behavior: "instant" });
   if (!v) { try { sizeSlides(); } catch (e) {} }   // Startseite: Bilderfolge sofort an ihren Platz, bevor sie zu sehen ist
+  if (!v && routedOnce) sucherFokus();   // zurück auf der Startseite: Sucher stellt wieder scharf
   setTocTop();   // Startseite wieder aufgebaut: Inhaltsverzeichnis neu ausrichten
 }
 addEventListener("hashchange", route);
@@ -1816,14 +1823,22 @@ document.addEventListener("click", (e) => {
   else window.scrollTo({ top: 0, behavior: reduceMotion() ? "instant" : "smooth" });
 });
 
+/* Sucher scharfstellen: Klasse neu setzen, damit die Bewegung jedes Mal von vorn beginnt */
+let fokusT = null;
+function sucherFokus() {
+  const root = document.documentElement;
+  root.classList.remove("fokus", "vorfokus"); void root.offsetWidth; root.classList.add("fokus");
+  clearTimeout(fokusT); fokusT = setTimeout(() => root.classList.remove("fokus"), 4500);
+}
 if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://… oder ./datei.jpg)
   const b = CONFIG.bgImage;
   const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
   document.documentElement.style.setProperty("--bg", `url("${u}")`);
   // Sucher scharfstellen, sobald das Seagull geladen ist (CSS entscheidet, ob die Bewegung überhaupt gezeigt wird)
-  const root = document.documentElement; let fokussiert = false;
-  const fokus = () => { if (fokussiert) return; fokussiert = true; root.classList.remove("vorfokus"); root.classList.add("fokus"); setTimeout(() => root.classList.remove("fokus"), 3000); };
-  root.classList.add("vorfokus");
+  let fokussiert = false;
+  // erst scharfstellen, wenn das Bild wirklich auf dem Schirm ist (kurz warten, bis der Browser es gemalt hat)
+  const fokus = () => { if (fokussiert) return; fokussiert = true; setTimeout(sucherFokus, 250); };
+  document.documentElement.classList.add("vorfokus");
   try { const pre = new Image(); pre.onload = fokus; pre.onerror = fokus; pre.src = u; if (pre.complete && pre.naturalWidth) fokus(); } catch (e) { fokus(); }
   setTimeout(fokus, 8000);   // Sicherheitsnetz: spätestens dann trotzdem ruhig scharfstellen
 }
