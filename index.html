@@ -949,6 +949,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   /* Kino auf Querformat-Schirmen, für die es das Inhaltsverzeichnis-Raster sonst nicht gibt (schmaler als 3:2 mit Maus, kleine Tablets):
      dieselbe Liste rechts – Nummer, Rubrik, Unterzeile */
   @media (min-width: 821px) and (orientation: landscape) and (min-height: 501px) and (max-aspect-ratio: 3/2) and (hover: hover),
+         (min-width: 821px) and (max-width: 1100px) and (orientation: landscape) and (min-height: 501px) and (hover: hover),
          (min-width: 821px) and (max-width: 1023px) and (orientation: landscape) and (min-height: 501px) and (hover: none) {
     html.kino body:not([data-view]) .site-head nav { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 0; }
     html.kino body:not([data-view]) .site-head nav .nav-home { display: none; }
@@ -2127,11 +2128,14 @@ function kinoBlende(buehne) {
   const el = document.createElement("canvas"); el.className = "kblende"; el.setAttribute("aria-hidden", "true");
   const g = el.getContext("2d"); let W = 0, H = 0, dpr = 1;
   const groesse = () => {
-    const w = buehne.clientWidth, h = buehne.clientHeight; if (w === W && h === H) return;   // Safari-Leiste: nichts neu anlegen
+    const w = buehne.clientWidth, h = buehne.clientHeight;
+    if (!w || !h || (w === W && h === H)) return;   // unsichtbar (Unterseite) oder Safari-Leiste: nichts neu anlegen
     dpr = matchMedia("(hover: none)").matches ? 1 : Math.min(devicePixelRatio || 1, 2); W = w; H = h; el.width = W * dpr; el.height = H * dpr; };
-  groesse(); addEventListener("resize", groesse);
+  groesse(); addEventListener("resize", () => { groesse(); male(stand, 0); });
   const N = 9;
+  let stand = 0;   // zuletzt gemalter Zustand – nach einer Größenänderung neu malen
   const male = (auf, dreh) => {   // auf: 0 = zu, 1 = ganz offen
+    stand = auf; if (!W || !H) return;
     const R = Math.hypot(W, H) / 2 + 4, r = auf * R;
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     if (auf >= 1) return;
@@ -2157,7 +2161,9 @@ function kinoBlende(buehne) {
   });
   const rein = (u) => u * u * (3 - 2 * u) * u, raus = (u) => 1 - Math.pow(1 - u, 2.4);   // weicher als ein echter Verschluss
   male(0, .6);   // anfangs geschlossen
-  return { el, schliessen: (ms) => lauf(1, 0, ms, rein), oeffnen: (ms) => lauf(0, 1, ms, raus) };
+  // wird die Bühne sichtbar oder ändert sie die Größe (z. B. nach dem Laden auf einer Unterseite): neu ausmessen und malen
+  const neu = () => { groesse(); male(stand, 0); };
+  return { el, neu, schliessen: (ms) => lauf(1, 0, ms, rein), oeffnen: (ms) => lauf(0, 1, ms, raus) };
 }
 function kinoLauf(buehne, pics, zeileVon, gross, still, alle) {
   // bildschirmfüllend; ein weißer Rand im Scan wird vorher erkannt und weggeschnitten
@@ -2165,12 +2171,19 @@ function kinoLauf(buehne, pics, zeileVon, gross, still, alle) {
   const lege = (d) => {
     const im = d.querySelector(".kfg"), q = d._rahmen; if (!q || !im.naturalWidth) return;
     const W = buehne.clientWidth, H = buehne.clientHeight, nw = im.naturalWidth, nh = im.naturalHeight;
+    if (!W || !H) return;   // Bühne gerade unsichtbar – wird beim Sichtbarwerden nachgeholt
     const s = Math.max(W / (nw * q.w), H / (nh * q.h));
     im.style.objectFit = "fill"; im.style.width = nw * s + "px"; im.style.height = nh * s + "px";
     im.style.left = (W / 2 - (q.x + q.w / 2) * nw * s) + "px"; im.style.top = (H / 2 - (q.y + q.h / 2) * nh * s) + "px";
   };
   let bw = 0, bh = 0;
-  addEventListener("resize", () => { if (buehne.clientWidth === bw && buehne.clientHeight === bh) return; bw = buehne.clientWidth; bh = buehne.clientHeight; buehne.querySelectorAll(".kslide").forEach(lege); });
+  const neuLegen = () => {
+    const w = buehne.clientWidth, h = buehne.clientHeight;
+    if (!w || !h || (w === bw && h === bh)) return; bw = w; bh = h;
+    buehne.querySelectorAll(".kslide").forEach(lege); if (buehne._blende) buehne._blende.neu();
+  };
+  addEventListener("resize", neuLegen);
+  if (window.ResizeObserver) new ResizeObserver(neuLegen).observe(buehne);   // auch wenn sie von unsichtbar auf sichtbar wechselt
   const laden = async (d) => {
     const u = gross(d._p), im = d.querySelector(".kfg");
     const rahmen = innenRahmen(d._p.src); im.src = u;
@@ -2178,7 +2191,7 @@ function kinoLauf(buehne, pics, zeileVon, gross, still, alle) {
     d._rahmen = await rahmen; lege(d);
   };
   const z = document.createElement("div"); z.className = "kino-zeile";
-  const blende = kinoBlende(buehne);
+  const blende = kinoBlende(buehne); buehne._blende = blende;
   const erstes = dia(pics[0]); buehne.append(erstes, blende.el, z);
   z.textContent = zeileVon(pics[0]);
   // beim Öffnen der Seite: Verschluss geht einmal auf
