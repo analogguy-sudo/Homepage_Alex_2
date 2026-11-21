@@ -769,6 +769,35 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     box-shadow: 0 10px 30px -10px rgba(0,0,0,.6); animation: backIn .3s cubic-bezier(.2,.8,.2,1);
   }
   .back-to-photo[hidden] { display: none; }
+  /* schwebender Knopf „Nach oben“: kleine Glas-Pille mit Text wie der Link in der Fußzeile; der Kreis um den Winkel zeigt den Fortschritt */
+  .nach-oben { position: fixed; z-index: 60; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom));
+    display: inline-flex; align-items: center; gap: .55rem; height: 38px; padding: 0 5px 0 14px; border: 0; border-radius: 999px; cursor: pointer;
+    font-family: var(--edge); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
+    /* durchscheinend: man sieht das Foto dahinter, die Schrift bleibt dank leichter Unschärfe lesbar */
+    color: #F2F0EB; background: rgba(20,20,20,.28);
+    -webkit-backdrop-filter: blur(10px) saturate(1.4); backdrop-filter: blur(10px) saturate(1.4);
+    box-shadow: inset 0 0 0 1px rgba(242,240,235,.28); text-shadow: 0 1px 3px rgba(0,0,0,.45);
+    opacity: 0; transform: translateY(14px); pointer-events: none;
+    transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1), background .2s, color .2s; }
+  :root[data-theme="light"] .nach-oben { color: #161616; background: rgba(250,249,246,.32); box-shadow: inset 0 0 0 1px rgba(22,21,19,.22); text-shadow: 0 1px 2px rgba(255,255,255,.5); }
+  .nach-oben.da { opacity: 1; transform: none; pointer-events: auto; }
+  .nach-oben:hover { background: rgba(20,20,20,.6); }
+  :root[data-theme="light"] .nach-oben:hover { background: rgba(250,249,246,.75); }
+  .nach-oben:active { transform: scale(.96); }
+  .nach-oben .kreis { display: grid; place-items: center; width: 28px; height: 28px; }
+  .nach-oben .kreis svg { grid-area: 1 / 1; }
+  .nach-oben .ring { width: 28px; height: 28px; transform: rotate(-90deg); }
+  .nach-oben .ring circle { fill: none; stroke-width: 1.4; }
+  .nach-oben .ring .spur { stroke: currentColor; opacity: .25; }
+  .nach-oben .ring .stand { stroke: var(--amber); stroke-linecap: round; }
+  .nach-oben .ic { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+  .nach-oben:hover .ic { transform: translateY(-2px); }
+  .nach-oben:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  /* in der Fußzeile: kleiner Link mit Kreis-Winkel */
+  .hoch-link { display: inline-flex; align-items: center; gap: .5rem; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; font: inherit; }
+  .hoch-link svg { width: 18px; height: 18px; padding: 3px; border: 1px solid currentColor; border-radius: 50%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+  .hoch-link:hover svg { transform: translateY(-3px); }
+  @media (prefers-reduced-motion: reduce) { .nach-oben, .nach-oben .ic, .hoch-link svg { transition: none; } }
   @keyframes backIn { from { opacity: 0; transform: translate(-50%, 12px); } }
   @media (prefers-reduced-motion: reduce) { .cam.flash, .back-to-photo { animation: none; } }
 
@@ -1226,11 +1255,19 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
 
 </main>
 <button type="button" class="back-to-photo" id="backToPhoto" hidden>← <span>Zurück zum Bild</span></button>
+<!-- schwebender Knopf: erscheint nach dem Titelbild, der Ring zeigt, wie weit man gescrollt hat; am Seitenende übernimmt der Link in der Fußzeile -->
+<button type="button" class="nach-oben" id="nachOben">
+  <span class="txt">Nach oben</span>
+  <span class="kreis" aria-hidden="true">
+    <svg class="ring" viewBox="0 0 28 28"><circle class="spur" cx="14" cy="14" r="12.5"/><circle class="stand" cx="14" cy="14" r="12.5"/></svg>
+    <svg class="ic" viewBox="0 0 24 24"><path d="M6 14.5l6-6 6 6"/></svg>
+  </span>
+</button>
 
 <footer>
   <div class="wrap">
     <span><span id="copy">©</span> <span id="year"></span> <span id="copyName"></span></span>
-    <span class="foot-links"><a href="#kontakt">Kontakt</a> <a href="impressum.html">Impressum</a> <a href="datenschutz.html">Datenschutz</a></span>
+    <span class="foot-links"><a href="#kontakt">Kontakt</a> <a href="impressum.html">Impressum</a> <a href="datenschutz.html">Datenschutz</a> <button type="button" class="hoch-link"><span>Nach oben</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14.5l6-6 6 6"/></svg></button></span>
   </div>
 </footer>
 
@@ -1284,6 +1321,26 @@ const state = { all: [], shown: [], filter: null, index: 0 };
 const $ = (id) => document.getElementById(id);
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 /* Filmkorn einmal als kleines Rasterbild erzeugen (statt einer SVG-Rechenvorschrift, die Safari immer wieder neu berechnet) */
+/* Knopf „Nach oben“: nach dem Titelbild einblenden, Ring zeigt den Fortschritt; erscheint die Fußzeile, übernimmt dort der Link */
+(function nachOben() {
+  const k = document.getElementById("nachOben"); if (!k) return;
+  const stand = k.querySelector(".stand"), umfang = 2 * Math.PI * 12.5, fuss = document.querySelector("footer");
+  stand.style.strokeDasharray = umfang;
+  let geplant = false;
+  const pruefen = () => {
+    geplant = false;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const fussOben = fuss ? fuss.getBoundingClientRect().top : Infinity;
+    k.classList.toggle("da", scrollY > innerHeight * .6 && fussOben > innerHeight - 20);
+    stand.style.strokeDashoffset = umfang * (1 - (max > 0 ? Math.min(1, scrollY / max) : 0));
+  };
+  addEventListener("scroll", () => { if (!geplant) { geplant = true; requestAnimationFrame(pruefen); } }, { passive: true });
+  addEventListener("resize", () => { if (!geplant) { geplant = true; requestAnimationFrame(pruefen); } });
+  const hoch = (e) => { e.currentTarget.blur(); if (typeof gleiten === "function") gleiten(0, Math.min(1400, 500 + scrollY * .25)); else scrollTo({ top: 0, behavior: "smooth" }); };
+  k.addEventListener("click", hoch);
+  document.querySelectorAll(".hoch-link").forEach((b) => b.addEventListener("click", hoch));
+  pruefen();
+})();
 (function korn() {
   try {
     const n = 192, c = document.createElement("canvas"); c.width = c.height = n;
@@ -1734,6 +1791,8 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
+  "Nach oben": "Back to top", "Entdecken": "Discover", "Alle Bildstrecken": "All photo series", "Zum Leuchttisch": "To the light table",
+  "Mehr über mich": "More about me", "Fotos": "photos", "Porträt": "Portrait",
   "Startseite": "Home", "Inhalt": "Contents", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series", "Vorige Bildstrecke": "Previous series", "Nächste Bildstrecke": "Next series",
   "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen zwischen Pfalz und Elsass": "Castle ruins between the Palatinate and Alsace", "Öffnen": "Open",
@@ -2309,7 +2368,7 @@ function kinoMehr(pics) {
       const lead = state.all.find((f) => f.strecke === it.id); if (!lead) return;
       const n = state.all.filter((f) => f.strecke === it.id).length;
       const b = document.createElement("button"); b.type = "button";
-      b.innerHTML = `<div class="bild"><img loading="lazy" alt="" src="${sized(lead.src, 800)}"></div><b></b><small>${n} ${tr("Fotos")}</small>`;
+      b.innerHTML = `<div class="bild"><img loading="lazy" alt="" src="${sized(lead.src, 800)}"></div><b></b><small>${n} <span>${tr("Fotos")}</span></small>`;
       b.querySelector("b").textContent = (lang === "en" && it.title_en) || it.title || it.title_de || "";
       ohneRand(b.querySelector("img"), lead);
       b.addEventListener("click", () => { projSel.bildstrecke = k; renderCards(); location.hash = "#bildstrecken"; });
