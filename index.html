@@ -1887,7 +1887,7 @@ async function loadProjects() {
   projLoaded = true;
   hasProjects = projects.some((p) => (p.kind || "projekt") === "projekt");
   document.querySelector(".nav-proj").hidden = !hasProjects;
-  renderCards(); renderPagers();
+  renderCards(); renderPagers(); tuerAuswahl();
 }
 /* Projekte und Bildstrecken liegen in derselben Tabelle, unterschieden durch "kind" */
 const projSel = { projekt: null, bildstrecke: null };
@@ -2020,7 +2020,7 @@ function renderKind(kind, pre) {
 
 /* ---------- Deine Daten (Logo, Kontakt, Profile) ---------- */
 function applyProfile() {
-  document.title = PROFILE.title;
+  if (!window.TUER) document.title = PROFILE.title;   // auf einer Eingangstür bleibt deren eigener Titel
   if (PROFILE.langFlags) { document.querySelector('[data-lang="de"]').textContent = "🇩🇪"; document.querySelector('[data-lang="en"]').textContent = "🇬🇧"; }
   document.querySelector(".brand").textContent = PROFILE.name;
   $("copyName").textContent = PROFILE.copyright;
@@ -2038,13 +2038,28 @@ function startVT(cb) { const t = document.startViewTransition(cb); t.ready.catch
 /* ---------- Ansichten, Hintergrund, Hell-Dunkel ---------- */
 const VIEWS = ["leuchttisch", "bildstrecken", "projekte", "ueber-mich"];
 const ALIAS = { equipment: "ueber-mich", kontakt: "ueber-mich" };   // Teile der Seite „Über mich“
+/* Eingangstüren: eigene Adressen wie /andalusien oder /leuchttisch. Jede ist eine Kopie dieser Seite (andalusien.html usw.,
+   erzeugt von tools/tueren.py) mit eigenem Titel für Suchmaschinen; window.TUER sagt, was dort aufgeschlagen wird.
+   Sobald man von dort weiterklickt, gilt wieder die normale Adresse mit # – zurück zur Tür führt die Zurück-Geste. */
+const TUER0 = window.TUER || null, TUER_PFAD = location.pathname, TUER_TITEL = document.title;
+let TUER = TUER0;
+const tuerHash = () => location.hash.slice(1) || (TUER ? TUER.v : "");
+function tuerAuswahl() {   // Bildstrecke der Tür auswählen, sobald die Strecken geladen sind
+  if (!TUER || !TUER.id || !projects.length) return;
+  const i = streckenItems().findIndex((x) => x.id === TUER.id);
+  if (i >= 0 && projSel.bildstrecke !== i) { projSel.bildstrecke = i; renderCards(); }
+}
+function tuerPruefen() {   // nach Klick oder Zurück: auf der Tür ohne # → Tür gilt; sonst normale Adresse
+  if (TUER0 && location.pathname === TUER_PFAD && !location.hash) { TUER = TUER0; document.title = TUER_TITEL; tuerAuswahl(); return; }
+  if (TUER && location.hash) { TUER = null; document.title = PROFILE.title; try { history.replaceState(null, "", "/" + location.search + location.hash); } catch (e) {} }
+}
 /* Alte Adresse #kontaktbogen (vor dem Umbau) führt zum Leuchttisch */
 if (location.hash === "#kontaktbogen") { try { history.replaceState(null, "", "#leuchttisch"); } catch (e) {} }
 /* Seitenwechsel mit sanftem Überblenden, wo der Browser es kann (View Transitions) */
 let routedOnce = false;
 function route() {
   if (location.hash === "#kontaktbogen") { location.replace("#leuchttisch"); return; }   // alter Link
-  const toTop = !location.hash || location.hash === "#top";
+  const toTop = !tuerHash() || location.hash === "#top";
   if (routedOnce && isTouch() && !reduceMotion()) {
     applyRoute();
     // Inhalt und Fußzeile gemeinsam einblenden (sonst springt die Fußzeile sichtbar an ihre neue Stelle)
@@ -2056,7 +2071,7 @@ function route() {
   routedOnce = true;
 }
 function applyRoute() {
-  const h = location.hash.slice(1), v = VIEWS.includes(h) ? h : (ALIAS[h] || "");
+  const h = tuerHash(), v = VIEWS.includes(h) ? h : (ALIAS[h] || "");
   if (v) document.body.dataset.view = v; else delete document.body.dataset.view;
   document.querySelectorAll("#mainNav a").forEach((a) => {   // aktuelle Seite im Menü markieren
     if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
@@ -2072,7 +2087,8 @@ function applyRoute() {
   if (!v && routedOnce) sucherFokus();   // zurück auf der Startseite: Sucher stellt wieder scharf
   setTocTop();   // Startseite wieder aufgebaut: Inhaltsverzeichnis neu ausrichten
 }
-addEventListener("hashchange", route);
+addEventListener("hashchange", () => { tuerPruefen(); route(); });
+addEventListener("popstate", () => { if (TUER0 && location.pathname === TUER_PFAD && !location.hash) { tuerPruefen(); route(); } });
 /* Höhe der Kopfzeile für die Sprungziele: am Handy steht sie fest oben, also Abstand = Höhe + etwas Luft */
 const setHeadH = () => {
   const head = document.querySelector(".site-head");
@@ -2100,7 +2116,7 @@ document.addEventListener("click", (e) => {
   const a = e.target.closest && e.target.closest('a[href="#top"]');
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
   e.preventDefault();
-  if (location.hash) { try { history.pushState(null, "", location.pathname + location.search); } catch (err) {} route(); }
+  if (location.hash || TUER) { if (TUER) { TUER = null; document.title = PROFILE.title; } try { history.pushState(null, "", "/" + location.search); } catch (err) {} route(); }
   else window.scrollTo({ top: 0, behavior: reduceMotion() ? "instant" : "smooth" });
 });
 

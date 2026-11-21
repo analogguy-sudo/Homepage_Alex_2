@@ -1,0 +1,28 @@
+# Eingangstüren (eigene Adressen wie /andalusien) und sitemap.xml aktuell halten:
+# täglich früh am Morgen, nach jeder Änderung an index.html und auf Knopfdruck (Actions → Eingangstüren → Run workflow).
+name: Eingangstüren
+on:
+  push:
+    branches: [main]
+    paths: [index.html, tools/tueren.py]
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: tueren
+  cancel-in-progress: false
+jobs:
+  tueren:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Türen erzeugen
+        run: python3 tools/tueren.py
+      - name: Änderungen speichern
+        run: |
+          git add -A -- '*.html' sitemap.xml tools/tueren.json
+          if git diff --cached --quiet; then echo "Nichts geändert."; exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Eingangstüren und Sitemap aktualisiert"
+          git push
