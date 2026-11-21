@@ -97,14 +97,6 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   html.korn[data-theme="dark"] body::after { background-image: var(--korn-hell); }
   :root[data-theme="dark"] body::after { opacity: .05;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
-  @keyframes grain {
-    0%   { transform: translate(0, 0); }
-    20%  { transform: translate(-3%, 2%); }
-    40%  { transform: translate(2%, -3%); }
-    60%  { transform: translate(-2%, -1%); }
-    80%  { transform: translate(3%, 3%); }
-    100% { transform: translate(0, 0); }
-  }
 
   /* Bilderschutz: kein Ziehen, kein Auswählen, kein Speichermenü per Langdruck (iOS) */
   img, .pimgs button, .frame35, .shot button, .lb-stage, .strip { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -1128,8 +1120,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   .km-ich img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; filter: grayscale(1); display: block; }
   .km-ich p { font-size: 1.15rem; line-height: 1.65; max-width: 52ch; margin: 0 0 1rem; }
   @media (prefers-reduced-motion: reduce) { .km { opacity: 1; transform: none; transition: none; } .kino-tipp::after { animation: none; } }
-  .kino-bild.neu { clip-path: circle(0% at 50% 50%); }
-  .kino-zeile { position: absolute; z-index: 4; right: 2rem; bottom: 1.4rem; font-family: var(--edge); font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.55); text-align: right; }
+  .kino-zeile { position: absolute; z-index: 4; right: 2rem; bottom: 1.4rem; font-family: var(--edge); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.78); text-shadow: 0 1px 6px rgba(0,0,0,.6); text-align: right; }
 
 </style>
 </head>
@@ -1435,9 +1426,10 @@ function renderHero(p) {
   const img = $("heroImg");
   if (CONFIG.heroImage) {
     const f = CONFIG.heroImage;
+    // verkleinert (1000 px) statt des 1-MB-Originals – das Porträt ist nie breiter als ~450 px zu sehen
     img.src = /^https?:/.test(f)
       ? f
-      : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${f.split("/").map(encodeURIComponent).join("/")}`;
+      : sized(`${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${f.split("/").map(encodeURIComponent).join("/")}`, 1000, 82);
     img.alt = "Porträt";
     $("edgeLeft").textContent = "▸ 1   1A";
     $("edgeRight").textContent = "";
@@ -1492,7 +1484,9 @@ function tableImg(p) {
   if (!img) {
     img = document.createElement("img");
     img.alt = p.title + (p.film ? ", " + p.film : ""); img.decoding = "async"; img.fetchPriority = "low";
-    img.src = sized(p.src, 400);
+    // erst laden, wenn der Leuchttisch wirklich offen ist – nicht schon unsichtbar auf der Startseite
+    img.dataset.src = sized(p.src, 400);
+    if (document.body.dataset.view === "leuchttisch") img.src = img.dataset.src;
     tableImgs.set(p.src, img);
   }
   return img;
@@ -1541,7 +1535,8 @@ function renderGrid(mode) {
   if (hasMouse()) setupLoupe(grid);
 }
 /* Beim Öffnen der Seite die Streifen nacheinander auflegen */
-function replayTable() { const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("play", "swap"); void g.offsetWidth; g.classList.add("play"); }
+function leuchttischLaden() { tableImgs.forEach((img) => { if (!img.getAttribute("src") && img.dataset.src) img.src = img.dataset.src; }); }
+function replayTable() { leuchttischLaden(); const g = $("grid"); if (!g.classList.contains("leuchttisch")) return; g.classList.remove("play", "swap"); void g.offsetWidth; g.classList.add("play"); }
 addEventListener("resize", () => { if (state.all.length && perStrip() !== stripN) renderGrid("swap"); });
 
 /* Lupe: folgt der Maus über den Bildern und zeigt den Ausschnitt 2,6-fach vergrößert */
@@ -2106,7 +2101,10 @@ function sucherFokus() {
   root.classList.remove("fokus", "vorfokus"); void root.offsetWidth; root.classList.add("fokus");
   clearTimeout(fokusT); fokusT = setTimeout(() => root.classList.remove("fokus"), 2300);
 }
-if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://… oder ./datei.jpg)
+/* Seagull im Sucher – nur für die bisherige Startseite (Handy quer, Rückfall ohne Kino). Mit Kino wird es gar nicht erst geladen. */
+let seagullGeladen = false;
+function seagullLaden() {
+  if (seagullGeladen || !CONFIG.bgImage) return; seagullGeladen = true;
   const b = CONFIG.bgImage;
   const u = /^(https?:|\.?\/)/.test(b) ? b : `${CONFIG.supabaseUrl}/storage/v1/object/public/${CONFIG.bucket}/${encodeURIComponent(b)}`;
   document.documentElement.style.setProperty("--bg", `url("${u}")`);
@@ -2118,6 +2116,13 @@ if (CONFIG.bgImage) {   // Dateiname im Bucket ODER komplette Adresse (https://�
   try { const pre = new Image(); pre.onload = fokus; pre.onerror = fokus; pre.src = u; if (pre.complete && pre.naturalWidth) fokus(); } catch (e) { fokus(); }
   setTimeout(fokus, 8000);   // Sicherheitsnetz: spätestens dann trotzdem ruhig scharfstellen
 }
+/* bisherige Startseite (Sucher + kleine Bilderfolge) nur aufbauen, wenn Kino nicht läuft – sonst lädt und rechnet sie unsichtbar mit */
+function altStartseite() {
+  if (document.documentElement.classList.contains("kino")) return;
+  seagullLaden();
+  if (slideState.pics && !slideState.gebaut) { slideState.gebaut = true; buildSlides(); mqPortrait.addEventListener("change", buildSlides); }
+}
+if (!document.documentElement.classList.contains("kino")) seagullLaden();
 /* ---------- Wechselnde Titelfotos ---------- */
 const slideState = { list: [], i: 0, timer: null, busy: false, hover: false };
 function setupSlides() {
@@ -2130,7 +2135,7 @@ function setupSlides() {
   box.closest(".hero").classList.add("has-slides");
   box.addEventListener("pointerenter", () => { slideState.hover = true; });
   box.addEventListener("pointerleave", () => { slideState.hover = false; });
-  buildSlides(); mqPortrait.addEventListener("change", buildSlides);
+  altStartseite();
   kinoStart(pics);
 }
 /* ===== Startseite „Kino“ (Computer mit Maus) ===== */
@@ -2144,7 +2149,8 @@ function kinoStart(pics) {
   kopf(); addEventListener("resize", kopf); if (document.fonts) document.fonts.ready.then(() => { breiteVorher = 0; kopf(); });
   const bauen = () => {
     root.classList.toggle("kino", mqKino.matches);
-    if (!mqKino.matches || kinoGebaut || !buehne) return;
+    if (!mqKino.matches) { altStartseite(); return; }
+    if (kinoGebaut || !buehne) return;
     kinoGebaut = true;
     const zeileVon = (p) => [p.title, p.location, p.film].filter(Boolean).join(" · ");
     // Bildgröße nach Bildschirm: Handy und Tablet bekommen kleinere Dateien – das schont Speicher und läuft flüssiger
@@ -2154,7 +2160,7 @@ function kinoStart(pics) {
   mqKino.addEventListener("change", bauen); bauen();
 }
 // ohne Startseiten-Fotos (Laden gescheitert): lieber die bisherige Startseite als eine dunkle Fläche
-setTimeout(() => { if (!kinoGebaut) document.documentElement.classList.remove("kino"); }, 9000);
+setTimeout(() => { if (!kinoGebaut) { document.documentElement.classList.remove("kino"); altStartseite(); } }, 9000);
 /* weißen Rand (Passepartout) eines Fotos finden: Anteil innen als {x, y, w, h} (0…1) */
 async function innenRahmen(src) {
   try {
