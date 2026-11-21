@@ -87,13 +87,16 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   .wrap { width: min(1760px, 100% - 4rem); margin-inline: auto; }
 
   /* Filmkorn über der ganzen Seite */
+  /* ruhend und ohne Mischmodus: eine bewegte, mit allem verrechnete Kornebene über dem ganzen Schirm bremst Scrollen und Kino aus */
   body::after {
-    content: ""; position: fixed; inset: -50%; z-index: 100; pointer-events: none;
-    opacity: .12; mix-blend-mode: multiply;
+    content: ""; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+    opacity: .09;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-    animation: grain 0.9s steps(6) infinite;
   }
-  :root[data-theme="dark"] body::after { filter: invert(1); mix-blend-mode: screen; opacity: .06; }
+  html.korn body::after { background-image: var(--korn); }
+  html.korn[data-theme="dark"] body::after { background-image: var(--korn-hell); }
+  :root[data-theme="dark"] body::after { opacity: .05;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
   @keyframes grain {
     0%   { transform: translate(0, 0); }
     20%  { transform: translate(-3%, 2%); }
@@ -535,7 +538,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   /* Bilder „entwickeln“ sich beim Laden: aus dem Dunkel ins Bild, statt ruckartig aufzuploppen */
   .pimgs img, .cam img { opacity: 0; }
   img.is-in { animation: imgIn .7s cubic-bezier(.2,.6,.3,1) forwards; }
-  @keyframes imgIn { from { opacity: 0; filter: brightness(.3) blur(4px); } to { opacity: 1; filter: none; } }
+  @keyframes imgIn { from { opacity: 0; } to { opacity: 1; } }   /* nur Deckkraft – Weichzeichner beim Einblenden bremst das Scrollen */
   #lbImg { transition: opacity .25s ease; }
   #lbImg.loading { opacity: .25; }
 
@@ -627,6 +630,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   .shot button::before {   /* unscharfe Vorschau, solange das große Bild lädt */
     content: ""; position: absolute; inset: -12%; background: var(--lqip) center / cover no-repeat; filter: blur(16px) saturate(1.1);
   }
+  .shot button.geladen::before { display: none; }   /* Platzhalter weg, sobald das Foto da ist – sonst rechnet Safari die Unschärfe beim Scrollen weiter */
   .shot img { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; }
   .shot figcaption {
     display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .9rem; margin-top: .55rem;
@@ -1029,7 +1033,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   .kslide { position: absolute; inset: 0; opacity: 0; }
   .kslide.on { opacity: 1; z-index: 1; }
   .kslide.on .kfg { animation: heran 8.5s linear both; transform-origin: 50% 50%; will-change: transform; }
-  html.unten .kslide.on .kfg { animation-play-state: paused; }   /* sehr langsam ein Stück heran */
+  html.weg .kslide.on .kfg { animation-play-state: paused; }   /* sobald gescrollt wird: Zoom anhalten, der Rechner gehört dem Scrollen */   /* sehr langsam ein Stück heran */
   @keyframes heran { from { transform: scale(1); } to { transform: scale(1.06); } }
   .kblende { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
   .kslide { overflow: hidden; background: #070707; }
@@ -1057,8 +1061,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     box-shadow: 0 0 0 5px #1d1b18, 0 0 0 7px #6d655a, 0 18px 40px rgba(0,0,0,.45), inset 0 0 30px rgba(0,0,0,.25); }
   .tlupe.an { opacity: 1; }
   .tlupe::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.35), transparent 40%); }
-  .tlupe-inhalt { position: absolute; left: 0; top: 0; transform-origin: 0 0; box-sizing: border-box; }
-  .tlupe-inhalt .km-streifen button { cursor: none; }
+  .tlupe { left: 0; top: 0; will-change: transform; background-repeat: no-repeat; background-color: #f4efe2; }
   .km-streifen::before, .km-streifen::after { content: ""; position: absolute; left: 6px; right: 6px; height: 8px;
     background: repeating-linear-gradient(90deg, #f4efe2 0 9px, transparent 9px 19px); border-radius: 1px; }
   .km-streifen { position: relative; }
@@ -1280,6 +1283,19 @@ const PROFILE = {
 const state = { all: [], shown: [], filter: null, index: 0 };
 const $ = (id) => document.getElementById(id);
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* Filmkorn einmal als kleines Rasterbild erzeugen (statt einer SVG-Rechenvorschrift, die Safari immer wieder neu berechnet) */
+(function korn() {
+  try {
+    const n = 192, c = document.createElement("canvas"); c.width = c.height = n;
+    const g = c.getContext("2d"), root = document.documentElement;
+    const bild = (wert) => {
+      const d = g.createImageData(n, n);
+      for (let i = 0; i < d.data.length; i += 4) { d.data[i] = d.data[i + 1] = d.data[i + 2] = wert; d.data[i + 3] = Math.random() * 230; }
+      g.putImageData(d, 0, 0); return `url(${c.toDataURL("image/png")})`;
+    };
+    root.style.setProperty("--korn", bild(0)); root.style.setProperty("--korn-hell", bild(255)); root.classList.add("korn");
+  } catch (e) {}
+})();
 /* Vorschaubilder: Supabase verkleinert das Bild auf dem Server (ca. 100 statt 800 KB). Klappt das nicht, kommt das Original. */
 const thumb = (src, w = 600) => src.includes("/storage/v1/object/public/")
   ? src.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + `?width=${w}&height=${w}&resize=contain&quality=72` : src;
@@ -1335,7 +1351,7 @@ const revealIO = window.IntersectionObserver && !reduceMotion()
 function revealOnScroll(nodes) { nodes.forEach((n) => { if (revealIO) revealIO.observe(n); else n.classList.add("in"); }); }
 /* Bild sanft einblenden, sobald es geladen ist; fehlt ein Vorschaubild, das Original nehmen */
 function fadeIn(img, original) {
-  const done = () => img.classList.add("is-in");
+  const done = () => { img.classList.add("is-in"); if (img.parentElement) img.parentElement.classList.add("geladen"); };
   img.addEventListener("load", done, { once: true });
   img.addEventListener("error", () => { if (original && img.src !== original) img.src = original; else done(); });
   if (img.complete && img.naturalWidth) done();
@@ -2130,7 +2146,8 @@ function kinoBlende(buehne) {
   const groesse = () => {
     const w = buehne.clientWidth, h = buehne.clientHeight;
     if (!w || !h || (w === W && h === H)) return;   // unsichtbar (Unterseite) oder Safari-Leiste: nichts neu anlegen
-    dpr = matchMedia("(hover: none)").matches ? 1 : Math.min(devicePixelRatio || 1, 2); W = w; H = h; el.width = W * dpr; el.height = H * dpr; };
+    // die Blende ist immer in Bewegung – einfache Auflösung reicht und hält auch große Retina-Schirme flüssig
+    dpr = 1; W = w; H = h; el.width = W * dpr; el.height = H * dpr; };
   groesse(); addEventListener("resize", () => { groesse(); male(stand, 0); });
   const N = 9;
   let stand = 0;   // zuletzt gemalter Zustand – nach einer Größenänderung neu malen
@@ -2212,7 +2229,7 @@ function kinoLauf(buehne, pics, zeileVon, gross, still, alle) {
   const vorbereiten = () => { const k = (i + 1) % pics.length, d = dia(pics[k]); d._k = k; d._fertig = laden(d); buehne.insertBefore(d, blende.el); naechstes = d; };
   vorbereiten();
   const weiter = async () => {
-    if (document.hidden || document.body.dataset.view || lb.open || scrollY > innerHeight * .6 || !document.documentElement.classList.contains("kino")) return setTimeout(weiter, 1500);
+    if (document.hidden || document.body.dataset.view || lb.open || scrollY > 40 || !document.documentElement.classList.contains("kino")) return setTimeout(weiter, 1500);   // kein Bildwechsel während man scrollt
     const nxt = naechstes; await nxt._fertig;
     if (reduceMotion()) { cur.classList.remove("on"); nxt.classList.add("on"); }
     else { await blende.schliessen(620); cur.classList.remove("on"); nxt.classList.add("on"); z.textContent = zeileVon(pics[nxt._k]); await new Promise((r) => setTimeout(r, 140)); await blende.oeffnen(1050); }
@@ -2230,21 +2247,27 @@ function ohneRand(img, p) {
 /* Lupe auf dem Leuchttisch: folgt der Maus, zeigt den Streifen darunter vergrößert */
 function tischLupe(tisch) {
   if (!matchMedia("(hover: hover)").matches) return;   // Touch: Tippen öffnet das Foto direkt
+  // Die Lupe zeigt nur das eine Foto unter dem Mauszeiger vergrößert (ein Hintergrundbild) – keine Kopie der Streifen.
+  // Bewegt wird sie per transform und höchstens einmal pro Bild: das bleibt auch in Safari leicht.
   const lupe = document.createElement("div"); lupe.className = "tlupe"; lupe.setAttribute("aria-hidden", "true");
   tisch.appendChild(lupe);
   const S = 2.4, R = 110;
-  let kopie = null;
-  const baue = () => { kopie && kopie.remove(); kopie = document.createElement("div"); kopie.className = "tlupe-inhalt";
-    [...tisch.querySelectorAll(".km-streifen")].forEach((st) => kopie.appendChild(st.cloneNode(true)));
-    kopie.style.width = tisch.clientWidth + "px"; kopie.style.padding = getComputedStyle(tisch).padding; lupe.appendChild(kopie); };
-  tisch.addEventListener("pointerenter", () => { baue(); lupe.classList.add("an"); });
+  let rahmen = [], tischR = null, x = 0, y = 0, geplant = false;
+  const messen = () => { tischR = tisch.getBoundingClientRect(); rahmen = [...tisch.querySelectorAll(".km-streifen img")].map((im) => ({ im, r: im.getBoundingClientRect() })); };
+  const zeichnen = () => {
+    geplant = false;
+    lupe.style.transform = `translate(${x - tischR.left - R}px, ${y - tischR.top - R}px)`;
+    const t = rahmen.find(({ r }) => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom);
+    if (t) {
+      lupe.style.backgroundImage = `url("${t.im.currentSrc || t.im.src}")`;
+      lupe.style.backgroundSize = `${t.r.width * S}px ${t.r.height * S}px`;
+      lupe.style.backgroundPosition = `${R - (x - t.r.left) * S}px ${R - (y - t.r.top) * S}px`;
+    } else lupe.style.backgroundImage = "none";
+  };
+  tisch.addEventListener("pointerenter", (e) => { messen(); x = e.clientX; y = e.clientY; zeichnen(); lupe.classList.add("an"); });
   tisch.addEventListener("pointerleave", () => lupe.classList.remove("an"));
-  tisch.addEventListener("pointermove", (e) => {
-    const r = tisch.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    lupe.style.left = x - R + "px"; lupe.style.top = y - R + "px";
-    if (kopie) kopie.style.transform = `translate(${R - x * S}px, ${R - y * S}px) scale(${S})`;
-  });
-  addEventListener("resize", () => { if (kopie) baue(); });
+  tisch.addEventListener("pointermove", (e) => { x = e.clientX; y = e.clientY; if (!geplant) { geplant = true; requestAnimationFrame(zeichnen); } });
+  addEventListener("scroll", () => { if (lupe.classList.contains("an")) messen(); }, { passive: true });
 }
 /* unter dem Kino: die drei Rubriken als eigene Abschnitte zum Hineinscrollen */
 function kinoMehr(pics) {
