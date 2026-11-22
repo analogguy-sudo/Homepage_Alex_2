@@ -1133,6 +1133,10 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     html.kino .kino-zeile { font-size: .68rem; }
     .km-strecken small, .lb-serie small { font-size: .74rem; }
   }
+  /* Instagram-Einladung am Ende einer Bildstrecke */
+  .ig-einladung { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: .35rem 1rem; margin: 3.5rem auto 1rem; padding-top: 1.6rem; border-top: 1px solid var(--rule); max-width: 40rem; text-align: center; color: var(--ink-soft); font-style: italic; }
+  .ig-einladung a { font-family: var(--edge); font-style: normal; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: .95rem; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--ink-soft); padding-bottom: .15rem; }
+  .ig-einladung a:hover { border-color: var(--ink); }
 </style>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ImageGallery", "name": "Landschaft & Natur", "url": "https://analogewelt.com/landschaft-natur", "description": "Natur, wie sie mir begegnet: mitten in der Stadt, am Rand der Stadt und manchmal im Nebel darüber. Oft im Mittelformat mit Seagull 4A und Agfa Isolette.", "author": {"@type": "Person", "name": "A.T. Fichter", "url": "https://analogewelt.com/"}, "inLanguage": "de", "image": [{"@type": "ImageObject", "contentUrl": "https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/Skatepark_Niddapark.jpg?width=1600&height=4800&resize=contain&quality=80", "name": "Skatepark Niddapark", "creator": {"@type": "Person", "name": "A.T. Fichter", "url": "https://analogewelt.com/"}, "creditText": "A.T. Fichter", "copyrightNotice": "© A.T. Fichter", "acquireLicensePage": "https://analogewelt.com/impressum.html", "caption": "Kodak T-Max 400, Seagull 4A", "contentLocation": {"@type": "Place", "name": "Frankfurt"}, "dateCreated": "2024"}, {"@type": "ImageObject", "contentUrl": "https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794088121754_Unbenannt-3.jpg?width=1600&height=4800&resize=contain&quality=80", "name": "Nutrias im Niddapark", "creator": {"@type": "Person", "name": "A.T. Fichter", "url": "https://analogewelt.com/"}, "creditText": "A.T. Fichter", "copyrightNotice": "© A.T. Fichter", "acquireLicensePage": "https://analogewelt.com/impressum.html", "caption": "Portra 400, Nikon FE", "contentLocation": {"@type": "Place", "name": "Frankfurt"}}, {"@type": "ImageObject", "contentUrl": "https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794088119457_LEO00147-2.jpg?width=1600&height=4800&resize=contain&quality=80", "name": "Über dem Nebel", "creator": {"@type": "Person", "name": "A.T. Fichter", "url": "https://analogewelt.com/"}, "creditText": "A.T. Fichter", "copyrightNotice": "© A.T. Fichter", "acquireLicensePage": "https://analogewelt.com/impressum.html", "caption": "Kodak T-Max 400 (expired), Agfa Isolette 2", "contentLocation": {"@type": "Place", "name": "Blumenstein, Pfalz"}}, {"@type": "ImageObject", "contentUrl": "https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794088125774_000017580008.jpg?width=1600&height=4800&resize=contain&quality=80", "name": "Sancho", "creator": {"@type": "Person", "name": "A.T. Fichter", "url": "https://analogewelt.com/"}, "creditText": "A.T. Fichter", "copyrightNotice": "© A.T. Fichter", "acquireLicensePage": "https://analogewelt.com/impressum.html", "caption": "Kodak T-Max 100, Seagull 4A", "dateCreated": "2024"}]}</script>
 </head>
@@ -1802,7 +1806,7 @@ loadPhotos().then((photos) => {
 
 /* ---------- Sprache ---------- */
 const EN = {
-  "Nach oben": "Back to top", "Entdecken": "Discover", "Alle Bildstrecken": "All photo series", "Zum Leuchttisch": "To the light table",
+  "Nach oben": "Back to top", "Mehr davon – neue Bilder zuerst auf Instagram": "More of this – new photos first on Instagram", "Entdecken": "Discover", "Alle Bildstrecken": "All photo series", "Zum Leuchttisch": "To the light table",
   "Mehr über mich": "More about me", "Fotos": "photos", "Porträt": "Portrait", "Gesamtbild": "Whole picture",
   "Startseite": "Home", "Inhalt": "Contents", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series", "Vorige Bildstrecke": "Previous series", "Nächste Bildstrecke": "Next series",
@@ -2012,6 +2016,12 @@ function renderKind(kind, pre) {
     });
     box.appendChild(story);
     revealOnScroll(story.querySelectorAll(".shot"));
+    // am Ende der Strecke: leise Einladung zu Instagram (nur ein Link, kein eingebetteter Feed – keine Daten an Meta)
+    if (PROFILE.instagram) {
+      const ig = document.createElement("p"); ig.className = "ig-einladung";
+      ig.innerHTML = `<span>${tr("Mehr davon – neue Bilder zuerst auf Instagram")}</span><a href="https://instagram.com/${PROFILE.instagram}" target="_blank" rel="noopener">@${PROFILE.instagram} →</a>`;
+      box.appendChild(ig);
+    }
   } else if (imgs.length) {
     const g = document.createElement("div"); g.className = "pimgs";
     imgs.forEach((src, k) => {
