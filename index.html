@@ -165,10 +165,12 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   body[data-view="leuchttisch"] #leuchttisch, body[data-view="projekte"] #projekte, body[data-view="bildstrecken"] #bildstrecken, body[data-view="ueber-mich"] #ueber-mich,
   body[data-view="equipment"] #equipment, body[data-view="kontakt"] #kontakt { display: block; }
   body[data-view] .bgfix { display: none; }
-  h2 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; line-height: 1; margin: 0 0 1.5rem; }
+  /* Seitenüberschriften der Unterseiten sind H1 (eine pro Seite), sehen aber aus wie die übrigen Überschriften */
+  h1.vh { font-size: 1.5em; }
+  h2, h1.vh { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; line-height: 1; margin: 0 0 1.5rem; }
   /* Seitennummer „02“, „03“ … über der Überschrift; die Zahl setzt das Skript (data-num), je nachdem, welche Seiten es gibt */
-  h2::before { display: block; font-family: var(--edge); font-size: .85rem; letter-spacing: .14em; color: var(--amber); margin-bottom: .4rem; }
-  .view h2::before { content: attr(data-num); }
+  h2::before, h1.vh::before { display: block; font-family: var(--edge); font-size: .85rem; letter-spacing: .14em; color: var(--amber); margin-bottom: .4rem; }
+  .view h2::before, .view h1.vh::before { content: attr(data-num); }
   .hint { font-style: italic; font-size: .95rem; color: var(--ink); margin: -.6rem 0 1.6rem; }
 
   /* Leuchttisch, Bildstrecken und Projekte: Liste links, Inhalt rechts (am Handy untereinander) */
@@ -198,7 +200,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   /* Über mich: Text als lesbare Spalte, Porträt darunter (Handy) bzw. rechts daneben (Tablet quer, Computer) */
   #ueber-mich .about { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 clamp(3rem, 7vw, 7rem); align-items: start; }
   #ueber-mich .about > div:first-child { display: contents; }
-  #ueber-mich .about h2 { grid-column: 1 / -1; }
+  #ueber-mich .about h2, #ueber-mich .about h1.vh { grid-column: 1 / -1; }
   #ueber-mich .about-text p { max-width: 60ch; margin: 0 0 1.1rem; font-size: 1.1rem; line-height: 1.6; }
   #ueber-mich .about > .strip { width: min(100%, 320px); margin: 1rem 0 0; justify-self: start; }
   .frame { aspect-ratio: 5 / 4; overflow: hidden; }
@@ -300,7 +302,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     /* Titelblatt und Unterseiten */
     .hero { grid-template-columns: 1fr; padding-block: 1.5rem 2.5rem; }
     .hero h1 { font-size: 2.3rem; line-height: 1.02; }
-    .view h2 { font-size: 2.3rem; }
+    .view h2, .view h1.vh { font-size: 2.3rem; }
     .sheet { grid-template-columns: 1fr; }
     .filters { position: static; }
 
@@ -328,7 +330,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   @media (min-width: 700px) and (max-width: 1100px) and (orientation: portrait) {
     .home-link .brand { font-size: 2.4rem; }
     .logo-head { width: 48px; }
-    .hero h1, .view h2 { font-size: 3.6rem; }
+    .hero h1, .view h2, .view h1.vh { font-size: 3.6rem; }
     .hero p { font-size: 1.15rem; }
   }
 
@@ -396,7 +398,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     body[data-view] footer .wrap > span:first-child { max-width: none; }
 
     /* Unterseiten zweispaltig, wo es passt */
-    .view h2 { font-size: clamp(2.2rem, 3vw, 2.8rem); }
+    .view h2, .view h1.vh { font-size: clamp(2.2rem, 3vw, 2.8rem); }
     #ueber-mich .about { grid-template-columns: minmax(0, 60ch) min(360px, 30vw); justify-content: start; }
     #ueber-mich .about > .strip { grid-column: 2; grid-row: 2; width: 100%; margin: .35rem 0 0; filter: grayscale(1); }   /* Porträt schwarzweiß */
     .cams { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem 2rem; }
@@ -1182,7 +1184,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
 
   <section class="works view" id="leuchttisch" aria-labelledby="arbeiten-titel">
     <div class="wrap">
-      <h2 id="arbeiten-titel">Leuchttisch</h2>
+      <h1 class="vh" id="arbeiten-titel">Leuchttisch</h1>
       <p class="hint" id="hint"></p>
       <div class="sheet">
         <div class="filters" id="filters" role="group" aria-label="Kategorien"></div>
@@ -1195,7 +1197,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   </section>
 
   <section class="view" id="bildstrecken" aria-labelledby="strk-titel"><div class="wrap">
-  <h2 id="strk-titel">Bildstrecken</h2>
+  <h1 class="vh" id="strk-titel">Bildstrecken</h1>
   <p class="hint" id="strkHint"></p>
   <div class="sheet">
     <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"></div>
@@ -1204,7 +1206,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
 </div></section>
 
   <section class="view" id="projekte" aria-labelledby="proj-titel"><div class="wrap">
-  <h2 id="proj-titel">Projekte</h2>
+  <h1 class="vh" id="proj-titel">Projekte</h1>
   <p class="hint" id="projHint"></p>
   <div class="sheet">
     <div class="filters" id="projList" role="group" aria-label="Projekte"></div>
@@ -1215,7 +1217,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
 <section class="view" id="ueber-mich" aria-labelledby="about-titel">
     <div class="wrap about">
       <div>
-        <h2 id="about-titel">Über mich</h2>
+        <h1 class="vh" id="about-titel">Über mich</h1>
         <div class="about-text">
         <p>Ich fotografiere seit über zehn Jahren auf Film, auf Kleinbild und im Mittelformat. Mich reizt, dass jede Aufnahme Zeit kostet: Man schaut länger hin, wartet aufs richtige Licht und sieht das Ergebnis erst Tage später.</p>
         <p>Unterwegs bin ich meist mit einer Nikon FE, einer Canon AV-1 oder der Seagull 4A, einer zweiäugigen Mittelformatkamera. Im Gepäck sind Kodak Tri-X, Ilford HP5 oder Portra 400. Meine Schwarzweißfilme entwickle ich selbst.</p>
@@ -1358,6 +1360,8 @@ const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matche
 const thumb = (src, w = 600) => src.includes("/storage/v1/object/public/")
   ? src.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + `?width=${w}&height=${w}&resize=contain&quality=72` : src;
 /* Bild in passender Breite vom Server (Seitenverhältnis bleibt, Höhe ist nur Obergrenze) */
+/* Großansicht: höchstens 2000 px (so groß sind die Originale ohnehin), als WebP vom Bilddienst – etwa halb so viele Daten wie das Original */
+const lbSrc = (src) => sized(src, 2000, 82);
 const sized = (src, w, q = 75) => src.includes("/storage/v1/object/public/")
   ? src.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + `?width=${w}&height=${w * 3}&resize=contain&quality=${q}` : src;
 /* Bildstrecken schneller: Seitenverhältnisse aller Fotos vorab messen (je ~1 KB), damit beim Öffnen sofort das Layout steht
@@ -1599,20 +1603,21 @@ function showLightbox() {
   setZoom(false);
   big.onload = big.onerror = null; big.removeAttribute("srcset");
   const el = state.lbEls && state.lbEls[state.index];
-  const quick = el && el.complete && el.naturalWidth ? el.currentSrc || el.src : null;
-  if (quick && quick !== p.src) {
-    // sofort das Vorschaubild zeigen (liegt schon im Speicher), das Original blendet danach unmerklich darüber
+  const quick = el && el.complete && el.naturalWidth ? el.currentSrc || el.src : null, gross = lbSrc(p.src);
+  if (quick && quick !== gross) {
+    // sofort das Vorschaubild zeigen (liegt schon im Speicher), die große Fassung blendet danach unmerklich darüber
     big.classList.remove("loading"); big.src = quick;
     const full = new Image();
-    full.onload = () => { if (state.lb[state.index] === p) big.src = p.src; };
-    full.src = p.src;
+    full.onload = () => { if (state.lb[state.index] === p) big.src = gross; };
+    full.onerror = () => { if (state.lb[state.index] === p) big.src = p.src; };   // Bilddienst gestört: Original
+    full.src = gross;
   } else {
-    if (big.getAttribute("src") !== p.src) { big.classList.add("loading"); big.onload = big.onerror = () => big.classList.remove("loading"); }
-    big.src = p.src;
+    if (big.getAttribute("src") !== gross) { big.classList.add("loading"); big.onload = () => big.classList.remove("loading"); big.onerror = () => { big.onerror = null; big.src = p.src; }; }
+    big.src = gross;
   }
   big.alt = p.title || "";
   // Nachbarbilder schon im Hintergrund laden, damit „Weiter“ und „Zurück“ sofort zeigen
-  [1, -1].forEach((d) => { const q = state.lb[(state.index + d + state.lb.length) % state.lb.length]; if (q && q !== p) new Image().src = q.src; });
+  [1, -1].forEach((d) => { const q = state.lb[(state.index + d + state.lb.length) % state.lb.length]; if (q && q !== p) new Image().src = lbSrc(q.src); });
   const rows = p.rows || [["Name", p.title], ["Film", p.film], ["Kamera", p.camera], ["Ort", p.location], ["Jahr", p.year],
                           ["Brennweite", p.focal], ["Zeit", p.shutter], ["Blende", p.aperture]];
   const dl = $("lbInfo"); dl.innerHTML = "";
@@ -1648,9 +1653,10 @@ function showLightbox() {
   if (p.details && p.details.length) {
     [p.src, ...p.details].forEach((src, i) => {
       const b = document.createElement("button"), im = document.createElement("img");
-      b.type = "button"; b.setAttribute("aria-current", String(i === 0)); im.alt = ""; im.src = src; b.appendChild(im);
+      b.type = "button"; b.setAttribute("aria-current", String(i === 0)); im.alt = ""; im.src = sized(src, 200); b.appendChild(im);
+      b.setAttribute("aria-label", tr(i ? "Detail" : "Gesamtbild") + (i ? " " + i : ""));
       b.addEventListener("click", () => {
-        $("lbImg").src = src;
+        $("lbImg").src = lbSrc(src);
         th.querySelectorAll("button").forEach((x) => x.setAttribute("aria-current", String(x === b)));
       });
       th.appendChild(b);
@@ -1797,7 +1803,7 @@ loadPhotos().then((photos) => {
 /* ---------- Sprache ---------- */
 const EN = {
   "Nach oben": "Back to top", "Entdecken": "Discover", "Alle Bildstrecken": "All photo series", "Zum Leuchttisch": "To the light table",
-  "Mehr über mich": "More about me", "Fotos": "photos", "Porträt": "Portrait",
+  "Mehr über mich": "More about me", "Fotos": "photos", "Porträt": "Portrait", "Gesamtbild": "Whole picture",
   "Startseite": "Home", "Inhalt": "Contents", "Wähle ein Projekt.": "Choose a project.", "Projekte": "Projects", "Wähle eine Bildstrecke.": "Choose a photo series.", "Bildstrecken": "Photo series", "Über mich": "About me", "Kontakt": "Contact",
   "Hell / Dunkel": "Light / Dark", "Schwarzweiß": "Black & White", "Farbe": "Colour", "Reisen & Touren": "Travels & tours", "Zur ganzen Bildstrecke": "View the whole series", "Vorige Bildstrecke": "Previous series", "Nächste Bildstrecke": "Next series",
   "Menschen & Porträts": "People & portraits", "Stadtbild": "Cityscape", "Landschaft & Natur": "Landscape & nature", "Andalusien": "Andalusia", "Burgruinen zwischen Pfalz und Elsass": "Castle ruins between the Palatinate and Alsace", "Öffnen": "Open",
@@ -1830,6 +1836,7 @@ function setLang(l) {
   });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
   renderCards(); renderPagers(); renderCameras(); if (state.all.length) { renderFilters(); renderGrid("swap"); }
+  if (!TUER || !TUER.id || projects.length) document.title = tuerTitel();   // Titel im Browser-Tab in der gewählten Sprache
 }
 
 
@@ -1844,7 +1851,7 @@ function renderPagers() {
   PAGES.forEach((id, i) => {
     if (!i) return;
     const no = String(i).padStart(2, "0");
-    const h = document.querySelector("#" + id + " h2"); if (h) h.dataset.num = no;
+    const h = document.querySelector("#" + id + " h1.vh") || document.querySelector("#" + id + " h2"); if (h) h.dataset.num = no;
     const a = document.querySelector('#mainNav a[href="#' + id + '"]'); if (a) a.dataset.no = no;
   });
   document.querySelectorAll(".pager").forEach((n) => n.remove());
@@ -2058,10 +2065,14 @@ function tuerAusPfad() {   // welche Tür passt zur Adresse (ohne #)?
   if (p) return { v: "bildstrecken", id: p.id };
   return location.pathname === TUER_START_PFAD ? TUER_START : null;
 }
+const MIT_TUER_EN = { bildstrecken: "Photo series – Analoge Welt", leuchttisch: "Light table – Analoge Welt", "ueber-mich": "About me – Analoge Welt" };
+const PROFIL_TITEL_EN = "Analoge Welt – Analogue photography by A.T. Fichter";
 function tuerTitel() {
-  if (!TUER) return PROFILE.title;
+  const en = lang === "en";
+  if (!TUER) return en ? PROFIL_TITEL_EN : PROFILE.title;
   const p = TUER.id && projects.find((x) => x.id === TUER.id);
-  return p && p.title ? p.title + " – Bildstrecke | Analoge Welt" : (MIT_TUER[TUER.v] || PROFILE.title);
+  if (p && p.title) return en ? ((p.title_en || p.title) + " – Photo series | Analoge Welt") : p.title + " – Bildstrecke | Analoge Welt";
+  return (en ? MIT_TUER_EN[TUER.v] : MIT_TUER[TUER.v]) || (en ? PROFIL_TITEL_EN : PROFILE.title);
 }
 function tuerAuswahl() {   // Bildstrecke der Tür auswählen, sobald die Strecken geladen sind
   if (!TUER || !TUER.id || !projects.length) return;
@@ -2419,7 +2430,7 @@ function kinoMehr(pics) {
     streifen.style.gridTemplateColumns = `repeat(${proStreifen}, 1fr)`;
     reihe.forEach((p, n) => {
       const k = r * proStreifen + n, b = document.createElement("button"); b.type = "button"; b.dataset.no = (k + 1) + "A";
-      b.innerHTML = `<img loading="lazy" alt="" src="${sized(p.src, 600)}">`; ohneRand(b.firstChild, p);
+      b.innerHTML = `<img loading="lazy" alt="" src="${sized(p.src, 600)}">`; b.firstChild.alt = p.title + (p.film ? ", " + p.film : ""); ohneRand(b.firstChild, p);
       b.addEventListener("click", () => openViewer(lieb, k, [])); streifen.appendChild(b);
     });
     tisch.appendChild(streifen);
