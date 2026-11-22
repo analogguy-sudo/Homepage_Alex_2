@@ -18,7 +18,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
 <meta name="theme-color" content="#0E0E0E">
 <meta name="apple-mobile-web-app-title" content="Analoge Welt">
 <title>Analoge Welt – Analoge Fotografie von A.T. Fichter</title>
-<meta name="description" content="Analoge Fotografie auf 35 mm und Mittelformat, von Hand entwickelt: Bildstrecken aus Frankfurt, Mannheim, der Pfalz und Andalusien.">
+<meta name="description" content="Analoge Fotografie auf 35 mm und Mittelformat, von Hand entwickelt: Bildstrecken über Menschen, Städte, Landschaften und Reisen.">
 <link rel="canonical" href="https://analogewelt.com/">
 <!-- Vorschau beim Teilen (WhatsApp, Signal, Mastodon …) -->
 <meta property="og:type" content="website">
@@ -1887,7 +1887,7 @@ async function loadProjects() {
   projLoaded = true;
   hasProjects = projects.some((p) => (p.kind || "projekt") === "projekt");
   document.querySelector(".nav-proj").hidden = !hasProjects;
-  renderCards(); renderPagers(); tuerAuswahl();
+  renderCards(); renderPagers(); if (!location.hash) TUER = tuerAusPfad() || TUER; tuerAuswahl(); if (document.body.dataset.view) pfadSync();
 }
 /* Projekte und Bildstrecken liegen in derselben Tabelle, unterschieden durch "kind" */
 const projSel = { projekt: null, bildstrecke: null };
@@ -1931,6 +1931,7 @@ async function switchItem(kind, pre, items, next) {
   } finally {
     [det, ...document.querySelectorAll(".pager"), document.querySelector("footer")].forEach((e) => { if (e) e.style.transition = e.style.opacity = ""; });
     switching = false;
+    if (kind === "bildstrecke") pfadSync();   // andere Bildstrecke gewählt: Adresse und Titel nachziehen
   }
 }
 function renderKind(kind, pre) {
@@ -2038,20 +2039,57 @@ function startVT(cb) { const t = document.startViewTransition(cb); t.ready.catch
 /* ---------- Ansichten, Hintergrund, Hell-Dunkel ---------- */
 const VIEWS = ["leuchttisch", "bildstrecken", "projekte", "ueber-mich"];
 const ALIAS = { equipment: "ueber-mich", kontakt: "ueber-mich" };   // Teile der Seite „Über mich“
-/* Eingangstüren: eigene Adressen wie /andalusien oder /leuchttisch. Jede ist eine Kopie dieser Seite (andalusien.html usw.,
-   erzeugt von tools/tueren.py) mit eigenem Titel für Suchmaschinen; window.TUER sagt, was dort aufgeschlagen wird.
-   Sobald man von dort weiterklickt, gilt wieder die normale Adresse mit # – zurück zur Tür führt die Zurück-Geste. */
-const TUER0 = window.TUER || null, TUER_PFAD = location.pathname, TUER_TITEL = document.title;
-let TUER = TUER0;
+/* Eingangstüren und echte Adressen: /leuchttisch, /andalusien usw. statt #leuchttisch.
+   Jede Tür ist eine Kopie dieser Seite (andalusien.html usw., erzeugt von tools/tueren.py) mit eigenem Titel für
+   Suchmaschinen; window.TUER sagt dort, was aufgeschlagen wird. Beim Klicken schreibt die Seite dieselben Adressen
+   in die Adresszeile (ohne neu zu laden) – wer sie kopiert und teilt, teilt also die Tür mit eigenem Vorschaubild. */
+const kurzname = (t) => String(t || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+  .normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const MIT_TUER = { bildstrecken: "Bildstrecken – Analoge Welt", leuchttisch: "Leuchttisch – Analoge Welt", "ueber-mich": "Über mich – Analoge Welt" };
+const TUER_START = window.TUER || null, TUER_START_PFAD = location.pathname;
+let TUER = TUER_START;
 const tuerHash = () => location.hash.slice(1) || (TUER ? TUER.v : "");
+function tuerAusPfad() {   // welche Tür passt zur Adresse (ohne #)?
+  if (location.hash) return null;
+  const sl = decodeURIComponent(location.pathname).replace(/^\/+|\/+$/g, "").replace(/\.html$/, "");
+  if (!sl || sl === "index") return null;
+  if (MIT_TUER[sl]) return { v: sl };
+  const p = streckenItems().find((x) => kurzname(x.title) === sl);
+  if (p) return { v: "bildstrecken", id: p.id };
+  return location.pathname === TUER_START_PFAD ? TUER_START : null;
+}
+function tuerTitel() {
+  if (!TUER) return PROFILE.title;
+  const p = TUER.id && projects.find((x) => x.id === TUER.id);
+  return p && p.title ? p.title + " – Bildstrecke | Analoge Welt" : (MIT_TUER[TUER.v] || PROFILE.title);
+}
 function tuerAuswahl() {   // Bildstrecke der Tür auswählen, sobald die Strecken geladen sind
   if (!TUER || !TUER.id || !projects.length) return;
   const i = streckenItems().findIndex((x) => x.id === TUER.id);
   if (i >= 0 && projSel.bildstrecke !== i) { projSel.bildstrecke = i; renderCards(); }
 }
-function tuerPruefen() {   // nach Klick oder Zurück: auf der Tür ohne # → Tür gilt; sonst normale Adresse
-  if (TUER0 && location.pathname === TUER_PFAD && !location.hash) { TUER = TUER0; document.title = TUER_TITEL; tuerAuswahl(); return; }
-  if (TUER && location.hash) { TUER = null; document.title = PROFILE.title; try { history.replaceState(null, "", "/" + location.search + location.hash); } catch (e) {} }
+function tuerPruefen() {   // nach Klick (#…) oder Zurück-Geste: was gilt jetzt?
+  if (location.hash) {
+    TUER = null;
+    if (location.pathname !== "/") { try { history.replaceState(null, "", "/" + location.search + location.hash); } catch (e) {} }
+  } else { TUER = tuerAusPfad(); tuerAuswahl(); }
+}
+/* nach jedem Seitenwechsel: schöne Adresse in die Adresszeile (ohne neuen Verlaufseintrag) und passender Titel */
+function pfadSync() {
+  const h = tuerHash(), v = VIEWS.includes(h) ? h : (ALIAS[h] || "");
+  let ziel = null, neu = null;
+  if (v === "bildstrecken" && TUER && TUER.id && projSel.bildstrecke === null) { document.title = tuerTitel(); return; }   // Strecken noch nicht geladen: Tür behalten
+  if (MIT_TUER[v] && !ALIAS[h]) {
+    neu = { v };
+    const it = v === "bildstrecken" && projSel.bildstrecke !== null ? streckenItems()[projSel.bildstrecke] : null;
+    if (it && kurzname(it.title)) neu = { v, id: it.id };
+    ziel = "/" + (neu.id ? kurzname(it.title) : v);
+  } else if (!h) ziel = "/";
+  if (ziel) {
+    if (ziel !== location.pathname || location.hash) { try { history.replaceState(null, "", ziel + location.search); } catch (e) {} }
+    TUER = neu;
+  }
+  document.title = tuerTitel();
 }
 /* Alte Adresse #kontaktbogen (vor dem Umbau) führt zum Leuchttisch */
 if (location.hash === "#kontaktbogen") { try { history.replaceState(null, "", "#leuchttisch"); } catch (e) {} }
@@ -2086,9 +2124,10 @@ function applyRoute() {
   if (!v) { try { sizeSlides(); } catch (e) {} }   // Startseite: Bilderfolge sofort an ihren Platz, bevor sie zu sehen ist
   if (!v && routedOnce) sucherFokus();   // zurück auf der Startseite: Sucher stellt wieder scharf
   setTocTop();   // Startseite wieder aufgebaut: Inhaltsverzeichnis neu ausrichten
+  pfadSync();
 }
 addEventListener("hashchange", () => { tuerPruefen(); route(); });
-addEventListener("popstate", () => { if (TUER0 && location.pathname === TUER_PFAD && !location.hash) { tuerPruefen(); route(); } });
+addEventListener("popstate", () => { if (!location.hash) { tuerPruefen(); route(); } });   // zwischen Adressen ohne # (z. B. /leuchttisch → /andalusien)
 /* Höhe der Kopfzeile für die Sprungziele: am Handy steht sie fest oben, also Abstand = Höhe + etwas Luft */
 const setHeadH = () => {
   const head = document.querySelector(".site-head");
@@ -2116,7 +2155,7 @@ document.addEventListener("click", (e) => {
   const a = e.target.closest && e.target.closest('a[href="#top"]');
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
   e.preventDefault();
-  if (location.hash || TUER) { if (TUER) { TUER = null; document.title = PROFILE.title; } try { history.pushState(null, "", "/" + location.search); } catch (err) {} route(); }
+  if (location.hash || TUER) { TUER = null; try { history.pushState(null, "", "/" + location.search); } catch (err) {} route(); }
   else window.scrollTo({ top: 0, behavior: reduceMotion() ? "instant" : "smooth" });
 });
 
