@@ -57,7 +57,7 @@ def setze(s, muster, ersatz):
     return neu
 
 
-def tuer_seite(vorlage, slug, titel, beschreibung, tuer, bild=None):
+def tuer_seite(vorlage, slug, titel, beschreibung, tuer, bild=None, galerie=None):
     a = lambda x: html.escape(x, quote=True)
     url = f"{SEITE}/{slug}"
     s = vorlage
@@ -71,18 +71,45 @@ def tuer_seite(vorlage, slug, titel, beschreibung, tuer, bild=None):
         s = setze(s, r'<meta property="og:image" content="[^"]*">', f'<meta property="og:image" content="{a(bild)}">')
         s = setze(s, r'<meta name="twitter:image" content="[^"]*">', f'<meta name="twitter:image" content="{a(bild)}">')
         s = re.sub(r'\s*<meta property="og:image:(width|height|alt)" content="[^"]*">', "", s)
+    if galerie:   # Bildergalerie für Suchmaschinen (Google-Bildersuche: Titel, Ort, Urheber, Copyright)
+        daten = json.dumps(galerie, ensure_ascii=False).replace("</", "<\\/")
+        s = setze(s, r"</head>", lambda m: f'<script type="application/ld+json">{daten}</script>\n</head>')   # Funktion statt Text: Backslashes im JSON bleiben unangetastet
     marke = "<!-- Eingangstür, erzeugt von tools/tueren.py – nicht von Hand bearbeiten -->"
     s = setze(s, r'<meta charset="utf-8">', f'<meta charset="utf-8">\n{marke}\n<script>window.TUER={json.dumps(tuer, ensure_ascii=False)}</script>')
     return s
 
 
+FOTOGRAF = {"@type": "Person", "name": "A.T. Fichter", "url": SEITE + "/"}
+
+
+def galerie(p, slug, text, bilder):
+    """Strukturierte Daten einer Bildstrecke: ImageGallery mit einem ImageObject je Foto."""
+    if not bilder:
+        return None
+    objekte = []
+    for f in bilder:
+        o = {"@type": "ImageObject", "contentUrl": bild_url(f["storage_path"], 1600), "name": f.get("title") or p["title"],
+             "creator": FOTOGRAF, "creditText": "A.T. Fichter", "copyrightNotice": "© A.T. Fichter",
+             "acquireLicensePage": SEITE + "/impressum.html"}
+        angaben = ", ".join(x for x in (f.get("film"), f.get("camera")) if x)
+        if angaben:
+            o["caption"] = angaben
+        if f.get("location"):
+            o["contentLocation"] = {"@type": "Place", "name": f["location"]}
+        if f.get("year"):
+            o["dateCreated"] = str(f["year"])
+        objekte.append(o)
+    return {"@context": "https://schema.org", "@type": "ImageGallery", "name": p["title"], "url": f"{SEITE}/{slug}",
+            "description": text, "author": FOTOGRAF, "inLanguage": "de", "image": objekte}
+
+
 def main():
     vorlage = open(os.path.join(WURZEL, "index.html"), encoding="utf-8").read()
     projekte = holen("projects?select=id,title,text_de,kind,sort&order=sort.asc")
-    fotos = holen("photos?select=storage_path,strecke_id,sort&order=sort.asc,created_at.desc")
-    tueren = []   # (slug, titel, beschreibung, tuer, bild)
+    fotos = holen("photos?select=title,storage_path,strecke_id,location,film,camera,year,sort&order=sort.asc,created_at.desc")
+    tueren = []   # (slug, titel, beschreibung, tuer, bild, galerie)
     for slug, titel, text in ANSICHTEN:
-        tueren.append((slug, titel, text, {"v": slug}, None))
+        tueren.append((slug, titel, text, {"v": slug}, None, None))
     vergeben = set(GESCHUETZT) | {t[0] for t in tueren}
     for p in projekte:
         if (p.get("kind") or "projekt") != "bildstrecke" or not p.get("title"):
@@ -94,11 +121,12 @@ def main():
         vergeben.add(slug)
         erstes = next((f["storage_path"] for f in fotos if f.get("strecke_id") == p["id"] and f.get("storage_path")), None)
         text = kuerzen(p.get("text_de")) or f"{p['title']} – eine Bildstrecke in analoger Fotografie von A.T. Fichter."
-        tueren.append((slug, f"{p['title']} – Bildstrecke | Analoge Welt", text, {"v": "bildstrecken", "id": p["id"]}, bild_url(erstes) if erstes else None))
+        tueren.append((slug, f"{p['title']} – Bildstrecke | Analoge Welt", text, {"v": "bildstrecken", "id": p["id"]}, bild_url(erstes) if erstes else None,
+                       galerie(p, slug, text, [f for f in fotos if f.get("strecke_id") == p["id"] and f.get("storage_path")])))
 
-    for slug, titel, text, tuer, bild in tueren:
+    for slug, titel, text, tuer, bild, gal in tueren:
         with open(os.path.join(WURZEL, slug + ".html"), "w", encoding="utf-8") as f:
-            f.write(tuer_seite(vorlage, slug, titel, text, tuer, bild))
+            f.write(tuer_seite(vorlage, slug, titel, text, tuer, bild, gal))
 
     # Türen, deren Bildstrecke es nicht mehr gibt, entfernen (nur solche, die dieses Skript selbst angelegt hat)
     alt = json.load(open(LISTE)) if os.path.exists(LISTE) else []
