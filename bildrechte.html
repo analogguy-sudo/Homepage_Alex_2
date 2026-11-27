@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico?v=20261121" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png?v=20261121">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20261121">
+<link rel="manifest" href="/manifest.webmanifest?v=20261121">
+<meta name="theme-color" content="#0E0E0E">
+<meta name="apple-mobile-web-app-title" content="Analoge Welt">
+<title>Bildrechte und Nutzungsbedingungen | Analoge Welt</title>
+<meta name="description" content="Bildrechte und Nutzungsbedingungen für die Fotografien auf analogewelt.com: © A.T. Fichter – alle Rechte vorbehalten, keine Nutzung ohne vorherige Zustimmung.">
+<link rel="canonical" href="https://analogewelt.com/bildrechte">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Analoge Welt">
+<meta property="og:title" content="Bildrechte und Nutzungsbedingungen | Analoge Welt">
+<meta property="og:url" content="https://analogewelt.com/bildrechte">
+<meta property="og:locale" content="de_DE">
+<link href="/fonts/fonts.css" rel="stylesheet">
+
+<style>
+  :root {
+    --paper:#EFEFED; --print:#FAFAF8; --ink:#141414; --ink-soft:#5C5C59; --amber:#8C8C88; --safelight:#444;
+    --display: "League Gothic", "Arial Narrow", Impact, sans-serif;
+    --sans:    "Crimson Pro", Georgia, "Times New Roman", serif;
+    --edge:    "Barlow Condensed", "Arial Narrow", sans-serif;
+  }
+  :root[data-theme="dark"] { --paper:#0E0E0E; --print:#1B1B1B; --ink:#EDEDEB; --ink-soft:#A2A29F; --safelight:#CFCFCB; color-scheme: dark; }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 1.15rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-underline-offset: 3px; }
+  :focus-visible { outline: 3px solid var(--safelight); outline-offset: 3px; }
+
+  .wrap { width: min(760px, 100% - 2rem); margin-inline: auto; }
+  .site-head {
+    display: flex; flex-wrap: wrap; gap: .75rem 2rem;
+    align-items: baseline; justify-content: space-between;
+    padding-block: 1.75rem;
+  }
+  .brand { font-family: var(--display); font-size: 2.2rem; letter-spacing: .05em; text-transform: uppercase; text-decoration: none; }
+  .home-link { display: inline-flex; align-items: center; gap: .8rem; color: inherit; text-decoration: none; }
+  .logo { display: block; width: 48px; aspect-ratio: 1; flex: none; background-color: var(--ink); -webkit-mask: url(/logo/atf-bildmarke.svg?v=20261121) center / contain no-repeat; mask: url(/logo/atf-bildmarke.svg?v=20261121) center / contain no-repeat; }
+  .site-head { align-items: center; }
+  .tools { display: flex; gap: .5rem; align-items: center; }
+  .tools button {
+    font: inherit; font-weight: 600; font-size: .95rem;
+    background: none; border: 1.5px solid var(--ink); color: var(--ink);
+    padding: .1rem .8rem; border-radius: 999px; cursor: pointer;
+  }
+  .tools button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+  main { padding-block: 1rem 4rem; }
+  h1 {
+    font-family: var(--display); font-weight: 400; text-transform: uppercase;
+    letter-spacing: .04em; font-size: clamp(2.4rem, 7vw, 3.6rem); line-height: 1; margin: 0 0 2rem;
+  }
+  h2 {
+    font-family: var(--edge); font-weight: 600; text-transform: uppercase;
+    letter-spacing: .1em; font-size: 1.05rem; margin: 2.2rem 0 .5rem;
+  }
+  p, ul { margin: 0 0 .9rem; }
+  ul { padding-left: 1.2rem; }
+  .muted { color: var(--ink-soft); font-size: 1rem; }
+  /* Anschrift: vollständig und lesbar, aber zurückhaltend in einer Zeile */
+  .addr { color: #6B6B67; font-size: 11px; line-height: 1.45; }   /* Postanschrift: vorhanden, aber dezent; Kontrast 4,6:1 (noch gut lesbar) */
+  :root[data-theme="dark"] .addr { color: #7D7D79; }
+
+  [lang="en"] .de, [lang="de"] .en { display: none; }
+
+  footer { padding-block: 1.75rem; font-size: .92rem; color: var(--ink-soft); }
+  /* BETA: deutlicher Weg zurück */
+  .back { display: inline-block; margin: 1.5rem 0 .5rem; font-family: var(--edge); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: .95rem; text-decoration: none; border-bottom: 1px solid var(--ink-soft); padding-bottom: .2rem; -webkit-user-select: none; user-select: none; }
+</style>
+</head>
+<body>
+
+<header class="wrap site-head">
+  <a class="home-link" href="/" aria-label="Analoge Welt – Startseite"><span class="logo logo-head" aria-hidden="true"></span><span class="brand">Analoge Welt</span></a>
+  <div class="tools">
+    <button type="button" data-lang="de">DE</button>
+    <button type="button" data-lang="en">EN</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <a class="back" href="/" onclick="if (document.referrer && new URL(document.referrer).origin === location.origin) { history.back(); return false; }"><span class="de">← Zurück zur Seite</span><span class="en">← Back to the site</span></a>
+
+  <!-- ===================== DEUTSCH ===================== -->
+  <article class="de">
+    <h1>Bildrechte</h1>
+
+    <h2>Urheberrecht und Bildnutzung</h2>
+    <p><strong>© A.T. Fichter – Alle Rechte vorbehalten.</strong></p>
+    <p>Sämtliche eigenen Fotografien auf dieser Website sind urheberrechtlich geschützt. Eine Nutzung, Vervielfältigung, Bearbeitung, Verbreitung oder erneute Veröffentlichung durch Dritte ist ohne meine vorherige ausdrückliche Zustimmung nicht gestattet, soweit keine gesetzliche Erlaubnis besteht.</p>
+    <p>Das gilt insbesondere für die Übernahme auf andere Websites, in soziale Netzwerke, in Printmedien oder für kommerzielle Zwecke. Die öffentliche Darstellung meiner Fotografien stellt keine Erlaubnis zur Weiterverwendung dar.</p>
+
+    <h2 id="anfrage">Anfragen zu Nutzungsrechten</h2>
+    <p>Für Anfragen zu Nutzungsrechten schreibe mir bitte an <a href="mailto:info@analogewelt.com">info@analogewelt.com</a>. Eine Anfrage oder Kontaktaufnahme allein begründet noch keine Nutzungserlaubnis.</p>
+
+    <h2>Fotos anderer</h2>
+    <p>Diese Bedingungen gelten für meine eigenen Fotografien. Fotos anderer Urheberinnen und Urheber sind davon nicht erfasst; für sie gelten deren Rechte.</p>
+
+    <p class="muted">Stand: 27. November 2026</p>
+  </article>
+
+  <!-- ===================== ENGLISH ===================== -->
+  <article class="en">
+    <h1>Image rights</h1>
+
+    <h2>Copyright and use of images</h2>
+    <p><strong>© A.T. Fichter – All rights reserved.</strong></p>
+    <p>All of my own photographs on this website are protected by copyright. Third parties may not use, reproduce, edit, distribute or republish them without my prior express consent, unless permitted by law.</p>
+    <p>This applies in particular to use on other websites, on social networks, in print media or for commercial purposes. Showing my photographs publicly does not grant permission to reuse them.</p>
+
+    <h2>Requests for usage rights</h2>
+    <p>For requests concerning usage rights, please write to me at <a href="mailto:info@analogewelt.com">info@analogewelt.com</a>. A request or getting in touch does not in itself grant any permission to use an image.</p>
+
+    <h2>Photos by others</h2>
+    <p>These terms apply to my own photographs. Photos by other authors are not covered; their own rights apply to them.</p>
+
+    <p class="muted">Last updated: 27 November 2026</p>
+  </article>
+
+</main>
+
+<footer class="wrap">
+  <a href="/">← <span class="de">Zurück zur Startseite</span><span class="en">Back to the homepage</span></a>
+  &nbsp;·&nbsp; <a href="/impressum.html"><span class="de">Impressum</span><span class="en">Legal notice</span></a>
+  &nbsp;·&nbsp; <a href="/datenschutz.html"><span class="de">Datenschutz</span><span class="en">Privacy</span></a>
+</footer>
+
+<script>
+function setLang(l) {
+  document.documentElement.lang = l;
+  document.title = l === "en" ? "Image rights and terms of use | Analoge Welt" : "Bildrechte und Nutzungsbedingungen | Analoge Welt";
+  try { localStorage.setItem("lang", l); } catch (e) {}
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+}
+let lang = "de";
+try { lang = localStorage.getItem("lang") || ((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de"); } catch (e) {}
+document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+setLang(lang);
+</script>
+</body>
+</html>

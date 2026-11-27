@@ -17,7 +17,7 @@ SB_URL = "https://owbbsnujnkhyyqvagtai.supabase.co"
 SB_KEY = "sb_publishable_29TK9hJ-e8e4eW9rp_eA8A__EHL2Kga"   # öffentlicher Schlüssel (steht auch in index.html)
 BUCKET = "photos"
 LISTE = os.path.join(WURZEL, "tools", "tueren.json")       # welche Türen zuletzt erzeugt wurden (zum Aufräumen)
-GESCHUETZT = {"index", "404", "admin", "passwort", "impressum", "datenschutz", "vorschau"}
+GESCHUETZT = {"index", "404", "admin", "passwort", "impressum", "datenschutz", "bildrechte", "vorschau"}
 
 ANSICHTEN = [
     ("bildstrecken", "Bildstrecken – Analoge Welt", "Bildstrecken in analoger Fotografie: Menschen, Städte, Landschaften und Reisen – auf Film fotografiert und von Hand entwickelt."),
@@ -80,6 +80,9 @@ def tuer_seite(vorlage, slug, titel, beschreibung, tuer, bild=None, galerie=None
 
 
 FOTOGRAF = {"@type": "Person", "name": "A.T. Fichter", "url": SEITE + "/"}
+# Nutzungsbedingungen der eigenen Fotos: alle Rechte vorbehalten, keine freie Lizenz. Die Seite /bildrechte beschreibt das und nennt
+# den Weg für individuelle Anfragen (E-Mail) – deshalb dient sie auch als acquireLicensePage; eine automatische Lizenzvergabe gibt es nicht.
+BILDRECHTE = SEITE + "/bildrechte"
 
 
 def galerie(p, slug, text, bilder):
@@ -89,8 +92,8 @@ def galerie(p, slug, text, bilder):
     objekte = []
     for f in bilder:
         o = {"@type": "ImageObject", "contentUrl": bild_url(f["storage_path"], 1600), "name": f.get("title") or p["title"],
-             "creator": FOTOGRAF, "creditText": "A.T. Fichter", "copyrightNotice": "© A.T. Fichter",
-             "acquireLicensePage": SEITE + "/impressum.html"}
+             "creator": FOTOGRAF, "creditText": "A.T. Fichter", "copyrightNotice": "© A.T. Fichter – Alle Rechte vorbehalten",
+             "license": BILDRECHTE, "acquireLicensePage": BILDRECHTE}
         angaben = ", ".join(x for x in (f.get("film"), f.get("camera")) if x)
         if angaben:
             o["caption"] = angaben
@@ -142,6 +145,7 @@ def main():
     zeilen = [f"  <url><loc>{SEITE}/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>"]
     zeilen += [f"  <url><loc>{SEITE}/{s}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>" for s in neu]
     zeilen += [f"  <url><loc>{SEITE}/{s}.html</loc><priority>0.2</priority></url>" for s in ("impressum", "datenschutz")]
+    zeilen.append(f"  <url><loc>{BILDRECHTE}</loc><priority>0.3</priority></url>")
     with open(os.path.join(WURZEL, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(zeilen) + "\n</urlset>\n")
     print("Türen:", ", ".join(neu))
