@@ -180,6 +180,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     text-align: left; overflow-wrap: anywhere; padding: .45rem .9rem; cursor: pointer;
     background: transparent; color: var(--ink); border: 0; border-left: 3px solid var(--rule); border-radius: 0;
   }
+  a.chip { text-decoration: none; }
   .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-left-color: var(--ink); }
   .status { color: var(--ink-soft); margin: 0 0 1.5rem; }
   /* Projekte */
@@ -1204,8 +1205,8 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   <h1 class="vh" id="strk-titel">Bildstrecken</h1>
   <p class="hint" id="strkHint"></p>
   <div class="sheet">
-    <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"></div>
-    <div id="strkDetail"></div>
+    <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"><!--strecken--><a class="chip" href="/menschen-portraets">Menschen &amp; Porträts</a><a class="chip" href="/stadtbild">Stadtbild</a><a class="chip" href="/landschaft-natur">Landschaft &amp; Natur</a><p class="filters-sub">Reisen &amp; Touren</p><a class="chip" href="/andalusien">Andalusien</a><a class="chip" href="/burgruinen-zwischen-pfalz-und-elsass">Burgruinen zwischen Pfalz und Elsass</a><!--/strecken--></div>
+    <div id="strkDetail"><!--strecke--><article class="strecke"><div class="strecke-head"><h3>Menschen &amp; Porträts</h3><p>Familie, Freunde und Menschen, die mir unterwegs begegnen – ohne Inszenierung, mit Zeit für den Moment. Vor allem mit der Nikon FE, auf Farb- und Schwarzweißfilm.</p></div><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1792828820438_LEO07915.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Herbst" loading="lazy"><figcaption>Herbst – Ilford HP Plus</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1793003155701_Paco_unscharf_im_Wald.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Ohne Brille, Frankfurt" loading="lazy"><figcaption>Ohne Brille – Frankfurt · Kodak T-Max 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794088121355_Robert_Garten.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Robert" loading="lazy"><figcaption>Robert – Portra 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1793004243760_Chris_1.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Chris, Frankfurt" loading="lazy"><figcaption>Chris – Frankfurt · Portra 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794088127018_artist_at_work.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Künstlerin bei der Arbeit" loading="lazy"><figcaption>Künstlerin bei der Arbeit – Kodak Gold 200</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794979584046_Eva_Posing-2.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Vor dem Plakat" loading="lazy"><figcaption>Vor dem Plakat</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794979585858_Eva_Posing_2.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Am Zollamt" loading="lazy"><figcaption>Am Zollamt</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794979587594_Eva_Posing_3.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Backsteinwand" loading="lazy"><figcaption>Backsteinwand</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794979589320_Eva_Posing_6.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Vor der Schirn" loading="lazy"><figcaption>Vor der Schirn</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794979591217_Eva_botanischer_Garten_2.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Im Steingarten" loading="lazy"><figcaption>Im Steingarten</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794979593186_Eva_Felsengarten.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Im Felsengarten" loading="lazy"><figcaption>Im Felsengarten</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1795383452696_17975244679860112.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Einsatz, Mannheim" loading="lazy"><figcaption>Einsatz – Mannheim · Kentmere 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1795383585712_18007426471920810.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Farbenschlacht, Frankfurt" loading="lazy"><figcaption>Farbenschlacht – Frankfurt · Kentmere 400</figcaption></figure></article><!--/strecke--></div>
   </div>
 </div></section>
 
@@ -1959,9 +1960,15 @@ function renderKind(kind, pre) {
     if (strecke && p.bereich !== "allgemein" && (i === 0 || items[i - 1].bereich === "allgemein")) {
       const sub = document.createElement("p"); sub.className = "filters-sub"; sub.textContent = tr("Reisen & Touren"); list.appendChild(sub);
     }
-    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = tr(p.title);
+    // Bildstrecken als echte Links auf ihre eigene Adresse (/andalusien …), damit Suchmaschinen sie finden;
+    // ein normaler Klick bleibt auf der Seite und blendet die Strecke wie bisher ein
+    const b = document.createElement(strecke && kurzname(p.title) ? "a" : "button"); b.className = "chip"; b.textContent = tr(p.title);
+    if (b.tagName === "A") { b.href = "/" + kurzname(p.title); b.setAttribute("role", "button"); } else b.type = "button";
     b.setAttribute("aria-pressed", String(i === sel));
-    b.addEventListener("click", () => switchItem(kind, pre, items, sel === i ? null : i));
+    b.addEventListener("click", (e) => {
+      if (b.tagName === "A" && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button)) return;   // neuer Tab o. Ä.: Link normal öffnen
+      e.preventDefault(); switchItem(kind, pre, items, sel === i ? null : i);
+    });
     list.appendChild(b);
   });
   const p = items[sel]; if (!p) return;

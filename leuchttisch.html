@@ -183,6 +183,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     text-align: left; overflow-wrap: anywhere; padding: .45rem .9rem; cursor: pointer;
     background: transparent; color: var(--ink); border: 0; border-left: 3px solid var(--rule); border-radius: 0;
   }
+  a.chip { text-decoration: none; }
   .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-left-color: var(--ink); }
   .status { color: var(--ink-soft); margin: 0 0 1.5rem; }
   /* Projekte */
@@ -1206,8 +1207,8 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   <h1 class="vh" id="strk-titel">Bildstrecken</h1>
   <p class="hint" id="strkHint"></p>
   <div class="sheet">
-    <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"></div>
-    <div id="strkDetail"></div>
+    <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"><!--strecken--><a class="chip" href="/menschen-portraets">Menschen &amp; Porträts</a><a class="chip" href="/stadtbild">Stadtbild</a><a class="chip" href="/landschaft-natur">Landschaft &amp; Natur</a><p class="filters-sub">Reisen &amp; Touren</p><a class="chip" href="/andalusien">Andalusien</a><a class="chip" href="/burgruinen-zwischen-pfalz-und-elsass">Burgruinen zwischen Pfalz und Elsass</a><!--/strecken--></div>
+    <div id="strkDetail"><!--strecke--><!--/strecke--></div>
   </div>
 </div></section>
 
@@ -1961,9 +1962,15 @@ function renderKind(kind, pre) {
     if (strecke && p.bereich !== "allgemein" && (i === 0 || items[i - 1].bereich === "allgemein")) {
       const sub = document.createElement("p"); sub.className = "filters-sub"; sub.textContent = tr("Reisen & Touren"); list.appendChild(sub);
     }
-    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = tr(p.title);
+    // Bildstrecken als echte Links auf ihre eigene Adresse (/andalusien …), damit Suchmaschinen sie finden;
+    // ein normaler Klick bleibt auf der Seite und blendet die Strecke wie bisher ein
+    const b = document.createElement(strecke && kurzname(p.title) ? "a" : "button"); b.className = "chip"; b.textContent = tr(p.title);
+    if (b.tagName === "A") { b.href = "/" + kurzname(p.title); b.setAttribute("role", "button"); } else b.type = "button";
     b.setAttribute("aria-pressed", String(i === sel));
-    b.addEventListener("click", () => switchItem(kind, pre, items, sel === i ? null : i));
+    b.addEventListener("click", (e) => {
+      if (b.tagName === "A" && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button)) return;   // neuer Tab o. Ä.: Link normal öffnen
+      e.preventDefault(); switchItem(kind, pre, items, sel === i ? null : i);
+    });
     list.appendChild(b);
   });
   const p = items[sel]; if (!p) return;

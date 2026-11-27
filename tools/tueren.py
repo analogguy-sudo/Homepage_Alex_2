@@ -57,10 +57,44 @@ def setze(s, muster, ersatz):
     return neu
 
 
-def tuer_seite(vorlage, slug, titel, beschreibung, tuer, bild=None, galerie=None):
+def vorab(s, name, inhalt):
+    """Inhalt zwischen <!--name--> und <!--/name--> setzen (Vorab-HTML, das die Seite beim Laden durch ihr eigenes ersetzt)."""
+    return setze(s, rf"<!--{name}-->.*?<!--/{name}-->", lambda m: f"<!--{name}-->{inhalt}<!--/{name}-->")
+
+
+def strecken_links(strecken):
+    """Auswahl der Bildstrecken als echte Links – so finden Suchmaschinen jede Bildstrecke auch ohne Sitemap."""
+    teile, reise = [], False
+    for slug, p in strecken:
+        if (p.get("bereich") or "allgemein") != "allgemein" and not reise:
+            teile.append('<p class="filters-sub">Reisen &amp; Touren</p>')
+            reise = True
+        teile.append(f'<a class="chip" href="/{slug}">{html.escape(p["title"])}</a>')
+    return "".join(teile)
+
+
+def strecke_vorab(p, bilder):
+    """Titel, Text und Bilder einer Bildstrecke als schlichtes HTML (wird beim Laden durch die gestaltete Strecke ersetzt)."""
+    e = lambda x: html.escape(x or "", quote=True)
+    teile = [f'<article class="strecke"><div class="strecke-head"><h3>{e(p["title"])}</h3>']
+    if p.get("text_de"):
+        text = re.sub(r"\s+", " ", p["text_de"]).strip()
+        teile.append(f"<p>{e(text)}</p>")
+    teile.append("</div>")
+    for f in bilder:
+        name = f.get("title") or p["title"]
+        alt = ", ".join(x for x in (name, f.get("location")) if x)
+        unten = " · ".join(x for x in (f.get("location"), f.get("film")) if x)
+        teile.append(f'<figure><img src="{e(bild_url(f["storage_path"], 800))}" alt="{e(alt)}" loading="lazy">'
+                     f'<figcaption>{e(name)}{(" – " + e(unten)) if unten else ""}</figcaption></figure>')
+    teile.append("</article>")
+    return "".join(teile)
+
+
+def tuer_seite(vorlage, slug, titel, beschreibung, tuer, bild=None, galerie=None, vorab_strecke=""):
     a = lambda x: html.escape(x, quote=True)
     url = f"{SEITE}/{slug}"
-    s = vorlage
+    s = vorab(vorlage, "strecke", vorab_strecke)
     s = setze(s, r"<title>[^<]*</title>", f"<title>{a(titel)}</title>")
     s = setze(s, r'<meta name="description" content="[^"]*">', f'<meta name="description" content="{a(beschreibung)}">')
     s = setze(s, r'<link rel="canonical" href="[^"]*">', f'<link rel="canonical" href="{url}">')
@@ -108,11 +142,12 @@ def galerie(p, slug, text, bilder):
 
 def main():
     vorlage = open(os.path.join(WURZEL, "index.html"), encoding="utf-8").read()
-    projekte = holen("projects?select=id,title,text_de,kind,sort&order=sort.asc")
+    projekte = holen("projects?select=id,title,text_de,kind,bereich,sort&order=sort.asc")
     fotos = holen("photos?select=title,storage_path,strecke_id,location,film,camera,year,sort&order=sort.asc,created_at.desc")
-    tueren = []   # (slug, titel, beschreibung, tuer, bild, galerie)
+    tueren = []   # (slug, titel, beschreibung, tuer, bild, galerie, vorab)
     for slug, titel, text in ANSICHTEN:
-        tueren.append((slug, titel, text, {"v": slug}, None, None))
+        tueren.append((slug, titel, text, {"v": slug}, None, None, ""))
+    strecken = []   # (slug, projekt) – für die Links in der Auswahl
     vergeben = set(GESCHUETZT) | {t[0] for t in tueren}
     for p in projekte:
         if (p.get("kind") or "projekt") != "bildstrecke" or not p.get("title"):
@@ -122,14 +157,23 @@ def main():
             print(f"übersprungen (Name schon vergeben): {p['title']}")
             continue
         vergeben.add(slug)
+        strecken.append((slug, p))
+        eigene = [f for f in fotos if f.get("strecke_id") == p["id"] and f.get("storage_path")]
         erstes = next((f["storage_path"] for f in fotos if f.get("strecke_id") == p["id"] and f.get("storage_path")), None)
         text = kuerzen(p.get("text_de")) or f"{p['title']} – eine Bildstrecke in analoger Fotografie von A.T. Fichter."
         tueren.append((slug, f"{p['title']} – Bildstrecke | Analoge Welt", text, {"v": "bildstrecken", "id": p["id"]}, bild_url(erstes) if erstes else None,
-                       galerie(p, slug, text, [f for f in fotos if f.get("strecke_id") == p["id"] and f.get("storage_path")])))
+                       galerie(p, slug, text, eigene), strecke_vorab(p, eigene)))
 
-    for slug, titel, text, tuer, bild, gal in tueren:
+    # die Links stehen auch in index.html selbst (Vorlage und Startseite); nur schreiben, wenn sich etwas ändert
+    vorlage = vorab(vorlage, "strecken", strecken_links(strecken))
+    start = vorab(vorlage, "strecke", "")
+    if start != open(os.path.join(WURZEL, "index.html"), encoding="utf-8").read():
+        with open(os.path.join(WURZEL, "index.html"), "w", encoding="utf-8") as f:
+            f.write(start)
+
+    for slug, titel, text, tuer, bild, gal, vor in tueren:
         with open(os.path.join(WURZEL, slug + ".html"), "w", encoding="utf-8") as f:
-            f.write(tuer_seite(vorlage, slug, titel, text, tuer, bild, gal))
+            f.write(tuer_seite(vorlage, slug, titel, text, tuer, bild, gal, vor))
 
     # Türen, deren Bildstrecke es nicht mehr gibt, entfernen (nur solche, die dieses Skript selbst angelegt hat)
     alt = json.load(open(LISTE)) if os.path.exists(LISTE) else []

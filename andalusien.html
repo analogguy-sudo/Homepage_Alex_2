@@ -180,6 +180,7 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
     text-align: left; overflow-wrap: anywhere; padding: .45rem .9rem; cursor: pointer;
     background: transparent; color: var(--ink); border: 0; border-left: 3px solid var(--rule); border-radius: 0;
   }
+  a.chip { text-decoration: none; }
   .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-left-color: var(--ink); }
   .status { color: var(--ink-soft); margin: 0 0 1.5rem; }
   /* Projekte */
@@ -1204,8 +1205,8 @@ if(/(^|&)(type=(recovery|invite)|error_code=)/.test(location.hash.slice(1)))loca
   <h1 class="vh" id="strk-titel">Bildstrecken</h1>
   <p class="hint" id="strkHint"></p>
   <div class="sheet">
-    <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"></div>
-    <div id="strkDetail"></div>
+    <div class="filters" id="strkList" role="group" aria-label="Bildstrecken"><!--strecken--><a class="chip" href="/menschen-portraets">Menschen &amp; Porträts</a><a class="chip" href="/stadtbild">Stadtbild</a><a class="chip" href="/landschaft-natur">Landschaft &amp; Natur</a><p class="filters-sub">Reisen &amp; Touren</p><a class="chip" href="/andalusien">Andalusien</a><a class="chip" href="/burgruinen-zwischen-pfalz-und-elsass">Burgruinen zwischen Pfalz und Elsass</a><!--/strecken--></div>
+    <div id="strkDetail"><!--strecke--><article class="strecke"><div class="strecke-head"><h3>Andalusien</h3><p>Atlantik, Palmen und weiße Mauern: ein Sommer an der andalusischen Küste zwischen Sancti Petri, Chiclana und Bolonia. Fotografiert 2020 mit der Nikon FE auf Kodak Portra 400.</p></div><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1793003384342_Eva_Pastell-2.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Evacita, Chiclana de la Frontera, Spanien" loading="lazy"><figcaption>Evacita – Chiclana de la Frontera, Spanien · Portra 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794088051760_Eva_Strand_Portra.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Playa en Chiclana, Chiclana de la Frontera, Spanien" loading="lazy"><figcaption>Playa en Chiclana – Chiclana de la Frontera, Spanien · Portra 400 (expired)</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794134865051_Eva_Pastell-1.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Palmenallee, Sancti Petri, Spanien" loading="lazy"><figcaption>Palmenallee – Sancti Petri, Spanien · Portra 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794134859085_Bolonia-1.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Möwen über den Palmen, Bolonia, Spanien" loading="lazy"><figcaption>Möwen über den Palmen – Bolonia, Spanien · Portra 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794134861539_Bolonia-2.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Bolonia, Bolonia, Spanien" loading="lazy"><figcaption>Bolonia – Bolonia, Spanien · Portra 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794134872691_Pastelltest_5.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Wasserturm in Sancti Petri, Sancti Petri, Spanien" loading="lazy"><figcaption>Wasserturm in Sancti Petri – Sancti Petri, Spanien · Portra 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794134870078_Pastelltest_4-1.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Wandbild in Sancti Petri, Sancti Petri, Spanien" loading="lazy"><figcaption>Wandbild in Sancti Petri – Sancti Petri, Spanien · Portra 400</figcaption></figure><figure><img src="https://owbbsnujnkhyyqvagtai.supabase.co/storage/v1/render/image/public/photos/1794979582235_Pastelltest_3.jpg?width=800&amp;height=2400&amp;resize=contain&amp;quality=80" alt="Unter Palmen" loading="lazy"><figcaption>Unter Palmen – Portra 400</figcaption></figure></article><!--/strecke--></div>
   </div>
 </div></section>
 
@@ -1959,9 +1960,15 @@ function renderKind(kind, pre) {
     if (strecke && p.bereich !== "allgemein" && (i === 0 || items[i - 1].bereich === "allgemein")) {
       const sub = document.createElement("p"); sub.className = "filters-sub"; sub.textContent = tr("Reisen & Touren"); list.appendChild(sub);
     }
-    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = tr(p.title);
+    // Bildstrecken als echte Links auf ihre eigene Adresse (/andalusien …), damit Suchmaschinen sie finden;
+    // ein normaler Klick bleibt auf der Seite und blendet die Strecke wie bisher ein
+    const b = document.createElement(strecke && kurzname(p.title) ? "a" : "button"); b.className = "chip"; b.textContent = tr(p.title);
+    if (b.tagName === "A") { b.href = "/" + kurzname(p.title); b.setAttribute("role", "button"); } else b.type = "button";
     b.setAttribute("aria-pressed", String(i === sel));
-    b.addEventListener("click", () => switchItem(kind, pre, items, sel === i ? null : i));
+    b.addEventListener("click", (e) => {
+      if (b.tagName === "A" && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button)) return;   // neuer Tab o. Ä.: Link normal öffnen
+      e.preventDefault(); switchItem(kind, pre, items, sel === i ? null : i);
+    });
     list.appendChild(b);
   });
   const p = items[sel]; if (!p) return;
